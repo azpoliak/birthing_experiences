@@ -1,28 +1,21 @@
 import imports as im 
 
+stop = im.stopwords.words('english')
+
 # **Topic Modeling**
-
-
-#get_ipython().system('which mallet')
-
-
 
 path_to_mallet = '/opt/conda/bin/mallet'
 path_to_mallet
 
-
-
 print("Story Stats: ")
-im.little_mallet_wrapper.print_dataset_stats(im.birth_stories_df['selftext'])
+im.lmw.print_dataset_stats(im.birth_stories_df['selftext'])
 
-
-
-stop = im.stopwords.words('english')
-    
+#processes the story using little mallet wrapper process_string function
 def process_s(s):
-    new = im.little_mallet_wrapper.process_string(s,lowercase=False,remove_punctuation=False, stop_words=stop)
+    new = im.lmw.process_string(s,lowercase=False,remove_punctuation=True, stop_words=stop)
     return new
 
+#removes all emojis
 def remove_emojis(s):
     regrex_pattern = im.re.compile(pattern = "["
       u"\U0001F600-\U0001F64F"  # emoticons
@@ -36,32 +29,33 @@ im.birth_stories_df['Cleaned Submission'] = im.birth_stories_df['selftext'].appl
 #replace urls with ''
 im.birth_stories_df['Cleaned Submission'] = im.birth_stories_df['Cleaned Submission'].replace(to_replace=r'^https?:\/\/.*[\r\n]*',value='',regex=True)
 
+#remove numbers
+im.birth_stories_df['Cleaned Submission'] = im.birth_stories_df['Cleaned Submission'].replace(to_replace=r'NUM*',value='',regex=True)
+
 #remove any missing values
-im.birth_stories_df_cleaned = im.birth_stories_df.dropna()
-im.birth_stories_df_cleaned
-
-print(im.birth_stories_df_cleaned.head())
-
-
-
-#get_ipython().run_cell_magic('time', '', 'topic_words, topic_doc_distribution = little_mallet_wrapper.quick_train_topic_model("../../../anaconda3/envs/new_environment", "../../topic_modeling", 50, birth_stories_df_cleaned[\'Cleaned Submission\'])')
-
-
+birth_stories_df_cleaned = im.birth_stories_df.dropna()
 
 #splits story into 100 word chunks for topic modeling 
-#def split_story_100_words(story):
-   # sentiment_story = []
-   # s = nltk.word_tokenize(story)
-   # for word in s:
-    #    print(s)
-        #if len(tokenize.word_tokenize(sentence)) >=5:
-         #   analyzed = sentiment_analyzer_scores(sentence)
-          #  sentiment_story.append(analyzed)
-   # rounded_up = int(np.ceil(len(lst)/10))
-    #remainder = rounded_up*10 %len(lst)
-    #step_10 = np.arange(0, len(lst)+remainder, rounded_up)
-    #split_story_sents = []
-    #for i in step_10:
-    #    split_story_sents.append((sentiment_story[i:i+rounded_up]))
-    #return split_story_sents
-#split_story_100_words(birth_stories_df['selftext'].iloc[0])
+def split_story_100_words(story):
+    sentiment_story = []
+    s = im.nltk.word_tokenize(story)
+    n = 100
+    for i in range(0, len(s), n):
+        sentiment_story.append(' '.join(s[i:i + n]))
+    return sentiment_story
+
+birth_stories_df_cleaned['100 word chunks'] = birth_stories_df_cleaned['Cleaned Submission'].apply(split_story_100_words)
+
+training_chunks = []
+def get_all_chunks(series):
+    for chunk in series:
+        training_chunks.append(chunk)
+    return training_chunks
+
+birth_stories_df_cleaned['100 word chunks'].apply(get_all_chunks)
+
+#topic_words, topic_doc_distributions = im.lmw.quick_train_topic_model("birthing_experiences/src/notebooks/opt/conda/bin/mallet", "topic_modeling", 50, training_chunks)
+num_topics = 50
+
+#for num_topics, topic in enumerate(topic_words):
+   # print(f"Topic {num_topics} \n\n{topic}\n")
