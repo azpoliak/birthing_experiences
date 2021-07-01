@@ -12,7 +12,7 @@ im.lmw.print_dataset_stats(im.birth_stories_df['selftext'])
 
 #processes the story using little mallet wrapper process_string function
 def process_s(s):
-    new = im.lmw.process_string(s,lowercase=False,remove_punctuation=True, stop_words=stop)
+    new = im.lmw.process_string(s,lowercase=True,remove_punctuation=True, stop_words=stop)
     return new
 
 #removes all emojis
@@ -54,8 +54,21 @@ def get_all_chunks(series):
 
 birth_stories_df_cleaned['100 word chunks'].apply(get_all_chunks)
 
-#topic_words, topic_doc_distributions = im.lmw.quick_train_topic_model("birthing_experiences/src/notebooks/opt/conda/bin/mallet", "topic_modeling", 50, training_chunks)
+path_to_mallet = 'mallet-2.0.8/bin/mallet'
+
+#topic_words, topic_doc_distributions = im.lmw.quick_train_topic_model(path_to_mallet, "topic_modeling", 50, training_chunks)
 num_topics = 50
 
-#for num_topics, topic in enumerate(topic_words):
-   # print(f"Topic {num_topics} \n\n{topic}\n")
+topics = im.lmw.load_topic_keys('topic_modeling/mallet.topic_keys.50')
+
+for num_topics, topic in enumerate(topics):
+    print(f"✨Topic {num_topics}✨ \n\n{topic}\n")
+
+#def make_ten_chunks(series):
+    #ten_chunks = im.lmw.divide_training_data(series, num_chunks=10)
+    #return ten_chunks
+
+chunks = birth_stories_df_cleaned['selftext'].iloc[0]
+chunks = im.nltk.sent_tokenize(chunks)
+
+print(im.lmw.divide_training_data(chunks, num_chunks=10))
