@@ -17,6 +17,7 @@ import seaborn
 import redditcleaner
 import re
 import warnings
+import itertools
 warnings.filterwarnings("ignore")
 
 birth_stories_df = pd.read_pickle('all_birth_stories.pkl')
