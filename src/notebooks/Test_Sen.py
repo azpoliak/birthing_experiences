@@ -45,23 +45,25 @@ sentiment_df['sentiment groups'] = sentiment_df['tokenized sentences'].apply(spl
 def story_lengths(lst):
     return len(lst)
 
-def group(story, num):
+def group(story, num, val):
     compound_scores = []
     for sent in story[num]:
         dictionary = sent[1]
-        compound_score = dictionary['compound']
+        compound_score = dictionary[val]
         compound_scores.append(compound_score)
     return compound_scores
 
-def per_group(story):
+def per_group(story, val):
     group_dict = {} 
     for i in im.np.arange(10):
-        group_dict[f"0.{str(i)}"] = group(story, i)
+        group_dict[f"0.{str(i)}"] = group(story, i, val)
     return group_dict
 
 sentiment_df['lengths'] = sentiment_df['sentiment groups'].apply(story_lengths)
 
-sentiment_df['sent per group'] = sentiment_df['sentiment groups'].apply(per_group)
+#sentiment_df['sent per group'] = sentiment_df['sentiment groups'].apply(per_group)
+sentiment_df['comp sent per group'] = sentiment_df['sentiment groups'].apply(per_group, args = ('compound',))
+
 
 def dict_to_frame(lst):
     compressed = im.pd.DataFrame(list(lst)).to_dict(orient='list')
@@ -70,16 +72,42 @@ def dict_to_frame(lst):
         group_dict[key] = im.np.mean(list(im.itertools.chain.from_iterable(compressed[key])))
     return(im.pd.DataFrame.from_dict(group_dict, orient='index', columns = ['Sentiments']).head(10))
 
-sentiment_over_narrative = dict_to_frame(sentiment_df['sent per group'])
+sentiment_over_narrative = dict_to_frame(sentiment_df['comp sent per group'])
 sentiment_over_narrative.index.name = 'Sections'
 print(sentiment_over_narrative)
 
 #Plotting over narrative time
-print(im.plt.plot(sentiment_over_narrative['Sentiments']))
+#print(im.plt.plot(sentiment_over_narrative['Sentiments']))
+#im.plt.xlabel('Story Time')
+#im.plt.ylabel('Sentiment')
+#im.plt.show()
+#im.plt.savefig('Sentiment_Plot.png')
+
+#Split based on positive vs. negative sentiment
+
+sentiment_df['pos sent per group'] = sentiment_df['sentiment groups'].apply(per_group, args = ('pos',))
+sentiment_df['neg sent per group'] = sentiment_df['sentiment groups'].apply(per_group, args = ('neg',))
+
+pos_sentiment_over_narrative = dict_to_frame(sentiment_df['pos sent per group'])
+pos_sentiment_over_narrative.index.name = 'Sections'
+print(pos_sentiment_over_narrative)
+
+neg_sentiment_over_narrative = dict_to_frame(sentiment_df['neg sent per group'])
+neg_sentiment_over_narrative.index.name = 'Sections'
+print(neg_sentiment_over_narrative)
+
+#Plotting each over narrative time
+print(im.plt.plot(pos_sentiment_over_narrative['Sentiments']))
 im.plt.xlabel('Story Time')
 im.plt.ylabel('Sentiment')
 im.plt.show()
-im.plt.savefig('Sentiment_Plot.png')
+#im.plt.savefig('Pos_Sentiment_Plot.png')
+
+print(im.plt.plot(neg_sentiment_over_narrative['Sentiments']))
+im.plt.xlabel('Story Time')
+im.plt.ylabel('Sentiment')
+im.plt.show()
+#im.plt.savefig('Neg_Sentiment_Plot.png')
 
 #def mean_sentiment(lst):
 #    compound_scores = []
