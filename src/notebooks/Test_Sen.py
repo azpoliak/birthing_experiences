@@ -56,7 +56,7 @@ def group(story, num):
 def per_group(story):
     group_dict = {} 
     for i in im.np.arange(10):
-        group_dict[f"Section {str(i)}"] = group(story, i)
+        group_dict[f"0.{str(i)}"] = group(story, i)
     return group_dict
 
 sentiment_df['lengths'] = sentiment_df['sentiment groups'].apply(story_lengths)
