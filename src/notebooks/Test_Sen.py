@@ -61,8 +61,6 @@ def per_group(story):
 
 sentiment_df['lengths'] = sentiment_df['sentiment groups'].apply(story_lengths)
 
-#Gets rid of the narratives that aren't actually stories 
-sentiment_df = sentiment_df.get(sentiment_df['lengths'] == 10)
 sentiment_df['sent per group'] = sentiment_df['sentiment groups'].apply(per_group)
 
 def dict_to_frame(lst):
@@ -82,7 +80,6 @@ im.plt.xlabel('Story Time')
 im.plt.ylabel('Sentiment')
 im.plt.show()
 im.plt.savefig('Sentiment_Plot.png')
-
 
 #def mean_sentiment(lst):
 #    compound_scores = []
