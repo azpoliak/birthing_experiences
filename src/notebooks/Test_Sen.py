@@ -56,10 +56,12 @@ def group(story, num):
 def per_group(story):
     group_dict = {} 
     for i in im.np.arange(10):
-        group_dict[f"Group {str(i)}"] = group(story, i)
+        group_dict[f"Section {str(i)}"] = group(story, i)
     return group_dict
 
 sentiment_df['lengths'] = sentiment_df['sentiment groups'].apply(story_lengths)
+
+#Gets rid of the narratives that aren't actually stories 
 sentiment_df = sentiment_df.get(sentiment_df['lengths'] == 10)
 sentiment_df['sent per group'] = sentiment_df['sentiment groups'].apply(per_group)
 
@@ -68,9 +70,18 @@ def dict_to_frame(lst):
     group_dict = {} 
     for key in compressed:
         group_dict[key] = im.np.mean(list(im.itertools.chain.from_iterable(compressed[key])))
-    return(im.pd.DataFrame.from_dict(group_dict, orient='index').head(10))
+    return(im.pd.DataFrame.from_dict(group_dict, orient='index', columns = ['Sentiments']).head(10))
 
-print(dict_to_frame(sentiment_df['sent per group']))
+sentiment_over_narrative = dict_to_frame(sentiment_df['sent per group'])
+sentiment_over_narrative.index.name = 'Sections'
+print(sentiment_over_narrative)
+
+#Plotting over narrative time
+print(im.plt.plot(sentiment_over_narrative['Sentiments']))
+im.plt.xlabel('Story Time')
+im.plt.ylabel('Sentiment')
+im.plt.show()
+im.plt.savefig('Sentiment_Plot.png')
 
 
 #def mean_sentiment(lst):
