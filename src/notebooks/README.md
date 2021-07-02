@@ -5,4 +5,4 @@
 - <code>corpus_stats.py</code>: re-implements Maria's code for Table 1 and Figure 1 (left and right): finds statistics about the corpus.
 - <code>labeling_stories.py</code>: re-implements Maria's code for Table 3: assigns labels to stories based on lexicon of key words, finds number of stories assigned each label.
 - <code>Topic_Modeling.py</code>: re-implements Maria's code for Figure 3: topic modeling.
-- <code>Test_Sent.py</code>: re-implements Maria's code for Figure 2: sentiment analysis over the course of the narrative.
+- <code>Test_Sen.py</code>: re-implements Maria's code for Figure 2: sentiment analysis over the course of the narrative.

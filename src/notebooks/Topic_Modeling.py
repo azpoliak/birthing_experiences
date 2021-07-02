@@ -61,14 +61,47 @@ num_topics = 50
 
 topics = im.lmw.load_topic_keys('topic_modeling/mallet.topic_keys.50')
 
-for num_topics, topic in enumerate(topics):
-    print(f"✨Topic {num_topics}✨ \n\n{topic}\n")
+#for num_topics, topic in enumerate(topics):
+    #print(f"✨Topic {num_topics}✨ \n\n{topic}\n")
 
 #def make_ten_chunks(series):
     #ten_chunks = im.lmw.divide_training_data(series, num_chunks=10)
     #return ten_chunks
 
-chunks = birth_stories_df_cleaned['selftext'].iloc[0]
-chunks = im.nltk.sent_tokenize(chunks)
+#print(type(birth_stories_df_cleaned['Cleaned Submission'].iloc[0]))
 
-print(im.lmw.divide_training_data(chunks, num_chunks=10))
+def split_story_10(str):
+    tokenized = im.tokenize.word_tokenize(str)
+    rounded = round(len(tokenized)/10)
+    if rounded != 0:
+        ind = im.np.arange(0, rounded*10, rounded)
+        remainder = len(tokenized) % rounded*10
+    else:
+        ind = im.np.arange(0, rounded*10)
+        remainder = 0
+    split_story = []
+    for i in ind:
+        if i == ind[-1]:
+            split_story.append(' '.join(tokenized[i:i+remainder]))
+            return split_story
+        split_story.append(' '.join(tokenized[i:i+rounded]))
+    #joined = ' '.join(split_story)
+    return split_story
+
+birth_stories_df_cleaned['10 chunks/story'] = birth_stories_df_cleaned['Cleaned Submission'].apply(split_story_10)
+
+testing_chunks = []
+def get_chunks(series):
+    for chunk in series:
+        testing_chunks.append(chunk)
+    return testing_chunks
+
+birth_stories_df_cleaned['10 chunks/story'].apply(get_chunks)
+
+#infers topics for the documents split into 10 equal chunks based on the topics trained on the 100 word chunks
+#im.lmw.import_data(path_to_mallet, "topic_modeling_ten_chunks/training_data", "topic_modeling_ten_chunks/formatted_training_data", testing_chunks, training_ids=None, use_pipe_from=None)
+#im.lmw.infer_topics(path_to_mallet, "topic_modeling/mallet.model.50", "topic_modeling_ten_chunks/formatted_training_data", "topic_modeling_ten_chunks/topic_distributions")
+
+topic_distributions = im.lmw.load_topic_distributions('topic_modeling_ten_chunks/topic_distributions')
+story_topics_df = im.pd.DataFrame(topic_distributions)
+print(story_topics_df)
