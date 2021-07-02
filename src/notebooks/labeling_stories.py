@@ -78,5 +78,7 @@ labels = { 'Labels': ['Positive', 'Negative', 'Unmedicated', 'Medicated', 'Home'
 
 #turn dictionary into a dataframe
 label_counts_df = im.pd.DataFrame(labels, index=im.np.arange(10))
-print(labels_df)
-print(label_counts_df.set_index('Labels'))
+#print(labels_df)
+#print(label_counts_df.set_index('Labels'))
+positive_framed = labels_df.get(labels_df['positive'] == True)
+negative_framed = labels_df.get(labels_df['negative'] == True)
