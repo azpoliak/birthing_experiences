@@ -64,12 +64,7 @@ topics = im.lmw.load_topic_keys('topic_modeling/mallet.topic_keys.50')
 #for num_topics, topic in enumerate(topics):
     #print(f"✨Topic {num_topics}✨ \n\n{topic}\n")
 
-#def make_ten_chunks(series):
-    #ten_chunks = im.lmw.divide_training_data(series, num_chunks=10)
-    #return ten_chunks
-
-#print(type(birth_stories_df_cleaned['Cleaned Submission'].iloc[0]))
-
+#splits story into ten equal chunks
 def split_story_10(str):
     tokenized = im.tokenize.word_tokenize(str)
     rounded = round(len(tokenized)/10)
@@ -90,6 +85,7 @@ def split_story_10(str):
 
 birth_stories_df_cleaned['10 chunks/story'] = birth_stories_df_cleaned['Cleaned Submission'].apply(split_story_10)
 
+#makes list of all the chunks for topic inferring
 testing_chunks = []
 def get_chunks(series):
     for chunk in series:
@@ -102,6 +98,61 @@ birth_stories_df_cleaned['10 chunks/story'].apply(get_chunks)
 #im.lmw.import_data(path_to_mallet, "topic_modeling_ten_chunks/training_data", "topic_modeling_ten_chunks/formatted_training_data", testing_chunks, training_ids=None, use_pipe_from=None)
 #im.lmw.infer_topics(path_to_mallet, "topic_modeling/mallet.model.50", "topic_modeling_ten_chunks/formatted_training_data", "topic_modeling_ten_chunks/topic_distributions")
 
+#makes df of the probabilities for each topic for each chunk of each story
 topic_distributions = im.lmw.load_topic_distributions('topic_modeling_ten_chunks/topic_distributions')
 story_topics_df = im.pd.DataFrame(topic_distributions)
-print(story_topics_df)
+
+#goes through stories and names them based on the story number and chunk number
+chunk_titles = []
+for i in range(len(birth_stories_df_cleaned)-3):
+    for j in range(10):
+        chunk_titles.append(str(i) + ":" + str(j))
+
+story_topics_df['chunk_titles'] = chunk_titles
+
+#groups every ten stories together
+story_topics_df = story_topics_df.groupby(story_topics_df.index // 10)
+
+#finds average probability for each topic for each chunk of story
+def average_per_chunk(df):
+    dictionary = {}
+    for i in range(10):
+        chunk = df.nth(i-1)
+        means = chunk.mean()
+        dictionary[i] = means
+    return im.pd.DataFrame.from_dict(dictionary, orient='index')
+
+topics_over_time_df = average_per_chunk(story_topics_df)
+
+#loads topic keys
+topic_keys = im.lmw.load_topic_keys('topic_modeling/mallet.topic_keys.50')
+
+#makes string of the top five keys for each topic
+def top_5_keys(lst):
+    top5_per_list = []
+    for l in lst:
+        joined = ' '.join(l[:5])
+        top5_per_list.append(joined)
+    return top5_per_list
+
+keys_topics = top_5_keys(topic_keys)
+
+#adds the keys as the names of the topic columns
+topics_over_time_df.set_axis(keys_topics, axis=1, inplace=True)
+
+def make_plots(df):
+    fig = im.plt.figure()
+    ax = fig.add_subplot(111)
+    for i in range(50):
+        ax.clear()
+        ax.plot(df.iloc[:, i])
+        ax.set_title(df.iloc[:, i].name)
+        ax.set_xlabel('Story Time')
+        ax.set_ylabel('Topic Probability')
+        #im.plt.plot(df.iloc[:, i])
+        #im.plt.title(df.iloc[:, i].name)
+        #im.plt.xlabel('Story Time')
+        #im.plt.ylabel('Topic Probability')
+        fig.savefig('Topic'+str(i)+'_Plot.png')
+
+print(make_plots(topics_over_time_df))
