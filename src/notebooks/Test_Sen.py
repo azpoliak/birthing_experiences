@@ -93,13 +93,13 @@ neg_sentiment_over_narrative.index.name = 'Sections'
 #print(neg_sentiment_over_narrative)
 
 #Plotting each over narrative time
-print(im.plt.plot(pos_sentiment_over_narrative['Sentiments']))
-print(im.plt.plot(neg_sentiment_over_narrative['Sentiments']))
-im.plt.xlabel('Story Time')
-im.plt.ylabel('Sentiment')
-im.plt.show()
-im.plt.legend(['Positive', 'Negative'])
-im.plt.savefig('Pos_and_Neg_Sentiment_Plot.png')
+#print(im.plt.plot(pos_sentiment_over_narrative['Sentiments']))
+#print(im.plt.plot(neg_sentiment_over_narrative['Sentiments']))
+#im.plt.xlabel('Story Time')
+#im.plt.ylabel('Sentiment')
+#im.plt.show()
+#im.plt.legend(['Positive Sentiment Score', 'Negative Sentiment Score'])
+#im.plt.savefig('Pos_and_Neg_Sentiment_Plot.png')
 
 #For the Negative and Positive framed stories
 negframed_df = im.pd.DataFrame()
@@ -122,11 +122,11 @@ sentiment_over_narrative_posframe.index.name = 'Sections'
 #print(sentiment_over_narrative_posframe)
 
 #Plotting each again over narrative time
-#print(im.plt.plot(sentiment_over_narrative_negframe['Sentiments']))
-#print(im.plt.plot(sentiment_over_narrative_posframe['Sentiments']))
+print(im.plt.plot(sentiment_over_narrative_negframe['Sentiments']))
+print(im.plt.plot(sentiment_over_narrative_posframe['Sentiments']))
 
-#im.plt.xlabel('Story Time')
-#im.plt.ylabel('Sentiment')
-#im.plt.show()
-#im.plt.legend(['Positive', 'Negative'])
-#im.plt.savefig('Pos_Neg_Frame_Plot.png')
+im.plt.xlabel('Story Time')
+im.plt.ylabel('Sentiment')
+im.plt.show()
+im.plt.legend(['Positive Title Frame', 'Negative Title Frame'])
+im.plt.savefig('Pos_Neg_Frame_Plot.png')
