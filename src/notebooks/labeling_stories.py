@@ -67,6 +67,8 @@ c_section_count = labels_df['c_section_count'].value_counts()[1]
 labels_df['vaginal'] = labels_df['title'].apply(lambda x: findkey(x,vaginal))
 vaginal_count = labels_df['vaginal'].value_counts()[1]
 
+
+
 labels = { 'Labels': ['Positive', 'Negative', 'Unmedicated', 'Medicated', 'Home', 'Hospital', 'First', 'Second', 'C-section', 'Vaginal'],
           'Description': ['Positively framed', 'Negatively framed', 'Birth without epidural', 'Birth with epidural',
                          'Birth takes place at home', 'Birth takes place at hospital', 'First birth for the author',
@@ -79,6 +81,6 @@ labels = { 'Labels': ['Positive', 'Negative', 'Unmedicated', 'Medicated', 'Home'
 #turn dictionary into a dataframe
 label_counts_df = im.pd.DataFrame(labels, index=im.np.arange(10))
 #print(labels_df)
-#print(label_counts_df.set_index('Labels'))
+label_counts_df.set_index('Labels', inplace = True)
 positive_framed = labels_df.get(labels_df['positive'] == True)
 negative_framed = labels_df.get(labels_df['negative'] == True)
