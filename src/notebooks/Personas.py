@@ -16,7 +16,7 @@ doula = ['doula']
 
 personas = {'Persona': persona_names, 'N-Grams': [author, we, baby, doctor, partner, nurse, midwife, family, anesthesiologist, doula], 'Total Mentions': [], 'Stories Containing Mentions': [], 'Average Mentions per Story': []}
 
-#returns total number of mentions for each persona per story. still need to get the sum.
+#returns total number of mentions for each persona per story.
 def counter(story):
 	lowered = story.lower()
 	tokenized = im.tokenize.word_tokenize(lowered)
@@ -33,7 +33,10 @@ def counter(story):
 
 total_mentions = im.birth_stories_df['selftext'].apply(counter)
 
-print(total_mentions)
+#finds sum for all stories
+a = im.np.array(list(total_mentions))
+
+number_mentions = a.sum(axis=0)
 
 #stories containing mentions:
 persona_df = im.pd.DataFrame()
@@ -68,9 +71,13 @@ anesthesiologist_count = persona_df['Anesthesiologist'].value_counts()[1]
 
 persona_df['Doula'] = im.birth_stories_df['selftext'].apply(lambda x: lb.findkey(x, doula))
 doula_count = persona_df['Doula'].value_counts()[1]
-#'Total Mentions': []
-#'Average Mentions per Story': []
-personas = {'Persona': persona_names, 'N-Grams': [author, we, baby, doctor, partner, nurse, midwife, family, anesthesiologist, doula], 'Stories Containing Mentions': [author_count, we_count, baby_count, doctor_count, partner_count, nurse_count, midwife_count, family_count, anesthesiologist_count, doula_count]}
+
+story_counts = [author_count, we_count, baby_count, doctor_count, partner_count, nurse_count, midwife_count, family_count, anesthesiologist_count, doula_count]
+
+#average number of mentions per story
+avg_mentions = number_mentions/story_counts
+
+personas = {'Persona': persona_names, 'N-Grams': [author, we, baby, doctor, partner, nurse, midwife, family, anesthesiologist, doula], 'Total Mentions': number_mentions, 'Stories Containing Mentions': story_counts, 'Average Mentions per Story': avg_mentions}
 persona_counts_df = im.pd.DataFrame(personas, index=im.np.arange(10))
 persona_counts_df.set_index('Persona', inplace = True)
 print(persona_counts_df)
