@@ -23,5 +23,3 @@ warnings.filterwarnings("ignore")
 
 birth_stories_df = compress_json.load('birth_stories_df.json.gz')
 birth_stories_df = pd.read_json(birth_stories_df)
-
-print(birth_stories_df)
