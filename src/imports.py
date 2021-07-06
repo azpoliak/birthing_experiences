@@ -18,15 +18,7 @@ import redditcleaner
 import re
 import warnings
 import itertools
+import compress_json
 warnings.filterwarnings("ignore")
 
-birth_stories_df = pd.read_pickle('all_birth_stories.pkl')
-
-def findkeyword(word, key):
-    if word.find(key) == -1:
-        return False
-    return True
-
-warning = 'disclaimer: this is the list that was previously posted'
-birth_stories_df['Valid'] = [findkeyword(sub, warning) for sub in birth_stories_df['selftext']]
-birth_stories_df = birth_stories_df.get(birth_stories_df['Valid'] == False)
+birth_stories_df = compress_json.load('birth_stories_df.json.gz')
