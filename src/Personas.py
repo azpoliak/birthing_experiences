@@ -2,11 +2,11 @@ import imports as im
 import labeling_stories as lb
 
 #returns total number of mentions for each persona per story.
-def counter(story):
+def counter(story, dc):
 	lowered = story.lower()
 	tokenized = im.tokenize.word_tokenize(lowered)
 	total_mentions = []
-	for ngram in personas['N-Grams']:
+	for ngram in list(dc.values()):
 		mentions = []
 		for word in tokenized:
 			if word in ngram:
@@ -30,21 +30,20 @@ def main():
     anesthesiologist = ['anesthesiologist']
     doula = ['doula']
 
-    #stories containing mentions:
-    total_mentions = im.birth_stories_df['selftext'].apply(counter)
-    print(total_mentions)
-
     #Dataframe with only relevant columns
-    persona_df = im.birth_stories_df['selftext']
+    persona_df = im.birth_stories_df[['selftext']]
 
-    personas_and_n_grams = {'Author': [author], 'We': [we], 'Baby': [baby], 'Doctor': [doctor], 'Partner': [partner], 'Nurse': [nurse], 'Midwife': [midwife], 'Family': [family], 'Anesthesiologist': [anesthesiologist], 'Doula': [doula]}
-    counts = create_df_label_list(persona_df, 'selftext', personas_and_n_grams, [])
+    personas_and_n_grams = {'Author': author, 'We': we, 'Baby': baby, 'Doctor': doctor, 'Partner': partner, 'Nurse': nurse, 'Midwife': midwife, 'Family': family, 'Anesthesiologist': anesthesiologist, 'Doula': doula}
+
+    #stories containing mentions:
+    total_mentions = persona_df['selftext'].apply(lambda x: counter(x, personas_and_n_grams))
+    print(total_mentions)
 
     #finds sum for all stories
     a = im.np.array(list(total_mentions))
     number_mentions = a.sum(axis=0)
 
-    story_counts = [author_count, we_count, baby_count, doctor_count, partner_count, nurse_count, midwife_count, family_count, anesthesiologist_count, doula_count]
+    story_counts = lb.create_df_label_list(persona_df, 'selftext', personas_and_n_grams, [])
 
     #average number of mentions per story
     avg_mentions = number_mentions/story_counts
@@ -52,7 +51,7 @@ def main():
     #applying functions and making a dictionary of the results for mentions accross stories
     personas_dict = {'Personas': list(personas_and_n_grams),
           'N-Grams': list(personas_and_n_grams.values()),
-          'Total Mentions': number_mentions, 
+          'Total Mentions': number_mentions,
           'Stories Containing Mentions': story_counts, 
           'Average Mentions per Story': avg_mentions}
 
@@ -62,3 +61,5 @@ def main():
     personas_counts_df.set_index('Personas', inplace = True)
     print(personas_counts_df)
 
+if __name__ == "__main__":
+    main()
