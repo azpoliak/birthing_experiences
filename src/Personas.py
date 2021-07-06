@@ -16,6 +16,40 @@ def counter(story, dc):
 		total_mentions.append(len(mentions))
 	return total_mentions
 
+def split_story_10(str):
+    tokenized = im.tokenize.word_tokenize(str)
+    rounded = round(len(tokenized)/10)
+    if rounded != 0:
+        ind = im.np.arange(0, rounded*10, rounded)
+        remainder = len(tokenized) % rounded*10
+    else:
+        ind = im.np.arange(0, rounded*10)
+        remainder = 0
+    split_story = []
+    for i in ind:
+        if i == ind[-1]:
+            split_story.append(' '.join(tokenized[i:i+remainder]))
+            return split_story
+        split_story.append(' '.join(tokenized[i:i+rounded]))
+    return split_story
+
+def count_chunks(series, dc):
+    mentions = []
+    for chunk in series:
+        mentions.append(counter(chunk, dc))
+    return mentions
+
+def make_hists(df):
+    fig = im.plt.figure()
+    ax = fig.add_subplot(111)
+    for i in range(df.shape[1]):
+        ax.clear()
+        ax.plot(df.iloc[:, i])
+        ax.set_title(df.iloc[:, i].name)
+        ax.set_xlabel('Story Time')
+        ax.set_ylabel('Persona Frequency')
+        fig.savefig(str(df.iloc[:, i].name)+'_Frequency_Hist.png')
+
 def main():
 
     #creating lists of words used to assign personas to stories
@@ -37,7 +71,7 @@ def main():
 
     #stories containing mentions:
     total_mentions = persona_df['selftext'].apply(lambda x: counter(x, personas_and_n_grams))
-    print(total_mentions)
+    #print(total_mentions)
 
     #finds sum for all stories
     a = im.np.array(list(total_mentions))
@@ -59,7 +93,21 @@ def main():
     personas_counts_df = im.pd.DataFrame(personas_dict, index=im.np.arange(10))
 
     personas_counts_df.set_index('Personas', inplace = True)
-    print(personas_counts_df)
+    #print(personas_counts_df)
+
+    #distributing across the course of the stories
+    persona_df['10 chunks/story'] = persona_df['selftext'].apply(split_story_10)
+
+    mentions_by_chunk = persona_df['10 chunks/story'].apply(lambda x: count_chunks(x, personas_and_n_grams))
+    
+    b = im.np.array(list(mentions_by_chunk))
+    chunk_mentions = b.sum(axis=0)
+    
+    personas_chunks_df = im.pd.DataFrame(chunk_mentions)
+    personas_chunks_df.set_axis(list(personas_dict['Personas']), axis=1, inplace=True)
+
+    #plots each persona across the story. right now it's a line plot but we want it to be a histogram.
+    print(make_hists(personas_chunks_df))
 
 if __name__ == "__main__":
     main()
