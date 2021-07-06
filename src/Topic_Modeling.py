@@ -56,7 +56,7 @@ birth_stories_df_cleaned['100 word chunks'].apply(get_all_chunks)
 
 path_to_mallet = 'mallet-2.0.8/bin/mallet'
 
-topic_words, topic_doc_distributions = im.lmw.quick_train_topic_model(path_to_mallet, "topic_modeling", 50, training_chunks)
+#topic_words, topic_doc_distributions = im.lmw.quick_train_topic_model(path_to_mallet, "topic_modeling", 50, training_chunks)
 num_topics = 50
 
 topics = im.lmw.load_topic_keys('topic_modeling/mallet.topic_keys.50')
@@ -143,13 +143,12 @@ topics_over_time_df.set_axis(keys_topics, axis=1, inplace=True)
 def make_plots(df):
     fig = im.plt.figure()
     ax = fig.add_subplot(111)
-    for i in range(50):
+    for i in range(topics_over_time_df.shape[1]):
         ax.clear()
         ax.plot(df.iloc[:, i])
         ax.set_title(df.iloc[:, i].name)
         ax.set_xlabel('Story Time')
         ax.set_ylabel('Topic Probability')
-        fig.savefig('Topic'+str(i)+df.iloc[:, i].name+'_Plot.png')
+        fig.savefig('Topic'+str(i)+'_'+str(df.iloc[:, i].name)+'_Plot.png')
 
-#print(make_plots(topics_over_time_df))
-print(topics_over_time_df.shape)
+print(make_plots(topics_over_time_df))
