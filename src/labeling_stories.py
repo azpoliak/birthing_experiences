@@ -58,6 +58,7 @@ vaginal = ['vaginal', 'vbac']
 #applying functions and making a dictionary of the results
 labels_and_n_grams = {'Positive': [positive, not_positive], 'Negative': [negative], 'Unmedicated': [unmedicated, not_unmedicated], 'Medicated': [medicated, not_medicated], 'Home': [home], 'Hospital': [hospital], 'First': [first], 'Second': [second], 'C-Section': [c_section], 'Vaginal': [vaginal]}
 disallows = ['Positive', 'Unmedicated', 'Medicated']
+global counts 
 counts = create_df_label_list(labels_df, 'title', labels_and_n_grams, disallows)
 
 def main():
