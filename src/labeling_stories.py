@@ -1,25 +1,7 @@
 import imports as im 
 
-
 # **Table 3: Labels**
 
-
-#creating lists of words used to assign labels to story titles 
-positive = ['positive']
-not_positive = ['less-than positive']
-negative = ['trauma', 'trigger', 'negative']
-unmedicated = ['no epi', 'natural', 'unmedicated', 'epidural free', 'no meds', 'no pain meds']
-not_unmedicated = ['unnatural']
-medicated = ['epidural', 'epi']
-not_medicated = ['no epi', 'epidural free']
-home = ['home']
-hospital = ['hospital']
-first = ['ftm', 'first time', 'first pregnancy']
-second = ['stm', 'second']
-c_section = ['cesarian', 'section', 'caesar']
-vaginal = ['vaginal', 'vbac']
-
-#ask Adam
 #functions to assign labels to posts based on their titles
 def findkey(title, labels):
     x = False
@@ -39,48 +21,55 @@ def findkeydisallow(title, labels, notlabels):
                     x = True
     return x
 
-#def assign_label(series):
+def create_df_label_list(df, column, dct, disallows):
+    label_counts = []
+    for label in list(dct):
+        if label not in disallows:
+            df[label] = df[column].apply(lambda x: findkey(x, dct[label][0]))
+            label_counts.append(df[label].value_counts()[1]) 
+        else:
+            df[label] = df[column].apply(lambda x: findkeydisallow(x, dct[label][0], dct[label][1]))
+            label_counts.append(df[label].value_counts()[1]) 
+    return label_counts
 
-pstv = im.birth_stories_df['title'].apply(lambda x: findkeydisallow(x,positive, not_positive))
+def main():
+    #creating lists of words used to assign labels to story titles 
+    positive = ['positive']
+    not_positive = ['less-than positive']
+    negative = ['trauma', 'trigger', 'negative']
+    unmedicated = ['no epi', 'natural', 'unmedicated', 'epidural free', 'no meds', 'no pain meds']
+    not_unmedicated = ['unnatural']
+    medicated = ['epidural', 'epi']
+    not_medicated = ['no epi', 'epidural free']
+    home = ['home']
+    hospital = ['hospital']
+    first = ['ftm', 'first time', 'first pregnancy']
+    second = ['stm', 'second']
+    c_section = ['cesarian', 'section', 'caesar']
+    vaginal = ['vaginal', 'vbac']
 
-labels_df = im.birth_stories_df[['title', 'selftext']]
+    #Dataframe with only the columns we're working with
+    labels_df = im.birth_stories_df[['title', 'selftext']]
 
-#applying functions and making a dictionary of the results
-labels_df['positive'] = labels_df['title'].apply(lambda x: findkeydisallow(x,positive, not_positive))
-positive_count = labels_df['positive'].value_counts()[1]
-labels_df['negative'] = labels_df['title'].apply(lambda x: findkey(x,negative))
-negative_count = labels_df['negative'].value_counts()[1]
-labels_df['unmedicated'] = labels_df['title'].apply(lambda x: findkeydisallow(x,unmedicated, not_unmedicated))
-unmedicated_count = labels_df['unmedicated'].value_counts()[1]
-labels_df['medicated'] = labels_df['title'].apply(lambda x: findkeydisallow(x,medicated, not_medicated))
-medicated_count = labels_df['medicated'].value_counts()[1]
-labels_df['home'] = labels_df['title'].apply(lambda x: findkey(x,home))
-home_count = labels_df['home'].value_counts()[1]
-labels_df['hospital'] = labels_df['title'].apply(lambda x: findkey(x,hospital))
-hospital_count = labels_df['hospital'].value_counts()[1]
-labels_df['first'] = labels_df['title'].apply(lambda x: findkey(x,first))
-first_count = labels_df['first'].value_counts()[1]
-labels_df['second'] = labels_df['title'].apply(lambda x: findkey(x,second)) 
-second_count = labels_df['second'].value_counts()[1]
-labels_df['c_section_count'] = labels_df['title'].apply(lambda x: findkey(x,c_section))
-c_section_count = labels_df['c_section_count'].value_counts()[1]
-labels_df['vaginal'] = labels_df['title'].apply(lambda x: findkey(x,vaginal))
-vaginal_count = labels_df['vaginal'].value_counts()[1]
+    #applying functions and making a dictionary of the results
+    labels_and_n_grams = {'Positive': [positive, not_positive], 'Negative': [negative], 'Unmedicated': [unmedicated, not_unmedicated], 'Medicated': [medicated, not_medicated], 'Home': [home], 'Hospital': [hospital], 'First': [first], 'Second': [second], 'C-Section': [c_section], 'Vaginal': [vaginal]}
+    disallows = ['Positive', 'Unmedicated', 'Medicated']
+    counts = create_df_label_list(labels_df, 'title', labels_and_n_grams, disallows)
 
-
-
-labels = { 'Labels': ['Positive', 'Negative', 'Unmedicated', 'Medicated', 'Home', 'Hospital', 'First', 'Second', 'C-section', 'Vaginal'],
+    labels_dict = { 'Labels': list(labels_and_n_grams),
           'Description': ['Positively framed', 'Negatively framed', 'Birth without epidural', 'Birth with epidural',
                          'Birth takes place at home', 'Birth takes place at hospital', 'First birth for the author',
                          'Second birth for the author', 'Birth via cesarean delivery', 'Vaginal births'],
           'N-Grams': [positive+not_positive, negative, unmedicated+not_unmedicated, medicated+not_medicated,
                      home, hospital, first, second, c_section, vaginal],
-          'Number of Stories': [positive_count, negative_count, unmedicated_count, medicated_count, home_count, hospital_count, 
-                                first_count, second_count, c_section_count, vaginal_count]}
+          'Number of Stories': counts}
 
-#turn dictionary into a dataframe
-label_counts_df = im.pd.DataFrame(labels, index=im.np.arange(10))
-#print(labels_df)
-label_counts_df.set_index('Labels', inplace = True)
-positive_framed = labels_df.get(labels_df['positive'] == True)
-negative_framed = labels_df.get(labels_df['negative'] == True)
+    #turn dictionary into a dataframe
+    label_counts_df = im.pd.DataFrame(labels_dict, index=im.np.arange(10))
+
+    label_counts_df.set_index('Labels', inplace = True)
+    print(label_counts_df)
+
+    #Pos vs. Neg Framed 
+    positive_framed = labels_df.get(labels_df['Positive'] == True)
+    negative_framed = labels_df.get(labels_df['Negative'] == True)
