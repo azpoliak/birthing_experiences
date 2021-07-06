@@ -58,8 +58,13 @@ vaginal = ['vaginal', 'vbac']
 #applying functions and making a dictionary of the results
 labels_and_n_grams = {'Positive': [positive, not_positive], 'Negative': [negative], 'Unmedicated': [unmedicated, not_unmedicated], 'Medicated': [medicated, not_medicated], 'Home': [home], 'Hospital': [hospital], 'First': [first], 'Second': [second], 'C-Section': [c_section], 'Vaginal': [vaginal]}
 disallows = ['Positive', 'Unmedicated', 'Medicated']
+Covid = {'Covid': ["2019-ncov", "2019ncov", "corona", "coronavirus", "covid", "covid-19", "covid19" "mers", "outbreak", "pandemic", "rona", "sars", "sars-cov-2", "sars2", "sarscov19", "virus", "wuflu", "wuhan"]}
+
 global counts 
 counts = create_df_label_list(labels_df, 'title', labels_and_n_grams, disallows)
+global covid 
+covid = create_df_label_list(labels_df, 'selftext', Covid, [])
+covid_df = labels_df[['title', 'selftext', 'Covid']]
 
 def main():
     labels_dict = { 'Labels': list(labels_and_n_grams),
@@ -74,9 +79,10 @@ def main():
     label_counts_df = im.pd.DataFrame(labels_dict, index=im.np.arange(10))
 
     print(labels_df)
+    print(covid_df.get(covid_df['Covid']==True))
 
     label_counts_df.set_index('Labels', inplace = True)
-    print(label_counts_df)
+    #print(label_counts_df)
 
 if __name__ == "__main__":
     main()
