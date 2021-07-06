@@ -159,7 +159,7 @@ def main():
 
 #Convert to compressed json 
 birth_stories_df = birth_stories_df.to_json()
-compress_json.dump(birth_stories_df, "birth_stories_df.json2.gz")
+compress_json.dump(birth_stories_df, "birth_stories_df.json.gz")
 
 if __name__ == "__main__":
     main()
