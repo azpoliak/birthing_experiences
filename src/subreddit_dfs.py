@@ -165,37 +165,37 @@ def main():
     InfertilityBabies_df_j = InfertilityBabies_df.to_json()
     compress_json.dump(InfertilityBabies_df_j, "InfertilityBabies_df.json.gz")
 
-    #birth_stories_df = birth_stories_df.append(BabyBumps_df, ignore_index=True)
-    #birth_stories_df = birth_stories_df.append(beyond_the_bump_df, ignore_index=True)
-    #birth_stories_df = birth_stories_df.append(BirthStories_df, ignore_index=True)
-    #birth_stories_df = birth_stories_df.append(daddit_df, ignore_index=True)
-    #birth_stories_df = birth_stories_df.append(predaddit_df, ignore_index=True)
-    #birth_stories_df = birth_stories_df.append(pregnant_df, ignore_index=True)
-    #birth_stories_df = birth_stories_df.append(Mommit_df, ignore_index=True)
-    #birth_stories_df = birth_stories_df.append(NewParents_df, ignore_index=True)
-    #birth_stories_df = birth_stories_df.append(InfertilityBabies_df, ignore_index=True)
+    birth_stories_df = birth_stories_df.append(BabyBumps_df, ignore_index=True)
+    birth_stories_df = birth_stories_df.append(beyond_the_bump_df, ignore_index=True)
+    birth_stories_df = birth_stories_df.append(BirthStories_df, ignore_index=True)
+    birth_stories_df = birth_stories_df.append(daddit_df, ignore_index=True)
+    birth_stories_df = birth_stories_df.append(predaddit_df, ignore_index=True)
+    birth_stories_df = birth_stories_df.append(pregnant_df, ignore_index=True)
+    birth_stories_df = birth_stories_df.append(Mommit_df, ignore_index=True)
+    birth_stories_df = birth_stories_df.append(NewParents_df, ignore_index=True)
+    birth_stories_df = birth_stories_df.append(InfertilityBabies_df, ignore_index=True)
 
     #gets rid of posts that have no content
-    #nan_value = float("NaN")
-    #birth_stories_df.replace("", nan_value, inplace=True)
-    #birth_stories_df.dropna(subset=['selftext'], inplace=True)
+    nan_value = float("NaN")
+    birth_stories_df.replace("", nan_value, inplace=True)
+    birth_stories_df.dropna(subset=['selftext'], inplace=True)
 
-    #birth_stories_df['story length'] = birth_stories_df['selftext'].apply(story_lengths)
+    birth_stories_df['story length'] = birth_stories_df['selftext'].apply(story_lengths)
 
     #only rows where the story is 500+ words long
-    #birth_stories_df['500+'] = birth_stories_df['story length'].apply(long_stories)
-    #birth_stories_df = birth_stories_df[birth_stories_df['500+'] == True]
+    birth_stories_df['500+'] = birth_stories_df['story length'].apply(long_stories)
+    birth_stories_df = birth_stories_df[birth_stories_df['500+'] == True]
 
     #only useful columns
-    #birth_stories_df = birth_stories_df[['author', 'title', 'selftext','story length','created_utc','permalink']]
+    birth_stories_df = birth_stories_df[['author', 'title', 'selftext','story length','created_utc','permalink']]
 
-    #warning = 'disclaimer: this is the list that was previously posted'
-    #birth_stories_df['Valid'] = [findkeyword(sub, warning) for sub in birth_stories_df['selftext']]
-    #birth_stories_df = birth_stories_df.get(birth_stories_df['Valid'] == False)
+    warning = 'disclaimer: this is the list that was previously posted'
+    birth_stories_df['Valid'] = [findkeyword(sub, warning) for sub in birth_stories_df['selftext']]
+    birth_stories_df = birth_stories_df.get(birth_stories_df['Valid'] == False)
 
 #Convert to compressed json 
-#birth_stories_df = birth_stories_df.to_json()
-#compress_json.dump(birth_stories_df, "birth_stories_df.json.gz")
+birth_stories_df = birth_stories_df.to_json()
+compress_json.dump(birth_stories_df, "birth_stories_df.json.gz")
 
 if __name__ == "__main__":
     main()
