@@ -6,9 +6,7 @@ import compress_json
 #import Maria_paper
 #from Maria_paper import birthstories
 
-#Instantiate primary dataframe for corpus
-global birth_stories_df 
-birth_stories_df = pd.DataFrame()
+#Instantiate primary dataframe for corpus 
 
 def birthstories(series):
     lowered = series.lower()
@@ -129,6 +127,8 @@ def main():
     InfertilityBabies_df['birth story'] = InfertilityBabies_df['title'].apply(birthstories)
     InfertilityBabies_df = InfertilityBabies_df[InfertilityBabies_df['birth story'] == True]
 
+    birth_stories_df = pd.DataFrame()
+
     birth_stories_df = birth_stories_df.append(BabyBumps_df, ignore_index=True)
     birth_stories_df = birth_stories_df.append(beyond_the_bump_df, ignore_index=True)
     birth_stories_df = birth_stories_df.append(BirthStories_df, ignore_index=True)
@@ -154,12 +154,12 @@ def main():
     birth_stories_df = birth_stories_df[['author', 'title', 'selftext','story length','created_utc','permalink']]
 
     warning = 'disclaimer: this is the list that was previously posted'
-    birth_stories_df['Valid'] = [findkeyword(sub, warning) for sub in birth_stories_df['selftext']]
-    birth_stories_df = birth_stories_df.get(birth_stories_df['Valid'] == False)
+    birth_stories_df['Disclaimer'] = [findkeyword(sub, warning) for sub in birth_stories_df['selftext']]
+    birth_stories_df = birth_stories_df.get(birth_stories_df['Disclaimer'] == False)
 
-#Convert to compressed json 
-birth_stories_df = birth_stories_df.to_json()
-compress_json.dump(birth_stories_df, "birth_stories_df.json.gz")
+    #Convert to compressed json 
+    birth_stories_df = birth_stories_df.to_json()
+    compress_json.dump(birth_stories_df, "birth_stories_df.json.gz")
 
 if __name__ == "__main__":
     main()
