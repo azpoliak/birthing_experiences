@@ -39,16 +39,54 @@ def count_chunks(series, dc):
         mentions.append(counter(chunk, dc))
     return mentions
 
-def make_hists(df):
-    fig = im.plt.figure()
-    ax = fig.add_subplot(111)
-    for i in range(df.shape[1]):
-        ax.clear()
-        ax.plot(df.iloc[:, i])
-        ax.set_title(df.iloc[:, i].name)
-        ax.set_xlabel('Story Time')
-        ax.set_ylabel('Persona Frequency')
-        fig.savefig(str(df.iloc[:, i].name)+'_Frequency_Hist.png')
+mentions = [[],[],[],[],[],[],[],[],[],[]]
+def process_mentions(element):
+    for i in range(len(element)):
+        for persona in element[i]:
+            mentions[i].append(persona)
+    return mentions
+
+def group(story, num, keys):
+    persona_counts = []
+    key_list = list(keys)
+    for chunk in story[num]:
+        persona_counts.append(chunk)
+    zip_iterator = zip(key_list, persona_counts)
+    dictionary = dict(zip_iterator)
+    return dictionary
+
+def per_group(story, keys):
+    group_dict = {} 
+    for i in im.np.arange(10):
+        group_dict[f"0.{str(i)}"] = group(story, i, keys)
+    return group_dict
+
+def make_hists(series, persona):
+    #fig = im.plt.figure()
+    #ax = fig.add_subplot(111)
+    #persona_counts = []
+    for story in series:
+        for key in story:
+            print(key)
+            #for k in key.keys():
+                #if k == persona:
+                    #persona_counts.append(key[k])
+    #ax.hist(persona_counts, bins=10)
+    #ax.set_title(str(persona))
+    #ax.set_xlabel('Story Time')
+    #ax.set_ylabel('Persona Frequency')
+    #fig.savefig(str(persona)+'_Frequency_Hist.png')
+
+#def make_hists(df):
+    #fig = im.plt.figure()
+    #ax = fig.add_subplot(111)
+    #for i in range(df.shape[1]):
+        #ax.clear()
+        #ax.plot(df.iloc[:, i])
+        #ax.set_title(df.iloc[:, i].name)
+        #ax.set_xlabel('Story Time')
+        #ax.set_ylabel('Persona Frequency')
+        #fig.savefig(str(df.iloc[:, i].name)+'_Frequency_Hist.png')
 
 def main():
 
@@ -100,14 +138,36 @@ def main():
 
     mentions_by_chunk = persona_df['10 chunks/story'].apply(lambda x: count_chunks(x, personas_and_n_grams))
     
-    b = im.np.array(list(mentions_by_chunk))
-    chunk_mentions = b.sum(axis=0)
-    
-    personas_chunks_df = im.pd.DataFrame(chunk_mentions)
-    personas_chunks_df.set_axis(list(personas_dict['Personas']), axis=1, inplace=True)
+    b = im.pd.Series(list(mentions_by_chunk))
+    #chunk_mentions = b.sum(axis=0)
+
+    c = b.apply(per_group, args=(personas_and_n_grams,))
+    c = dict(c)
+
+    d = im.pd.DataFrame.from_dict({(i,j): c[i][j]
+        for i in c.keys() 
+        for j in c[i].keys()},
+    orient='index')
+
+    idx = im.pd.IndexSlice
+    print(d.loc[idx[:, ['0.0']]])
+
+    #mentions_by_chunk.apply(process_mentions)
+    #print(mentions)
+
+    #print(personas_chunks_df)
 
     #plots each persona across the story. right now it's a line plot but we want it to be a histogram.
-    print(make_hists(personas_chunks_df))
+    #print(make_hists(c, 'Author'))
+
+    #b = im.np.array(list(mentions_by_chunk))
+    #chunk_mentions = b.sum(axis=0)
+    
+    #personas_chunks_df = im.pd.DataFrame(chunk_mentions)
+    #personas_chunks_df.set_axis(list(personas_dict['Personas']), axis=1, inplace=True)
+
+    #plots each persona across the story. right now it's a line plot but we want it to be a histogram.
+    #print(make_hists(personas_chunks_df))
 
 if __name__ == "__main__":
     main()
