@@ -6,8 +6,6 @@ import compress_json
 #import Maria_paper
 #from Maria_paper import birthstories
 
-#Instantiate primary dataframe for corpus
-
 def birthstories(series):
     lowered = series.lower()
     if 'birth story' in lowered:
