@@ -49,6 +49,10 @@ def main():
     BabyBumps_df['birth story'] = BabyBumps_df['title'].apply(birthstories)
     BabyBumps_df = BabyBumps_df[BabyBumps_df['birth story'] == True]
 
+    BabyBumps_df.reset_index(drop=True, inplace=True)
+    BabyBumps_df_j = BabyBumps_df.to_json()
+    compress_json.dump(BabyBumps_df_j, "BabyBumps_df.json.gz")
+
     beyond_the_bump_df = pd.DataFrame()
     for file in os.listdir("../data/original-reddit/subreddits/beyondthebump/submissions/"):
         post = "../data/original-reddit/subreddits/beyondthebump/submissions/"+file
@@ -58,6 +62,10 @@ def main():
 
     beyond_the_bump_df['birth story'] = beyond_the_bump_df['title'].apply(birthstories)
     beyond_the_bump_df = beyond_the_bump_df[beyond_the_bump_df['birth story'] == True]
+
+    beyond_the_bump_df.reset_index(drop=True, inplace=True)
+    beyond_the_bump_df_j = beyond_the_bump_df.to_json()
+    compress_json.dump(beyond_the_bump_df_j, "beyond_the_bump_df.json.gz")
 
     BirthStories_df = pd.DataFrame()
     for file in os.listdir("../data/original-reddit/subreddits/BirthStories/submissions/"):
@@ -69,6 +77,10 @@ def main():
     BirthStories_df['birth story'] = BirthStories_df['title'].apply(birthstories)
     BirthStories_df = BirthStories_df[BirthStories_df['birth story'] == True]
 
+    BirthStories_df.reset_index(drop=True, inplace=True)
+    BirthStories_df_j = BirthStories_df.to_json()
+    compress_json.dump(BirthStories_df_j, "BirthStories_df.json.gz")
+
     daddit_df = pd.DataFrame()
     for file in os.listdir("../data/original-reddit/subreddits/daddit/submissions/"):
         post = "../data/original-reddit/subreddits/daddit/submissions/"+file
@@ -78,6 +90,10 @@ def main():
 
     daddit_df['birth story'] = daddit_df['title'].apply(birthstories)
     daddit_df = daddit_df[daddit_df['birth story'] == True]
+
+    daddit_df.reset_index(drop=True, inplace=True)
+    daddit_df_j = daddit_df.to_json()
+    compress_json.dump(daddit_df_j, "daddit_df.json.gz")
 
     predaddit_df = pd.DataFrame()
     for file in os.listdir("../data/original-reddit/subreddits/predaddit/submissions/"):
@@ -89,6 +105,10 @@ def main():
     predaddit_df['birth story'] = predaddit_df['title'].apply(birthstories)
     predaddit_df = predaddit_df[predaddit_df['birth story'] == True]
 
+    predaddit_df.reset_index(drop=True, inplace=True)
+    predaddit_df_j = predaddit_df.to_json()
+    compress_json.dump(predaddit_df_j, "predaddit_df.json.gz")
+
     pregnant_df = pd.DataFrame()
     for file in os.listdir("../data/original-reddit/subreddits/pregnant/submissions/"):
         post = "../data/original-reddit/subreddits/pregnant/submissions/"+file
@@ -98,6 +118,10 @@ def main():
 
     pregnant_df['birth story'] = pregnant_df['title'].apply(birthstories)
     pregnant_df = pregnant_df[pregnant_df['birth story'] == True]
+
+    pregnant_df.reset_index(drop=True, inplace=True)
+    pregnant_df_j = pregnant_df.to_json()
+    compress_json.dump(pregnant_df_j, "pregnant_df.json.gz")
 
     Mommit_df = pd.DataFrame()
     for file in os.listdir("../data/original-reddit/subreddits/Mommit/submissions/"):
@@ -109,6 +133,10 @@ def main():
     Mommit_df['birth story'] = Mommit_df['title'].apply(birthstories)
     Mommit_df = Mommit_df[Mommit_df['birth story'] == True]
 
+    Mommit_df.reset_index(drop=True, inplace=True)
+    Mommit_df_j = Mommit_df.to_json()
+    compress_json.dump(Mommit_df_j, "Mommit_df.json.gz")
+
     NewParents_df = pd.DataFrame()
     for file in os.listdir("../data/original-reddit/subreddits/NewParents/submissions/"):
         post = "../data/original-reddit/subreddits/NewParents/submissions/"+file
@@ -118,6 +146,10 @@ def main():
 
     NewParents_df['birth story'] = NewParents_df['title'].apply(birthstories)
     NewParents_df = NewParents_df[NewParents_df['birth story'] == True]
+
+    NewParents_df.reset_index(drop=True, inplace=True)
+    NewParents_df_j = NewParents_df.to_json()
+    compress_json.dump(NewParents_df_j, "NewParents_df.json.gz")
 
     InfertilityBabies_df = pd.DataFrame()
     for file in os.listdir("../data/original-reddit/subreddits/InfertilityBabies/submissions/"):
@@ -129,37 +161,41 @@ def main():
     InfertilityBabies_df['birth story'] = InfertilityBabies_df['title'].apply(birthstories)
     InfertilityBabies_df = InfertilityBabies_df[InfertilityBabies_df['birth story'] == True]
 
-    birth_stories_df = birth_stories_df.append(BabyBumps_df, ignore_index=True)
-    birth_stories_df = birth_stories_df.append(beyond_the_bump_df, ignore_index=True)
-    birth_stories_df = birth_stories_df.append(BirthStories_df, ignore_index=True)
-    birth_stories_df = birth_stories_df.append(daddit_df, ignore_index=True)
-    birth_stories_df = birth_stories_df.append(predaddit_df, ignore_index=True)
-    birth_stories_df = birth_stories_df.append(pregnant_df, ignore_index=True)
-    birth_stories_df = birth_stories_df.append(Mommit_df, ignore_index=True)
-    birth_stories_df = birth_stories_df.append(NewParents_df, ignore_index=True)
-    birth_stories_df = birth_stories_df.append(InfertilityBabies_df, ignore_index=True)
+    InfertilityBabies_df.reset_index(drop=True, inplace=True)
+    InfertilityBabies_df_j = InfertilityBabies_df.to_json()
+    compress_json.dump(InfertilityBabies_df_j, "InfertilityBabies_df.json.gz")
+
+    #birth_stories_df = birth_stories_df.append(BabyBumps_df, ignore_index=True)
+    #birth_stories_df = birth_stories_df.append(beyond_the_bump_df, ignore_index=True)
+    #birth_stories_df = birth_stories_df.append(BirthStories_df, ignore_index=True)
+    #birth_stories_df = birth_stories_df.append(daddit_df, ignore_index=True)
+    #birth_stories_df = birth_stories_df.append(predaddit_df, ignore_index=True)
+    #birth_stories_df = birth_stories_df.append(pregnant_df, ignore_index=True)
+    #birth_stories_df = birth_stories_df.append(Mommit_df, ignore_index=True)
+    #birth_stories_df = birth_stories_df.append(NewParents_df, ignore_index=True)
+    #birth_stories_df = birth_stories_df.append(InfertilityBabies_df, ignore_index=True)
 
     #gets rid of posts that have no content
-    nan_value = float("NaN")
-    birth_stories_df.replace("", nan_value, inplace=True)
-    birth_stories_df.dropna(subset=['selftext'], inplace=True)
+    #nan_value = float("NaN")
+    #birth_stories_df.replace("", nan_value, inplace=True)
+    #birth_stories_df.dropna(subset=['selftext'], inplace=True)
 
-    birth_stories_df['story length'] = birth_stories_df['selftext'].apply(story_lengths)
+    #birth_stories_df['story length'] = birth_stories_df['selftext'].apply(story_lengths)
 
     #only rows where the story is 500+ words long
-    birth_stories_df['500+'] = birth_stories_df['story length'].apply(long_stories)
-    birth_stories_df = birth_stories_df[birth_stories_df['500+'] == True]
+    #birth_stories_df['500+'] = birth_stories_df['story length'].apply(long_stories)
+    #birth_stories_df = birth_stories_df[birth_stories_df['500+'] == True]
 
     #only useful columns
-    birth_stories_df = birth_stories_df[['author', 'title', 'selftext','story length','created_utc','permalink']]
+    #birth_stories_df = birth_stories_df[['author', 'title', 'selftext','story length','created_utc','permalink']]
 
-    warning = 'disclaimer: this is the list that was previously posted'
-    birth_stories_df['Valid'] = [findkeyword(sub, warning) for sub in birth_stories_df['selftext']]
-    birth_stories_df = birth_stories_df.get(birth_stories_df['Valid'] == False)
+    #warning = 'disclaimer: this is the list that was previously posted'
+    #birth_stories_df['Valid'] = [findkeyword(sub, warning) for sub in birth_stories_df['selftext']]
+    #birth_stories_df = birth_stories_df.get(birth_stories_df['Valid'] == False)
 
 #Convert to compressed json 
-birth_stories_df = birth_stories_df.to_json()
-compress_json.dump(birth_stories_df, "birth_stories_df.json.gz")
+#birth_stories_df = birth_stories_df.to_json()
+#compress_json.dump(birth_stories_df, "birth_stories_df.json.gz")
 
 if __name__ == "__main__":
     main()
