@@ -6,10 +6,6 @@ import compress_json
 #import Maria_paper
 #from Maria_paper import birthstories
 
-#Instantiate primary dataframe for corpus
-global birth_stories_df 
-birth_stories_df = pd.DataFrame()
-
 def birthstories(series):
     lowered = series.lower()
     if 'birth story' in lowered:
@@ -164,6 +160,8 @@ def main():
     InfertilityBabies_df.reset_index(drop=True, inplace=True)
     InfertilityBabies_df_j = InfertilityBabies_df.to_json()
     compress_json.dump(InfertilityBabies_df_j, "InfertilityBabies_df.json.gz")
+ 
+    birth_stories_df = pd.DataFrame()
 
     birth_stories_df = birth_stories_df.append(BabyBumps_df, ignore_index=True)
     birth_stories_df = birth_stories_df.append(beyond_the_bump_df, ignore_index=True)
@@ -193,9 +191,9 @@ def main():
     birth_stories_df['Valid'] = [findkeyword(sub, warning) for sub in birth_stories_df['selftext']]
     birth_stories_df = birth_stories_df.get(birth_stories_df['Valid'] == False)
 
-#Convert to compressed json 
-birth_stories_df = birth_stories_df.to_json()
-compress_json.dump(birth_stories_df, "birth_stories_df.json.gz")
+    #Convert to compressed json 
+    birth_stories_df = birth_stories_df.to_json()
+    compress_json.dump(birth_stories_df, "birth_stories_df.json.gz")
 
 if __name__ == "__main__":
     main()
