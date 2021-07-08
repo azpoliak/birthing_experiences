@@ -75,16 +75,6 @@ def main():
 
     counts = create_df_label_list(labels_df, 'title', labels_and_n_grams, disallows)
 
-    covid = create_df_label_list(labels_df, 'selftext', Covid, [])
-    covid_df = labels_df[['title', 'selftext', 'Covid']]
-
-    #Read dataframes to compressed json so we can reference them later
-    labels_df = labels_df.to_json()
-    im.compress_json.dump(labels_df, "labeled_df.json.gz")
-
-    covid_df = covid_df.to_json()
-    im.compress_json.dump(covid_df, "covid_df.json.gz")
-
     labels_dict = { 'Labels': list(labels_and_n_grams),
     'Description': ['Positively framed', 'Negatively framed', 'Birth without epidural', 'Birth with epidural',
                  'Birth takes place at home', 'Birth takes place at hospital', 'First birth for the author',
@@ -101,25 +91,31 @@ def main():
 
     im.birth_stories_df['date created'] = im.birth_stories_df['created_utc'].apply(get_post_year)
     im.birth_stories_df = im.birth_stories_df.sort_values(by = 'date created')
-    im.birth_stories_df['Pre-Covid'] = im.birth_stories_df['date created'].apply(pandemic)
+    labels_df['Pre-Covid'] = im.birth_stories_df['date created'].apply(pandemic)
+
+    covid = create_df_label_list(labels_df, 'selftext', Covid, [])
 
     #Subreddits before pandemic 
-    pre_covid_posts_df = im.birth_stories_df.get(im.birth_stories_df['Pre-Covid']==True)
-    #print(pre_covid_posts_df)
-    #print(f"Subreddits before pandemic: {len(pre_covid_posts_df)}")
+    pre_covid_posts_df = labels_df.get(labels_df['Pre-Covid']==True).get(['title', 'selftext', 'Covid'])
+    print(pre_covid_posts_df)
+    print(f"Subreddits before pandemic: {len(pre_covid_posts_df)}")
 
     #Convert to Json
-    #pre_covid_posts_df = pre_covid_posts_df.to_json()
-    #im.compress_json.dump(pre_covid_posts_df, "pre_covid_posts_df.json.gz")
+    pre_covid_posts_df = pre_covid_posts_df.to_json()
+    im.compress_json.dump(pre_covid_posts_df, "pre_covid_posts_df.json.gz")
 
     #Subreddits after pandemic 
-    post_covid_posts_df = im.birth_stories_df.get(im.birth_stories_df['Pre-Covid']==False)
-    #print(post_covid_posts_df)
-    #print(f"Subreddits during/after pandemic: {len(post_covid_posts_df)}")
+    post_covid_posts_df = labels_df.get(labels_df['Pre-Covid']==False).get(['title', 'selftext', 'Covid'])
+    print(post_covid_posts_df)
+    print(f"Subreddits during/after pandemic: {len(post_covid_posts_df)}")
 
+    #Read dataframes to compressed json so we can reference them later
+    labels_df = labels_df.to_json()
+    im.compress_json.dump(labels_df, "labeled_df.json.gz")
+    
     #Convert to Json
-    #post_covid_posts_df = post_covid_posts_df.to_json()
-    #im.compress_json.dump(post_covid_posts_df, "post_covid_posts_df.json.gz")
+    post_covid_posts_df = post_covid_posts_df.to_json()
+    im.compress_json.dump(post_covid_posts_df, "post_covid_posts_df.json.gz")
 
 if __name__ == "__main__":
     main()
