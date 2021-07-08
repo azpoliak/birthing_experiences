@@ -1,5 +1,5 @@
 import imports as im 
-import labeling_stories as lb
+import labeling_stories 
 # **Figure 2: Sentiment Analysis**
 
 #set up sentiment analyzer
@@ -102,8 +102,8 @@ def main():
     #im.plt.savefig('Pos_and_Neg_Sentiment_Plot.png')
 
     #For the Negative and Positive framed stories
-    positive_framed = lb.labels_df[['title', 'selftext']].get(lb.labels_df['Positive'] == True)
-    negative_framed = lb.labels_df[['title', 'selftext']].get(lb.labels_df['Negative'] == True)
+    positive_framed = im.labels_df[['title', 'selftext']].get(im.labels_df['Positive'] == True)
+    negative_framed = im.labels_df[['title', 'selftext']].get(im.labels_df['Negative'] == True)
 
     negframed_df = im.pd.DataFrame()
     negframed_df['tokenized sentences'] = positive_framed['selftext'].apply(im.tokenize.sent_tokenize)
