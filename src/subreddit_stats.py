@@ -9,11 +9,8 @@ def make_plots(series, name):
     fig = im.plt.figure(figsize=(20,10))
     posts_per_year = series.value_counts()
     posts_per_year.sort_index().plot.bar()
-    #ax.set_title(df.iloc[:, i].name)
-    #ax.set_xlabel('Story Time')
-    #ax.set_ylabel('Topic Probability')
-    fig.savefig(str(name)+'_years.png')
-    #print(type(posts_per_year))
+    fig.suptitle('Number of posts in r/'+str(name)+' per year')
+    fig.savefig('../data/subreddit_years_bar_graphs/'+str(name)+'_years.png')
 
 BabyBumps_df = im.compress_json.load('subreddit_json_gzs/BabyBumps_df.json.gz')
 BabyBumps_df = im.pd.read_json(BabyBumps_df)

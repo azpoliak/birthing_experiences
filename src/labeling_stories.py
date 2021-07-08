@@ -87,7 +87,7 @@ def main():
     label_counts_df = im.pd.DataFrame(labels_dict, index=im.np.arange(10))
 
     label_counts_df.set_index('Labels', inplace = True)
-    #print(label_counts_df)
+    label_counts_df.to_csv('../data/label_counts_df.csv')
 
     im.birth_stories_df['date created'] = im.birth_stories_df['created_utc'].apply(get_post_year)
     im.birth_stories_df = im.birth_stories_df.sort_values(by = 'date created')
