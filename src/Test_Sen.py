@@ -10,8 +10,10 @@ def sentiment_analyzer_scores(sentence):
 
 def split_story_10_sentiment(lst):
     sentiment_story = []
+    if isinstance(lst, float) == True:
+        lst = str(lst)
     for sentence in lst:
-    	if len(im.tokenize.word_tokenize(sentence)) >=5:
+        if len(im.tokenize.word_tokenize(sentence)) >=5:
             analyzed = sentiment_analyzer_scores(sentence)
             sentiment_story.append(analyzed)
     rounded = round(len(lst)/10)
@@ -55,6 +57,7 @@ def dict_to_frame(lst):
 
 def main():
     #tokenize stories by sentence
+    
     sentiment_df = im.pd.DataFrame()
     sentiment_df['tokenized sentences'] = im.birth_stories_df['selftext'].apply(im.tokenize.sent_tokenize)
     #print(sentiment_df)
@@ -134,6 +137,68 @@ def main():
     #im.plt.show()
     #im.plt.legend(['Positive Title Frame', 'Negative Title Frame'])
     #im.plt.savefig('Pos_Neg_Frame_Plot.png')
+
+    #Pre and Post Covid Sentiments
+    #Starting with Compound Sentiment
+
+    im.pre_covid_posts_df['tokenized sentences: pre covid'] = im.pre_covid_posts_df['selftext'].apply(im.tokenize.sent_tokenize)
+    im.post_covid_posts_df['tokenized sentences: post covid'] = im.post_covid_posts_df['selftext'].apply(im.tokenize.sent_tokenize)
+
+    im.pre_covid_posts_df['sentiment groups: pre covid'] = im.pre_covid_posts_df['tokenized sentences: pre covid'].apply(split_story_10_sentiment)
+    im.post_covid_posts_df['sentiment groups: post covid'] = im.post_covid_posts_df['tokenized sentences: post covid'].apply(split_story_10_sentiment)
+
+    im.pre_covid_posts_df['comp sent per group: pre covid'] = im.pre_covid_posts_df['sentiment groups: pre covid'].apply(per_group, args = ('compound',))
+    im.post_covid_posts_df['comp sent per group: post covid'] = im.post_covid_posts_df['sentiment groups: post covid'].apply(per_group, args = ('compound',))
+
+    sentiment_over_narrative_pre = dict_to_frame(im.pre_covid_posts_df['comp sent per group: pre covid'])
+    sentiment_over_narrative_pre.index.name = 'Sections'
+
+    sentiment_over_narrative_post = dict_to_frame(im.post_covid_posts_df['comp sent per group: post covid'])
+    sentiment_over_narrative_post.index.name = 'Sections'
+
+    #Plotting over narrative time
+    #print(im.plt.plot(sentiment_over_narrative_post['Sentiments'], label = 'Post-Covid'))
+    #print(im.plt.plot(sentiment_over_narrative_pre['Sentiments'], label = 'Pre-Covid'))
+    #im.plt.xlabel('Story Time')
+    #im.plt.ylabel('Sentiment')
+    #im.plt.title("Sentiment over Narrative Before and After Covid-19")
+    #im.plt.show()
+    #im.plt.legend()
+    #im.plt.savefig('Compound_Sentiment_Plot_Pre_Post.png')
+
+    #Now, split based on positive vs. negative sentiment-- this plot should have 4 lines
+
+    im.pre_covid_posts_df['pos sent per group: pre covid'] = im.pre_covid_posts_df['sentiment groups: pre covid'].apply(per_group, args = ('pos',))
+    im.pre_covid_posts_df['neg sent per group: pre covid'] = im.pre_covid_posts_df['sentiment groups: pre covid'].apply(per_group, args = ('neg',))
+
+    pos_sentiment_over_narrative_pre = dict_to_frame(im.pre_covid_posts_df['pos sent per group: pre covid'])
+    pos_sentiment_over_narrative_pre.index.name = 'Sections'
+
+    neg_sentiment_over_narrative_pre = dict_to_frame(im.pre_covid_posts_df['neg sent per group: pre covid'])
+    neg_sentiment_over_narrative_pre.index.name = 'Sections'
+
+    im.post_covid_posts_df['pos sent per group: post covid'] = im.post_covid_posts_df['sentiment groups: post covid'].apply(per_group, args = ('pos',))
+    im.post_covid_posts_df['neg sent per group: post covid'] = im.post_covid_posts_df['sentiment groups: post covid'].apply(per_group, args = ('neg',))
+
+    pos_sentiment_over_narrative_post = dict_to_frame(im.post_covid_posts_df['pos sent per group: post covid'])
+    pos_sentiment_over_narrative_post.index.name = 'Sections'
+
+    neg_sentiment_over_narrative_post = dict_to_frame(im.post_covid_posts_df['neg sent per group: post covid'])
+    neg_sentiment_over_narrative_post.index.name = 'Sections'
+
+    #Plotting each over narrative time
+    print(im.plt.plot(pos_sentiment_over_narrative_pre['Sentiments'], label = 'Positive Sentiment Score Pre Covid'))
+    print(im.plt.plot(neg_sentiment_over_narrative_pre['Sentiments'], label = 'Negative Sentiment Score Pre Covid'))
+    print(im.plt.plot(pos_sentiment_over_narrative_post['Sentiments'], label = 'Positive Sentiment Score Post Covid'))
+    print(im.plt.plot(neg_sentiment_over_narrative_post['Sentiments'], label = 'Negative Sentiment Score Post Covid'))
+    im.plt.xlabel('Story Time')
+    im.plt.ylabel('Sentiment')
+    im.plt.title("Pos/NegSentiment over Narrative Before and After Covid-19")
+    im.plt.show()
+    im.plt.legend()
+    im.plt.savefig('Pos_and_Neg_Sentiment_Plot_Pre_Post.png')
+
+    #For the Negative and Positive framed stories
 
 if __name__ == "__main__":
     main()

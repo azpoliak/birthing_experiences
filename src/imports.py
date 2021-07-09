@@ -6,19 +6,14 @@ from nltk import ngrams
 from nltk import tokenize
 nltk.download('stopwords')
 from nltk.corpus import stopwords
-from nltk.stem.wordnet import WordNetLemmatizer
 import numpy as np
 from datetime import datetime
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 from matplotlib import pyplot as plt
-import matplotlib.dates as mdates
 import itertools
 from itertools import chain, zip_longest
 from little_mallet_wrapper import process_string
-import seaborn as sns
-sns.set(rc={'figure.figsize':(11, 4)})
-from collections import defaultdict
-from tqdm import tqdm
+import seaborn
 import redditcleaner
 import re
 import warnings
