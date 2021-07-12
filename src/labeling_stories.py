@@ -35,8 +35,8 @@ def create_df_label_list(df, column, dct, disallows):
             label_counts.append(df[label].value_counts()[1]) 
     return label_counts
 
-#translate created_utc column into years
-def get_post_year(series):
+#translate created_utc column into dates
+def get_post_date(series):
     parsed_date = im.datetime.utcfromtimestamp(series)
     date = parsed_date
     return date
@@ -51,7 +51,7 @@ def pandemic(date):
 
 def main():
     #Dataframe with only the columns we're working with
-    labels_df = im.birth_stories_df[['title', 'selftext']]
+    labels_df = im.birth_stories_df[['title', 'selftext', 'created_utc']]
 
     #creating lists of words used to assign labels to story titles 
     positive = ['positive']
@@ -89,23 +89,24 @@ def main():
     label_counts_df.set_index('Labels', inplace = True)
     label_counts_df.to_csv('../data/label_counts_df.csv')
 
-    im.birth_stories_df['date created'] = im.birth_stories_df['created_utc'].apply(get_post_year)
+    im.birth_stories_df['date created'] = im.birth_stories_df['created_utc'].apply(get_post_date)
     im.birth_stories_df = im.birth_stories_df.sort_values(by = 'date created')
     labels_df['Pre-Covid'] = im.birth_stories_df['date created'].apply(pandemic)
 
     covid = create_df_label_list(labels_df, 'selftext', Covid, [])
+    labels_df['Date'] = labels_df['created_utc'].apply(get_post_date)
 
     #Subreddits before pandemic 
-    pre_covid_posts_df = labels_df.get(labels_df['Pre-Covid']==True).get(['title', 'selftext', 'Covid'])
+    pre_covid_posts_df = labels_df.get(labels_df['Pre-Covid']==True).get(list(labels_df.columns))
     print(pre_covid_posts_df)
     print(f"Subreddits before pandemic: {len(pre_covid_posts_df)}")
 
     #Convert to Json
     pre_covid_posts_df = pre_covid_posts_df.to_json()
-    im.compress_json.dump(pre_covid_posts_df, "pre_covid_posts_df.json.gz")
+    #im.compress_json.dump(pre_covid_posts_df, "pre_covid_posts_df.json.gz")
 
     #Subreddits after pandemic 
-    post_covid_posts_df = labels_df.get(labels_df['Pre-Covid']==False).get(['title', 'selftext', 'Covid'])
+    post_covid_posts_df = labels_df.get(labels_df['Pre-Covid']==False).get(list(labels_df.columns))
     print(post_covid_posts_df)
     print(f"Subreddits during/after pandemic: {len(post_covid_posts_df)}")
 
