@@ -86,20 +86,22 @@ def top_5_keys(lst):
 
 def get_post_date(series):
     parsed_date = im.datetime.utcfromtimestamp(series)
-    year = parsed_date.year
-    month = parsed_date.month
-    return str(year)+"-"+str(month)
+    to_dt = im.pd.to_datetime(parsed_date)
+    year = to_dt.year
+    months = to_dt.to_period('M')
+    #date_by_month = [month.to_timestamp() for month in months]
+    return months
 
 def make_plots(df):
     fig = im.plt.figure(figsize=(15,8))
     ax = fig.add_subplot(111)
     for i in range(df.shape[1]):
         topic_number = i
-        grouped = df.groupby(df.index).mean()
         topic_label = df.iloc[:, i].name
+        grouped = df.groupby(df.index)[[topic_label]].mean()
         ax.clear()
         ax.plot(grouped.iloc[:, i])
-        ax.legend(topic_label)
+        ax.legend([topic_label])
         #ax.plot_topics_over_time(topic_distributions, topic_keys, times, topic_index, output_path=None)
         ax.set_title('Birth Story Topics Over Time')
         ax.set_xlabel('Month')
@@ -182,10 +184,11 @@ def main():
 
     birth_stories_df_cleaned = im.pd.concat([birth_stories_df_cleaned['created_utc'], story_topics_df], axis = 1)
     
-    birth_stories_df_cleaned['Created Dates'] = birth_stories_df_cleaned['created_utc'].apply(get_post_date)
+    birth_stories_df_cleaned['Date Created'] = birth_stories_df_cleaned['created_utc'].apply(get_post_date)
+    #birth_stories_df_cleaned['Date Created'] = [month.to_timestamp() for month in birth_stories_df_cleaned['year-month']]
 
     birth_stories_df_cleaned.drop(columns='created_utc', inplace=True)
-    birth_stories_df_cleaned = birth_stories_df_cleaned.set_index('Created Dates')
+    birth_stories_df_cleaned = birth_stories_df_cleaned.set_index('Date Created')
 
     make_plots(birth_stories_df_cleaned)
 
