@@ -41,7 +41,7 @@ def count_chunks(series, dc):
     return mentions
 
 def make_plots(pre_df, m_j_df, j_n_df, n_a_df, a_j_df):
-    fig = im.plt.figure(figsize=(20,10))
+    fig = im.plt.figure(figsize=(15,10))
     ax = fig.add_subplot(111)
     for i in range(pre_df.shape[1]):
         ax.clear()
@@ -55,7 +55,7 @@ def make_plots(pre_df, m_j_df, j_n_df, n_a_df, a_j_df):
         ax.set_xlabel('Story Time')
         ax.set_ylabel('Persona Frequency')
         ax.legend()
-        fig.savefig(f'{persona_label}_throughout_covid_frequency.png')
+        fig.savefig(f'../data/Personas_Throughout_Covid/{persona_label}_throughout_covid_frequency.png')
 
 def main():
 
