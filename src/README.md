@@ -1,6 +1,7 @@
 # Python Files
 - **Path to corpus:**`birthing_experiences/src/birth_stories_df.json.gz`: compressed json file containing the dataframe of our corpus.
-- `subreddit_dfs.py`: compiles all the posts about birth stories that are 500+ words from all nine subreddits into one dataframe birth_stories_df and saves it as a compressed json file.
+- **Pre and Post COVID corpus:** `birthing_experiences/src/pre_covid_posts_df.json.gz` and `birthing_experiences/src/post_covid_posts_df.json.gz` are compressed json files containing dataframes of the posts made before and after (respectively) March 11, 2020.
+- `subreddit_dfs.py`: compiles all the submissions about birth stories that are 500+ words from all nine subreddits into one dataframe birth_stories_df, incorporates author's first comment for empty submissions, and saves it as a compressed json file.
 - `imports.py`: all the packages we use in our code and reads the json file into a dataframe.
 - `corpus_stats.py`: re-implements Maria's code for Table 1 and Figure 1 (left and right): finds statistics about the corpus.
 - - `subreddit_stats.py`: gets statistics about number of posts made per year for all nine subreddits.
