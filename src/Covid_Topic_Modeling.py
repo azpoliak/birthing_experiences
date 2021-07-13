@@ -84,14 +84,15 @@ def top_5_keys(lst):
         top5_per_list.append(joined)
     return top5_per_list
 
+#turns utc timestamp into datetime object
 def get_post_date(series):
     parsed_date = im.datetime.utcfromtimestamp(series)
     to_dt = im.pd.to_datetime(parsed_date)
     year = to_dt.year
     months = to_dt.to_period('M')
-    #date_by_month = [month.to_timestamp() for month in months]
     return months
 
+#makes line plot for each topic over time (2010-2021)
 def make_plots(df):
     fig = im.plt.figure(figsize=(15,8))
     ax = fig.add_subplot(111)
@@ -180,13 +181,20 @@ def main():
     #birth_stories_df_cleaned = im.pd.concat([birth_stories_df_cleaned['created_utc'], story_topics_df], axis = 1)
     #birth_stories_df_cleaned['Date Created'] = birth_stories_df_cleaned['created_utc'].apply(get_post_date)
     
+    #read in csv with content from above to save time
     birth_stories_df_cleaned = im.pd.read_csv("birth_stories_df_cleaned.csv")
+
+    #converts date created into datetime object for year and month
     birth_stories_df_cleaned['date'] = im.pd.to_datetime(birth_stories_df_cleaned['Date Created'])
     birth_stories_df_cleaned['year-month'] = birth_stories_df_cleaned['date'].dt.to_period('M')
     birth_stories_df_cleaned['Date (by month)'] = [month.to_timestamp() for month in birth_stories_df_cleaned['year-month']]
     birth_stories_df_cleaned.drop(columns=['Date Created', 'year-month', 'date'], inplace=True)
     birth_stories_df_cleaned = birth_stories_df_cleaned.set_index('Date (by month)')
+
+    #groups stories by month and finds average
     birth_stories_df_cleaned = im.pd.DataFrame(birth_stories_df_cleaned.groupby(birth_stories_df_cleaned.index).mean())
+    
+    #makes plots for each topics over time
     make_plots(birth_stories_df_cleaned)
 
 if __name__ == "__main__":

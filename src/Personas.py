@@ -17,6 +17,7 @@ def counter(story, dc):
 		total_mentions.append(len(mentions))
 	return total_mentions
 
+#splits story into ten equal chunks
 def split_story_10(str):
     tokenized = im.tokenize.word_tokenize(str)
     rounded = round(len(tokenized)/10)
@@ -34,12 +35,14 @@ def split_story_10(str):
         split_story.append(' '.join(tokenized[i:i+rounded]))
     return split_story
 
+#counts number of persona mentions in each chunk
 def count_chunks(series, dc):
     mentions = []
     for chunk in series:
         mentions.append(counter(chunk, dc))
     return mentions
 
+#makes plots of persona mention over narrative time for any number of dfs
 def make_plots(pre_df, m_j_df, j_n_df, n_a_df, a_j_df):
     fig = im.plt.figure(figsize=(15,10))
     ax = fig.add_subplot(111)
@@ -73,15 +76,21 @@ def main():
 
     personas_and_n_grams = {'Author': author, 'We': we, 'Baby': baby, 'Doctor': doctor, 'Partner': partner, 'Nurse': nurse, 'Midwife': midwife, 'Family': family, 'Anesthesiologist': anesthesiologist, 'Doula': doula}
 
+    #name the dfs for easy reference inside the for loop
     im.pre_covid_posts_df.name = 'pre_covid'
     im.post_covid_posts_df.name = 'post_covid'
     cvd.mar_june_2020_df.name = 'mar_june'
     cvd.june_nov_2020_df.name = 'june_nov'
     cvd.nov_2020_apr_2021_df.name = 'nov_apr'
     cvd.apr_june_2021_df.name = 'apr_june'
+
+    #list of dfs to iterate through in the for loop
     dfs = (im.pre_covid_posts_df, cvd.mar_june_2020_df, cvd.june_nov_2020_df, cvd.nov_2020_apr_2021_df, cvd.apr_june_2021_df)
 
+    #dictionary to save the dfs to at the end of the for loop for easy reference for plotting
     d = {}
+
+    #iterate through each df in the list above and return a df of average mentions for each persona for each chunk of the average story
     for df in dfs:
         
         df_name = df.name
@@ -128,13 +137,14 @@ def main():
 
         d[df_name] = personas_chunks_df
 
+    #access the created dfs from the dictionary
     pre_covid_personas_df = d['pre_covid']
     mar_june_personas_df = d['mar_june']
     june_nov_personas_df = d['june_nov']
     nov_apr_personas_df = d['nov_apr']
     apr_june_personas_df = d['apr_june']
 
-    #plots each persona across the story.
+    #plots each persona across the story for each df.
     make_plots(pre_covid_personas_df, mar_june_personas_df, june_nov_personas_df, nov_apr_personas_df, apr_june_personas_df)
 
 if __name__ == "__main__":

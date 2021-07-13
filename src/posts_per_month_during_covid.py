@@ -1,5 +1,6 @@
 import imports as im
 
+#labels the dataframe with True or False based on whether the date the post was created falls within the inputed start and end date
 def pandemic_eras(series, start_date, end_date):
 	date = str(series)
 	if end_date == '2021-06':
@@ -15,6 +16,7 @@ def pandemic_eras(series, start_date, end_date):
 
 post_covid_posts_df = im.post_covid_posts_df
 
+#turns the date column into a year-month datetime object
 post_covid_posts_df['Date Created'] = im.pd.to_datetime(post_covid_posts_df['Date'])
 post_covid_posts_df['year-month'] = post_covid_posts_df['Date Created'].dt.to_period('M')
 post_covid_posts_df.drop(columns=['Date Created', 'Date'], inplace=True)

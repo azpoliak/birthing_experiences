@@ -89,6 +89,8 @@ def main():
     label_counts_df.set_index('Labels', inplace = True)
     label_counts_df.to_csv('../data/label_counts_df.csv')
 
+    #splitting into pre and post pandemic corpuses based on post date
+
     im.birth_stories_df['date created'] = im.birth_stories_df['created_utc'].apply(get_post_date)
     im.birth_stories_df = im.birth_stories_df.sort_values(by = 'date created')
     labels_df['Pre-Covid'] = im.birth_stories_df['date created'].apply(pandemic)
