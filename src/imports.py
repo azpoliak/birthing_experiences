@@ -34,3 +34,18 @@ pre_covid_posts_df = pd.read_json(pre_covid_posts_df)
 
 post_covid_posts_df = compress_json.load("post_covid_posts_df.json.gz")
 post_covid_posts_df = pd.read_json(post_covid_posts_df)
+
+import pandas as pd
+import numpy as np
+from tqdm import tqdm
+# from tqdm.auto import tqdm  # for notebooks
+
+# Create new `pandas` methods which use `tqdm` progress
+# (can use tqdm_gui, optional kwargs, etc.)
+
+def progress_bar():
+	tqdm.pandas()
+
+	df = pd.DataFrame(np.random.randint(0, int(1e8), (10000, 1000)))
+	# Now you can use `progress_apply` instead of `apply`
+	df.groupby(0).progress_apply(lambda x: x**2)
