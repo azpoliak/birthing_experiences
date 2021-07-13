@@ -55,7 +55,7 @@ post_covid_posts_df['June 1-Nov 1 2020'] = post_covid_posts_df['year-month'].app
 post_covid_posts_df['Nov 1 2020-Apr 1 2021'] = post_covid_posts_df['year-month'].apply(lambda x: pandemic_eras(x, '2020-11', '2021-04'))
 post_covid_posts_df['Apr 1-June 24 2021'] = post_covid_posts_df['year-month'].apply(lambda x: pandemic_eras(x, '2021-04', '2021-06'))
 
-mar_june_2020_df = post_covid_posts_df.get(post_covid_posts_df['Mar 11-June 1 2020']==True).get(['year-month','title', 'selftext'])
-june_nov_2020_df = post_covid_posts_df.get(post_covid_posts_df['June 1-Nov 1 2020']==True).get(['year-month','title', 'selftext'])
-nov_2020_apr_2021_df = post_covid_posts_df.get(post_covid_posts_df['Nov 1 2020-Apr 1 2021']==True).get(['year-month','title', 'selftext'])
-apr_june_2021_df = post_covid_posts_df.get(post_covid_posts_df['Apr 1-June 24 2021']==True).get(['year-month','title', 'selftext'])
+mar_june_2020_df = post_covid_posts_df.get(post_covid_posts_df['Mar 11-June 1 2020']==True).get(list(im.post_covid_posts_df.columns))
+june_nov_2020_df = post_covid_posts_df.get(post_covid_posts_df['June 1-Nov 1 2020']==True).get(list(im.post_covid_posts_df.columns))
+nov_2020_apr_2021_df = post_covid_posts_df.get(post_covid_posts_df['Nov 1 2020-Apr 1 2021']==True).get(list(im.post_covid_posts_df.columns))
+apr_june_2021_df = post_covid_posts_df.get(post_covid_posts_df['Apr 1-June 24 2021']==True).get(list(im.post_covid_posts_df.columns))
