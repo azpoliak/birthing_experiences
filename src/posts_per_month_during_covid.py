@@ -14,7 +14,26 @@ def pandemic_eras(series, start_date, end_date):
 		else:
 			return False
 
+def story_lengths(series):
+    lowered = series.lower()
+    tokenized = im.nltk.word_tokenize(lowered)
+    length = len(tokenized)
+    return length
+
 post_covid_posts_df = im.post_covid_posts_df
+pre_covid_posts_df = im.pre_covid_posts_df
+
+#to find the average story length between pre and post covid
+pre_covid_posts_df['story length'] = pre_covid_posts_df['selftext'].apply(story_lengths)
+post_covid_posts_df['story length'] = post_covid_posts_df['selftext'].apply(story_lengths)
+
+pre_story_lengths = list(pre_covid_posts_df['story length'])
+post_story_lengths = list(post_covid_posts_df['story length'])
+pre_average_story_length = im.np.round(im.np.mean(pre_story_lengths),2)
+post_average_story_length = im.np.round(im.np.mean(post_story_lengths),2)
+
+print(f'Average story length pre-covid: {pre_average_story_length}')
+print(f'Average story length post-covid: {post_average_story_length}')
 
 #turns the date column into a year-month datetime object
 post_covid_posts_df['Date Created'] = im.pd.to_datetime(post_covid_posts_df['Date'])
