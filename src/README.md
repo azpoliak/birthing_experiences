@@ -4,7 +4,7 @@
 - `subreddit_dfs.py`: compiles all the submissions about birth stories that are 500+ words from all nine subreddits into one dataframe birth_stories_df, incorporates author's first comment for empty submissions, and saves it as a compressed json file.
 - `imports.py`: all the packages we use in our code and reads the json file into a dataframe.
 - `corpus_stats.py`: re-implements Maria's code for Table 1 and Figure 1 (left and right): finds statistics about the corpus.
-- - `subreddit_stats.py`: gets statistics about number of posts made per year for all nine subreddits.
+- `subreddit_stats.py`: gets statistics about number of posts made per year for all nine subreddits.
 - `labeling_stories.py`: re-implements Maria's code for Table 3: assigns labels to stories based on lexicon of key words, finds number of stories assigned each label. Also assigns "COVID" label to posts made after March 11, 2020, when COVID-19 was declared a pandemic by WHO, and separates the pre- and post-pandemic stories into two dataframes.
 - `Topic_Modeling.py`: trains a topic model and plots topic probability over the course of the narrative for 50 topics.
 - `Covid_Topic_Modeling.py`: plots topic probability over time for 50 topics (2010-2021).
