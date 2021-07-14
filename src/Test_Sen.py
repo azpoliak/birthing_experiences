@@ -38,11 +38,19 @@ def story_lengths(lst):
 
 def group(story, num, val):
     compound_scores = []
+    sentences = []
     for sent in story[num]:
-        dictionary = sent[1]
-        compound_score = dictionary[val]
-        compound_scores.append(compound_score)
-    return compound_scores
+        if val == 'compound' or val == 'pos' or val == 'neg':
+            dictionary = sent[1]
+            compound_score = dictionary[val]
+            compound_scores.append(compound_score)
+        else:
+            sen = sent[0]
+            sentences.append(sen)
+    if val == 'sentences': 
+        return " ".join(sentences)
+    else:
+        return compound_scores
 
 def per_group(story, val):
     group_dict = {} 
@@ -170,7 +178,22 @@ def plot_4_sections(labels):
         label_frame(im.pre_covid_posts_df, label, 'Pre-Covid')
         im.plt.savefig(f'{label}_4_Sects_Plot.png')
 
+def sample(df, label, start, end, size):
+    sample = df.get(['title', 'selftext']).get(df[label] == True)
+    sample['tokenized sentences'] = sample['selftext'].apply(im.tokenize.sent_tokenize)     
+    sample['sentiment groups'] = sample['tokenized sentences'].apply(split_story_10_sentiment)
+    sample['sentences per group'] = sample['sentiment groups'].apply(per_group, args = ('sentences',))
+    sampled = sample.sample(size)
+    col = []
+    titles = []
+    for dt in sampled['sentences per group']:
+        col.append(list(dt.items())[start:end])
+    dic = {'title': sampled['title'], 'stories': col}
+    new_df = im.pd.DataFrame(dic)
+    return new_df
 def main():
+    #im.progress_bar()
+
     #Compound sentiment--only pre-covid
     #comp_sents(im.birth_stories_df, '')
     #im.plt.savefig('Compound_Sentiment_Plot.png')
@@ -207,14 +230,24 @@ def main():
     #label_frames(im.post_covid_posts_df, 'Positive', 'Negative', 'Post-Covid')
     #im.plt.savefig('Pos_Neg_Frame_Pre_Post_Plot.png')
 
+    #Just Negative pre/post 
+    #label_frame(im.pre_covid_posts_df, 'Negative', 'Pre-Covid')
+    #label_frame(im.post_covid_posts_df, 'Negative', 'Post-Covid')
+    #im.plt.savefig('Neg_Pre_Post_Plot.png')
+
+    #Just Positive pre/post 
+    #label_frame(im.pre_covid_posts_df, 'Positive', 'Pre-Covid')
+    #label_frame(im.post_covid_posts_df, 'Positive', 'Post-Covid')
+    #im.plt.savefig('Pos_Pre_Post_Plot.png')
+
     #For the 4 time frames of Covid
-    labels = list(im.labels_df.columns)
-    labels.remove('title')
-    labels.remove('created_utc')
-    labels.remove('Covid')
-    labels.remove('Pre-Covid')
-    labels.remove('Date')
-    labels.remove('selftext')
+    #labels = list(im.labels_df.columns)
+    #labels.remove('title')
+    #labels.remove('created_utc')
+    #labels.remove('Covid')
+    #labels.remove('Pre-Covid')
+    #labels.remove('Date')
+    #labels.remove('selftext')
     #plot_4_sections(labels)
 
     #Medicated and Un-medicated births pre and post Covid
@@ -222,20 +255,60 @@ def main():
     #label_frames(im.post_covid_posts_df, 'Medicated', 'Unmedicated', 'Post-Covid')
     #im.plt.savefig('Med_Unmed_Pre_Post_Plot.png')
 
+    #Just medicated pre/post 
+    #label_frame(im.pre_covid_posts_df, 'Medicated', 'Pre-Covid')
+    #label_frame(im.post_covid_posts_df, 'Medicated', 'Post-Covid')
+    #im.plt.savefig('Med_Pre_Post_Plot.png')
+
+    #Just unmedicated pre/post 
+    #label_frame(im.pre_covid_posts_df, 'Unmedicated', 'Pre-Covid')
+    #label_frame(im.post_covid_posts_df, 'Unmedicated', 'Post-Covid')
+    #im.plt.savefig('Unmed_Pre_Post_Plot.png')
+
     #Home vs. Hospital births pre and post Covid
     #label_frames(im.pre_covid_posts_df, 'Home', 'Hospital', 'Pre-Covid')
     #label_frames(im.post_covid_posts_df, 'Home', 'Hospital', 'Post-Covid')
     #im.plt.savefig('Home_Hospital_Pre_Post_Plot.png')
+
+    #Just home pre/post 
+    #label_frame(im.pre_covid_posts_df, 'Home', 'Pre-Covid')
+    #label_frame(im.post_covid_posts_df, 'Home', 'Post-Covid')
+    #im.plt.savefig('Home_Pre_Post_Plot.png')
+
+    #Just hospital pre/post 
+    #label_frame(im.pre_covid_posts_df, 'Hospital', 'Pre-Covid')
+    #label_frame(im.post_covid_posts_df, 'Hospital', 'Post-Covid')
+    #im.plt.savefig('Hospital_Pre_Post_Plot.png')
 
     #Vaginal vs. Cesarian births pre and post Covid
     #label_frames(im.pre_covid_posts_df, 'Vaginal', 'C-Section', 'Pre-Covid')
     #label_frames(im.post_covid_posts_df, 'Vaginal', 'C-Section', 'Post-Covid')
     #im.plt.savefig('Vaginal_Cesarian_Pre_Post_Plot.png')
 
+    #Just vaginal pre/post 
+    #label_frame(im.pre_covid_posts_df, 'Vaginal', 'Pre-Covid')
+    #label_frame(im.post_covid_posts_df, 'Vaginal', 'Post-Covid')
+    #im.plt.savefig('Vaginal_Pre_Post_Plot.png')
+
+    #Just cesarian pre/post 
+    #label_frame(im.pre_covid_posts_df, 'C-Section', 'Pre-Covid')
+    #label_frame(im.post_covid_posts_df, 'C-Section', 'Post-Covid')
+    #im.plt.savefig('Cesarian_Pre_Post_Plot.png')
+
     #First vs. Second births pre and post Covid
     #label_frames(im.pre_covid_posts_df, 'First', 'Second', 'Pre-Covid')
     #label_frames(im.post_covid_posts_df, 'First', 'Second', 'Post-Covid')
     #im.plt.savefig('First_Second_Pre_Post_Plot.png')
+
+    #Just first pre/post 
+    #label_frame(im.pre_covid_posts_df, 'First', 'Pre-Covid')
+    #label_frame(im.post_covid_posts_df, 'First', 'Post-Covid')
+    #im.plt.savefig('First_Pre_Post_Plot.png')
+
+    #Just second pre/post 
+    #label_frame(im.pre_covid_posts_df, 'Second', 'Pre-Covid')
+    #label_frame(im.post_covid_posts_df, 'Second', 'Post-Covid')
+    #im.plt.savefig('Second_Pre_Post_Plot.png')
 
     #Stories mentioning Covid vs. Not
     #Starting with Compound Sentiment
@@ -256,6 +329,17 @@ def main():
     #pos_neg_sents(no_covid_df, 'pos', 'neg', 'Does Not Mention Covid')
     #im.plt.title('Pos/Neg Sentiment: Covid-19')
     #im.plt.savefig('Pos_Neg_Sentiment_Covid_Plot.png')
+
+    #sample(im.pre_covid_posts_df, 'Home', 3, 10, 20).to_csv('home_births_pre_covid.csv', index = False)
+    #sample(im.post_covid_posts_df, 'Home', 3, 10, 18).to_csv('home_births_post_covid.csv', index = False)
+    #sample(im.pre_covid_posts_df, 'Hospital', 3, 10, 20).to_csv('hospital_births_pre_covid.csv', index = False)
+    #sample(im.post_covid_posts_df, 'Hospital', 3, 10, 19).to_csv('hospital_births_post_covid.csv', index = False)
+
+    #print(f"Pre-Covid: Home Sample: {len(im.pre_covid_posts_df.get(im.pre_covid_posts_df['Home'] == True))}")
+    #print(f"Post-Covid: Home Sample: {len(im.post_covid_posts_df.get(im.post_covid_posts_df['Home'] == True))}")
+    #print(f"Pre-Covid: Hospital Sample: {len(im.pre_covid_posts_df.get(im.pre_covid_posts_df['Hospital'] == True))}")
+    #print(f"Post-Covid: Hospital Sample: {len(im.post_covid_posts_df.get(im.post_covid_posts_df['Hospital'] == True))}")
+    
 
 if __name__ == "__main__":
     main()
