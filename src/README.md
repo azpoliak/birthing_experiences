@@ -10,4 +10,5 @@
 - `Covid_Topic_Modeling.py`: plots topic probability over time for 50 topics (2010-2021).
 - `Test_Sen.py`: re-implements Maria's code for Figure 2: sentiment analysis over the course of the narrative.
 - `Personas.py`: Determines prevalence of personas in the corpus and plots distribution of personas over story time for any number of dataframes.
+- `Persona_Stats.py`: Statistical analysis of persona results using t-tests.
 - `posts_per_month_during_covid.py`: finds number of posts made during each month from March 2020 to June 2021 and creates four separate dataframes for each era of COVID (March 11 2020-June 1 2020, June 1 2020-November 1 2020, November 1 2020-April 1 2020, and April 1 2021-June 24 2021). These eras were determined based on the New York Times line plot of number of new COVID cases over time.
