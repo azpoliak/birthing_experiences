@@ -14,10 +14,13 @@ post_covid_persona_mentions = im.pd.read_csv('persona_csvs/post_covid_persona_me
 
 pre_covid_persona_mentions = pre_covid_persona_mentions.drop('Unnamed: 0', axis=1)
 post_covid_persona_mentions = post_covid_persona_mentions.drop('Unnamed: 0', axis=1)
+pre_covid_personas_df = pre_covid_personas_df.drop('Unnamed: 0', axis=1)
+post_covid_personas_df = post_covid_personas_df.drop('Unnamed: 0', axis=1)
 
 #normalize pre-covid dataframe for average story length
 normalizing_ratio=(1182.53/1427.09)
 normalized_pre_covid = pre_covid_persona_mentions*normalizing_ratio
+normalized_chunks = pre_covid_personas_df*normalizing_ratio
 
 def ttest(df, df2):
 	for i in range(df.shape[1]):
@@ -27,8 +30,10 @@ def ttest(df, df2):
 		ttest = stats.ttest_ind(pre_covid, post_covid)
 		print((f"{persona_name} t-test: {ttest}"))
 
-print('Not normalized:')
 ttest(pre_covid_persona_mentions, post_covid_persona_mentions)
-print('------')
-print('Normalized:')
+print('-------')
 ttest(normalized_pre_covid, post_covid_persona_mentions)
+
+#ttest(pre_covid_personas_df, post_covid_personas_df)
+#print('-------')
+#ttest(normalized_chunks, post_covid_personas_df)
