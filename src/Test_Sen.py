@@ -69,39 +69,36 @@ def dict_to_frame(lst):
 def comp_sents(df, t):
 
     #tokenize stories by sentence
-    sentiment_df = im.pd.DataFrame()
-    sentiment_df['tokenized sentences'] = df['selftext'].apply(im.tokenize.sent_tokenize)
-
-    sentiment_df['sentiment groups'] = sentiment_df['tokenized sentences'].apply(split_story_10_sentiment)
-    sentiment_df['lengths'] = sentiment_df['sentiment groups'].apply(story_lengths)
-
-    sentiment_df['comp sent per group'] = sentiment_df['sentiment groups'].apply(per_group, args = ('compound',))
-    sentiment_over_narrative = dict_to_frame(sentiment_df['comp sent per group'])
+    df['tokenized sentences'] = df['selftext'].apply(im.tokenize.sent_tokenize)
+    
+    df['sentiment groups'] = df['tokenized sentences'].apply(split_story_10_sentiment)
+    df['comp sent per group'] = df['sentiment groups'].apply(per_group, args = ('compound',))
+    
+    sentiment_over_narrative = dict_to_frame(df['comp sent per group'])
     sentiment_over_narrative.index.name = 'Sections'
 
     print(im.plt.plot(sentiment_over_narrative['Sentiments'], label = f'{t} Compound Sentiment'))
     im.plt.xlabel('Story Time')
     im.plt.ylabel('Sentiment')
-    im.plt.show()
     im.plt.legend()
+    return(sentiment_over_narrative)
 
 #Positive vs. Negative Sentiment 
 def pos_neg_sents(df, t):
+
     #tokenize stories by sentence
-    
-    sentiment_df = im.pd.DataFrame()
-    sentiment_df['tokenized sentences'] = df['selftext'].apply(im.tokenize.sent_tokenize)
+    df['tokenized sentences'] = df['selftext'].apply(im.tokenize.sent_tokenize)
 
-    sentiment_df['sentiment groups'] = sentiment_df['tokenized sentences'].apply(split_story_10_sentiment)
-    sentiment_df['lengths'] = sentiment_df['sentiment groups'].apply(story_lengths)
+    df['sentiment groups'] = df['tokenized sentences'].apply(split_story_10_sentiment)
+    df['lengths'] = df['sentiment groups'].apply(story_lengths)
 
-    sentiment_df['Pos sent per group'] = sentiment_df['sentiment groups'].apply(per_group, args = ('pos',))
-    sentiment_df['Neg sent per group'] = sentiment_df['sentiment groups'].apply(per_group, args = ('neg',))
+    df['Pos sent per group'] = df['sentiment groups'].apply(per_group, args = ('pos',))
+    df['Neg sent per group'] = df['sentiment groups'].apply(per_group, args = ('neg',))
 
-    sentiment_over_narrative_t1 = dict_to_frame(sentiment_df['Pos sent per group'])
+    sentiment_over_narrative_t1 = dict_to_frame(df['Pos sent per group'])
     sentiment_over_narrative_t1.index.name = 'Sections'
 
-    sentiment_over_narrative_t2 = dict_to_frame(sentiment_df['Neg sent per group'])
+    sentiment_over_narrative_t2 = dict_to_frame(df['Neg sent per group'])
     sentiment_over_narrative_t2.index.name = 'Sections'
 
     #Plotting over narrative time
@@ -110,8 +107,8 @@ def pos_neg_sents(df, t):
     im.plt.xlabel('Story Time')
     im.plt.ylabel('Sentiment')
     im.plt.title('Positive vs. Negative Sentiment')
-    im.plt.show()
     im.plt.legend()
+    return (sentiment_over_narrative_one, sentiment_over_narrative_two)
 
 #Labels 
 def label_frames(df, l_one, l_two, lab):
@@ -140,8 +137,8 @@ def label_frames(df, l_one, l_two, lab):
     im.plt.xlabel('Story Time')
     im.plt.ylabel('Sentiment')
     im.plt.title(f'{l_one} vs. {l_two} Birth Sentiments')
-    im.plt.show()
     im.plt.legend()
+    return (sentiment_over_narrative_one, sentiment_over_narrative_two)
 
 #Labels 
 def label_frame(df, l_one, lab):
@@ -155,15 +152,16 @@ def label_frame(df, l_one, lab):
 
     sentiment_over_narrative_one = dict_to_frame(label_one['comp sent per group'])
     sentiment_over_narrative_one.index.name = 'Sections'
+    #if l_one == 'Negative':
+    #    sentiment_over_narrative_one['Sentiments']*=-1 
 
     #Plotting each again over narrative time
-    print(im.plt.plot(sentiment_over_narrative_one['Sentiments'], label = f'{l_one} Births: {lab}'))
-
+    im.plt.plot(sentiment_over_narrative_one['Sentiments'], label = f'{l_one} Births: {lab}')
     im.plt.xlabel('Story Time')
     im.plt.ylabel('Sentiment')
     im.plt.title(f'{l_one} Birth Sentiments')
-    im.plt.show()
     im.plt.legend()
+    return sentiment_over_narrative_one
 
 def plot_4_sections(labels):
     fig = im.plt.figure(figsize=(15,10))
@@ -191,8 +189,9 @@ def sample(df, label, start, end, size):
     dic = {'title': sampled['title'], 'stories': col}
     new_df = im.pd.DataFrame(dic)
     return new_df
+    
 def main():
-    #im.progress_bar()
+    im.progress_bar()
 
     #Compound sentiment--only pre-covid
     #comp_sents(im.birth_stories_df, '')
@@ -233,7 +232,7 @@ def main():
     #Just Negative pre/post 
     #label_frame(im.pre_covid_posts_df, 'Negative', 'Pre-Covid')
     #label_frame(im.post_covid_posts_df, 'Negative', 'Post-Covid')
-    #im.plt.savefig('Neg_Pre_Post_Plot.png')
+    #im.plt.savefig('Neg_Pre_Post_Plot_axis.png')
 
     #Just Positive pre/post 
     #label_frame(im.pre_covid_posts_df, 'Positive', 'Pre-Covid')
@@ -248,6 +247,7 @@ def main():
     #labels.remove('Pre-Covid')
     #labels.remove('Date')
     #labels.remove('selftext')
+    #labels.remove('author')
     #plot_4_sections(labels)
 
     #Medicated and Un-medicated births pre and post Covid
@@ -334,12 +334,10 @@ def main():
     #sample(im.post_covid_posts_df, 'Home', 3, 10, 18).to_csv('home_births_post_covid.csv', index = False)
     #sample(im.pre_covid_posts_df, 'Hospital', 3, 10, 20).to_csv('hospital_births_pre_covid.csv', index = False)
     #sample(im.post_covid_posts_df, 'Hospital', 3, 10, 19).to_csv('hospital_births_post_covid.csv', index = False)
-
     #print(f"Pre-Covid: Home Sample: {len(im.pre_covid_posts_df.get(im.pre_covid_posts_df['Home'] == True))}")
     #print(f"Post-Covid: Home Sample: {len(im.post_covid_posts_df.get(im.post_covid_posts_df['Home'] == True))}")
     #print(f"Pre-Covid: Hospital Sample: {len(im.pre_covid_posts_df.get(im.pre_covid_posts_df['Hospital'] == True))}")
     #print(f"Post-Covid: Hospital Sample: {len(im.post_covid_posts_df.get(im.post_covid_posts_df['Hospital'] == True))}")
-    
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
