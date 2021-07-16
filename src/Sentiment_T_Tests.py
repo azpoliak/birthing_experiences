@@ -17,8 +17,21 @@ def t_test(df_pre, df_post, labels):
 	for label in labels:
 		label_pre = group_raw_scores(df_pre, label)
 		label_post = group_raw_scores(df_post, label)
+		stat = []
+		p_value = []
 		for key in list(label_pre.keys()):
-			print(f"{label} Birth, Section {key}: {stats.ttest_ind(label_pre[key], label_post[key])}")
+			t_test = stats.ttest_ind(label_pre[key], label_post[key])
+			stat.append(t_test.statistic)
+			p_value.append(t_test.pvalue)
+		label_frame = im.pd.DataFrame(data = {'Statistics': stat, 'P-Values': p_value}, index = list(label_pre.keys()))
+		label_frame.index.name = f"{label}: Pre-Post Covid"
+		sig_vals = label_frame.get(label_frame['P-Values'] < .05)
+		if not sig_vals.empty:
+			sig_vals.to_csv(f"T_Test_Results_Sig: {label}.csv")
+		#label_frame.to_csv(f"T_Test_Results: {label}.csv")
+		#print(label_frame)
+		#print(f"{label} Birth, Section {key}: {stats.ttest_ind(label_pre[key], label_post[key])}")
+
 def main():
 	im.progress_bar()
 	labels = list(im.labels_df.columns)
