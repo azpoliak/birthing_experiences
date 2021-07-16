@@ -28,7 +28,9 @@ def t_test(df_pre, df_post, labels):
 		sig_vals = label_frame.get(label_frame['P-Values'] < .05)
 		if not sig_vals.empty:
 			sig_vals.to_csv(f"T_Test_Results_Sig: {label}.csv")
-		#label_frame.to_csv(f"T_Test_Results: {label}.csv")
+			#sig_vals.to_excel(f"T_Test_Results_Sig: {label}.xlsx")
+		label_frame.to_csv(f"T_Test_Results: {label}.csv")
+		#label_frame.to_excel(f"T_Test_Results: {label}.xlsx")
 		#print(label_frame)
 		#print(f"{label} Birth, Section {key}: {stats.ttest_ind(label_pre[key], label_post[key])}")
 
