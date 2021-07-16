@@ -178,16 +178,11 @@ def main():
         persona_df['10 chunks/story'] = persona_df['selftext'].apply(split_story_10)
 
         mentions_by_chunk = persona_df['10 chunks/story'].apply(lambda x: count_chunks(x, personas_and_n_grams))
+        mentions_by_chunk.to_csv(f'{df_name}_mentions_by_chunk.csv')
 
         b = im.np.array(list(mentions_by_chunk))
         chunk_mentions = b.mean(axis=0)
 
-        print(b)
-
-        chunk_mentions_df = im.pd.DataFrame(im.np.row_stack(b))
-        chunk_mentions_df.columns = personas_and_n_grams
-        chunk_stats_dict[df_name] = chunk_mentions_df
-        
         personas_chunks_df = im.pd.DataFrame(chunk_mentions)
         personas_chunks_df.set_axis(list(personas_dict['Personas']), axis=1, inplace=True)
 
@@ -207,12 +202,6 @@ def main():
     pre_covid_persona_mentions = dict_for_stats['pre_covid']
     post_covid_persona_mentions = dict_for_stats['post_covid']
 
-    pre_covid_chunk_mentions = chunk_stats_dict['pre_covid']
-    post_covid_chunk_mentions = chunk_stats_dict['post_covid']
-
-    print(pre_covid_chunk_mentions)
-    print(post_covid_chunk_mentions)
-
     pre_covid_personas_df.to_csv('persona_csvs/pre_covid_personas_df.csv')
     post_covid_personas_df.to_csv('persona_csvs/post_covid_personas_df.csv')
     mar_june_personas_df.to_csv('persona_csvs/mar_june_personas_df.csv')
@@ -223,8 +212,8 @@ def main():
     pre_covid_persona_mentions.to_csv('persona_csvs/pre_covid_persona_mentions.csv')
     post_covid_persona_mentions.to_csv('persona_csvs/post_covid_persona_mentions.csv')
 
-    pre_covid_chunk_mentions.to_csv('persona_csvs/pre_covid_chunk_mentions.csv')
-    post_covid_chunk_mentions.to_csv('persona_csvs/post_covid_chunk_mentions.csv')
+    #pre_covid_chunk_mentions.to_csv('persona_csvs/pre_covid_chunk_mentions.csv')
+    #post_covid_chunk_mentions.to_csv('persona_csvs/post_covid_chunk_mentions.csv')
 
     #plots each persona across the story for each df.
     #make_plots(pre_covid_personas_df, normalized_pre, post_covid_personas_df)
