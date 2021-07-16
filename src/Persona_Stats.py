@@ -2,38 +2,70 @@ import imports as im
 from scipy import stats
 from scipy.stats import norm
 
-pre_covid_personas_df = im.pd.read_csv('persona_csvs/pre_covid_personas_df.csv')
-post_covid_personas_df = im.pd.read_csv('persona_csvs/post_covid_personas_df.csv')
-mar_june_personas_df = im.pd.read_csv('persona_csvs/mar_june_personas_df.csv')
-june_nov_personas_df = im.pd.read_csv('persona_csvs/june_nov_personas_df.csv')
-nov_apr_personas_df = im.pd.read_csv('persona_csvs/nov_apr_personas_df.csv')
-apr_june_personas_df = im.pd.read_csv('persona_csvs/apr_june_personas_df.csv')
+#load in everything from Personas.py
 
+#not chunked
 pre_covid_persona_mentions = im.pd.read_csv('persona_csvs/pre_covid_persona_mentions.csv')
 post_covid_persona_mentions = im.pd.read_csv('persona_csvs/post_covid_persona_mentions.csv')
 
+#chunked
+pre_covid_chunk_mentions = im.pd.read_csv('persona_csvs/pre_covid_chunk_mentions.csv')
+post_covid_chunk_mentions = im.pd.read_csv('persona_csvs/post_covid_chunk_mentions.csv')
+
 pre_covid_persona_mentions = pre_covid_persona_mentions.drop('Unnamed: 0', axis=1)
 post_covid_persona_mentions = post_covid_persona_mentions.drop('Unnamed: 0', axis=1)
-pre_covid_personas_df = pre_covid_personas_df.drop('Unnamed: 0', axis=1)
-post_covid_personas_df = post_covid_personas_df.drop('Unnamed: 0', axis=1)
+pre_covid_chunk_mentions = pre_covid_chunk_mentions.drop('Unnamed: 0', axis=1)
+post_covid_chunk_mentions = post_covid_chunk_mentions.drop('Unnamed: 0', axis=1)
 
-#normalize pre-covid dataframe for average story length
-normalizing_ratio=(1182.53/1427.09)
-normalized_pre_covid = pre_covid_persona_mentions*normalizing_ratio
-normalized_chunks = pre_covid_personas_df*normalizing_ratio
+#performs the t-test
+def ttest(df, df2, chunks=False):
+	stat=[]
+	p_value=[]
+	index = []
+	if chunks==True:
+		for i in range(10):
+			chunk = i
+			pre_chunk = df[i::10]
+			post_chunk = df2[i::10]
+			for i in range(df.shape[1]):
+				persona_name = pre_chunk.iloc[:, i].name
+				pre_chunk1 = pre_chunk.iloc[:, i]
+				post_chunk1 = post_chunk.iloc[:, i]
+				ttest = stats.ttest_ind(pre_chunk1, post_chunk1)
+				stat.append(ttest.statistic)
+				p_value.append(ttest.pvalue)
+				index.append(persona_name)
+		ttest_df = im.pd.DataFrame(data = {'Statistics': stat, 'P-Values': p_value}, index = index)
+		ttest_df.to_csv("normalized_chunk_stats.csv")
+				#print((f"{persona_name} {chunk} t-test: {ttest}"))
+	else:
+		for i in range(df.shape[1]):
+			persona_name = df.iloc[:, i].name
+			pre_covid = df.iloc[:, i]
+			post_covid = df2.iloc[:, i]
+			ttest = stats.ttest_ind(pre_covid, post_covid)
+			stat.append(ttest.statistic)
+			p_value.append(ttest.pvalue)
+			index.append(persona_name)
+		ttest_df = im.pd.DataFrame(data = {'Statistics': stat, 'P-Values': p_value}, index = index)
+		ttest_df.to_csv("normalized_persona_stats.csv")
+			#print((f"{persona_name} t-test: {ttest}"))
 
-def ttest(df, df2):
-	for i in range(df.shape[1]):
-		persona_name = df.iloc[:, i].name
-		pre_covid = df.iloc[:, i]
-		post_covid = df2.iloc[:, i]
-		ttest = stats.ttest_ind(pre_covid, post_covid)
-		print((f"{persona_name} t-test: {ttest}"))
+def main():
 
-ttest(pre_covid_persona_mentions, post_covid_persona_mentions)
-print('-------')
-ttest(normalized_pre_covid, post_covid_persona_mentions)
+	#normalize pre-covid dataframe for average story length
+	normalizing_ratio=(1182.53/1427.09)
+	normalized_chunk_mentions = pre_covid_chunk_mentions*normalizing_ratio
+	normalized_chunks = pre_covid_persona_mentions*normalizing_ratio
 
-#ttest(pre_covid_personas_df, post_covid_personas_df)
-#print('-------')
-#ttest(normalized_chunks, post_covid_personas_df)
+	#ttest(pre_covid_persona_mentions, post_covid_persona_mentions)
+	#print('-------')
+	ttest(normalized_chunks, post_covid_persona_mentions)
+
+	#ttest(pre_covid_chunk_mentions, post_covid_chunk_mentions, chunks=True)
+	#print('-------')
+	ttest(normalized_chunk_mentions, post_covid_chunk_mentions, chunks=True)
+
+
+if __name__ == "__main__":
+    main()

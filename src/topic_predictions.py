@@ -17,12 +17,14 @@ birth_stories_df_cleaned['Date (by month)'] = [month.to_timestamp() for month in
 birth_stories_df_cleaned.drop(columns=['Date Created', 'year-month', 'date'], inplace=True)
 birth_stories_df_cleaned = birth_stories_df_cleaned.set_index('Date (by month)')
 
-pre_covid = birth_stories_df_cleaned[(birth_stories_df_cleaned.index < '2020-03-11')]
+pre_covid = birth_stories_df_cleaned[(birth_stories_df_cleaned.index <= '2020-02-01')]
 
 pre_covid = im.pd.DataFrame(pre_covid.groupby(pre_covid.index).mean())
 birth_stories_df_cleaned = im.pd.DataFrame(birth_stories_df_cleaned.groupby(birth_stories_df_cleaned.index).mean())
 
-r_squareds = []
+birth_stories_df_cleaned.to_csv('birth_stories_df_topics.csv')
+
+#r_squareds = []
 
 def predict_topic_trend(df, df2):
     fig = im.plt.figure(figsize=(15,10))
@@ -39,25 +41,31 @@ def predict_topic_trend(df, df2):
         actual.columns = ['ds', 'y']
 
         m = Prophet()
-        m.fit(topic)
+        #m.fit(topic)
 
-        future = m.make_future_dataframe(periods=16, freq='MS')
+        #future = m.make_future_dataframe(periods=16, freq='MS')
 
-        forecast = m.predict(future)
+        #forecast = m.predict(future)
+        #print(forecast)
 
-        #fig1 = m.plot(forecast, xlabel='Date', ylabel='Topic Probability', ax=ax)
-        #ax.plot(df2.iloc[:, i], color='k')
-        #ax = fig.gca()
-        #ax.set_title(f'{topic_label} Forecast')
-        #im.plt.axvline(im.pd.Timestamp('2020-03-11'),color='r')
-        #fig1.savefig(f'../data/Topic_Forecasts/{topic_label}_Prediction_Plot.png')
+        #forecast.to_csv(f'topic_forecasts/{topic_label}_forecast.csv')
 
-        metric_df = forecast.set_index('ds')[['yhat']].join(actual.set_index('ds').y).reset_index()
-        metric_df.dropna(inplace=True)
-        print(metric_df)
-        r_squareds.append(r2_score(metric_df.y, metric_df.yhat))
+        #load from csv to save time
+        forecast = im.pd.read_csv(f'topic_forecasts/{topic_label}_forecast.csv')
+
+        fig1 = m.plot(forecast, xlabel='Date', ylabel='Topic Probability', ax=ax)
+        ax.plot(df2.iloc[:, i], color='k')
+        ax = fig.gca()
+        ax.set_title(f'{topic_label} Forecast')
+        im.plt.axvline(im.pd.Timestamp('2020-03-01'),color='r')
+        fig1.savefig(f'../data/Topic_Forecasts/{topic_label}_Prediction_Plot.png')
+
+        #metric_df = forecast.set_index('ds')[['yhat']].join(actual.set_index('ds').y).reset_index()
+        #metric_df.dropna(inplace=True)
+        #print(metric_df)
+        #r_squareds.append(r2_score(metric_df.y, metric_df.yhat))
         #print(f'R-Squared Value for topic: {r2_score(metric_df.y, metric_df.yhat)}')
         #print(f'R-Squared Value for topic {topic_label}: {r2_score}')
 
 predict_topic_trend(pre_covid, birth_stories_df_cleaned)
-print(r_squareds)
+#print(r_squareds)
