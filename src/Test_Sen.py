@@ -73,7 +73,6 @@ def comp_sents(df, t):
     
     df['sentiment groups'] = df['tokenized sentences'].apply(split_story_10_sentiment)
     df['comp sent per group'] = df['sentiment groups'].apply(per_group, args = ('compound',))
-    
     sentiment_over_narrative = dict_to_frame(df['comp sent per group'])
     sentiment_over_narrative.index.name = 'Sections'
 
@@ -130,6 +129,9 @@ def label_frames(df, l_one, l_two, lab):
     sentiment_over_narrative_two = dict_to_frame(label_two['comp sent per group'])
     sentiment_over_narrative_two.index.name = 'Sections'
 
+    if l_two == 'Negative' or 'Second':
+        sentiment_over_narrative_two['Sentiments']*=-1
+
     #Plotting each again over narrative time
     print(im.plt.plot(sentiment_over_narrative_one['Sentiments'], label = f'{l_one} Births: {lab}'))
     print(im.plt.plot(sentiment_over_narrative_two['Sentiments'], label = f'{l_two} Births: {lab}'))
@@ -152,8 +154,6 @@ def label_frame(df, l_one, lab):
 
     sentiment_over_narrative_one = dict_to_frame(label_one['comp sent per group'])
     sentiment_over_narrative_one.index.name = 'Sections'
-    #if l_one == 'Negative':
-    #    sentiment_over_narrative_one['Sentiments']*=-1 
 
     #Plotting each again over narrative time
     im.plt.plot(sentiment_over_narrative_one['Sentiments'], label = f'{l_one} Births: {lab}')
@@ -189,13 +189,14 @@ def sample(df, label, start, end, size):
     dic = {'title': sampled['title'], 'stories': col}
     new_df = im.pd.DataFrame(dic)
     return new_df
-    
+
 def main():
     im.progress_bar()
 
     #Compound sentiment--only pre-covid
     #comp_sents(im.birth_stories_df, '')
     #im.plt.savefig('Compound_Sentiment_Plot.png')
+    #im.plt.clf()
 
     #Positive vs. Negative Title Frame
     #label_frames(im.labels_df, 'Positive', 'Negative', '')
@@ -204,12 +205,14 @@ def main():
     #pos_neg_sents(im.birth_stories_df, '')
     #im.plt.title('Positive vs. Negative Sentiment')
     #im.plt.savefig('Pos_Neg_Sentiment_Plot.png')
+    #im.plt.clf()
 
     #Pre and Post Covid Sentiments
     #Starting with Compound Sentiment
     #comp_sents(im.pre_covid_posts_df, 'Pre-Covid')
     #comp_sents(im.post_covid_posts_df, 'Post-Covid')
     #im.plt.savefig('Compound_Sentiment_Pre_Post_Plot.png')
+    #im.plt.clf()
 
     #For the 4 time frames of Covid
     #comp_sents(m.mar_june_2020_df, 'March-June 2020')
@@ -217,27 +220,32 @@ def main():
     #comp_sents(m.nov_2020_apr_2021_df, 'November 2020-April 2021')
     #comp_sents(m.apr_june_2021_df, 'April-June 2021')
     #im.plt.savefig('Compound_Sentiment_4_Sects_Plot.png')
+    #im.plt.clf()
 
     #Now, split based on positive vs. negative sentiment-- this plot should have 4 lines
     #pos_neg_sents(im.pre_covid_posts_df,'Pre-Covid')
     #pos_neg_sents(im.post_covid_posts_df,'Post-Covid')
     #im.plt.title('Pos/Neg Sentiment Before and After Covid-19')
     #im.plt.savefig('Pos_Neg_Sentiment_Pre_Post_Plot.png')
+    #im.plt.clf()
 
     #For the Negative and Positive framed stories
     #label_frames(im.pre_covid_posts_df, 'Positive', 'Negative', 'Pre-Covid')
     #label_frames(im.post_covid_posts_df, 'Positive', 'Negative', 'Post-Covid')
-    #im.plt.savefig('Pos_Neg_Frame_Pre_Post_Plot.png')
+    #im.plt.savefig('Pos_Neg_Frame_Pre_Post_Plot_scaled.png')
+    #im.plt.clf()
 
     #Just Negative pre/post 
     #label_frame(im.pre_covid_posts_df, 'Negative', 'Pre-Covid')
     #label_frame(im.post_covid_posts_df, 'Negative', 'Post-Covid')
-    #im.plt.savefig('Neg_Pre_Post_Plot_axis.png')
+    #im.plt.savefig('Neg_Pre_Post_Plot.png')
+    #im.plt.clf()
 
     #Just Positive pre/post 
     #label_frame(im.pre_covid_posts_df, 'Positive', 'Pre-Covid')
     #label_frame(im.post_covid_posts_df, 'Positive', 'Post-Covid')
     #im.plt.savefig('Pos_Pre_Post_Plot.png')
+    #im.plt.clf()
 
     #For the 4 time frames of Covid
     #labels = list(im.labels_df.columns)
@@ -254,61 +262,72 @@ def main():
     #label_frames(im.pre_covid_posts_df, 'Medicated', 'Unmedicated', 'Pre-Covid')
     #label_frames(im.post_covid_posts_df, 'Medicated', 'Unmedicated', 'Post-Covid')
     #im.plt.savefig('Med_Unmed_Pre_Post_Plot.png')
+    #im.plt.clf()
 
     #Just medicated pre/post 
     #label_frame(im.pre_covid_posts_df, 'Medicated', 'Pre-Covid')
     #label_frame(im.post_covid_posts_df, 'Medicated', 'Post-Covid')
     #im.plt.savefig('Med_Pre_Post_Plot.png')
+    #im.plt.clf()
 
     #Just unmedicated pre/post 
     #label_frame(im.pre_covid_posts_df, 'Unmedicated', 'Pre-Covid')
     #label_frame(im.post_covid_posts_df, 'Unmedicated', 'Post-Covid')
     #im.plt.savefig('Unmed_Pre_Post_Plot.png')
+    #im.plt.clf()
 
     #Home vs. Hospital births pre and post Covid
     #label_frames(im.pre_covid_posts_df, 'Home', 'Hospital', 'Pre-Covid')
     #label_frames(im.post_covid_posts_df, 'Home', 'Hospital', 'Post-Covid')
     #im.plt.savefig('Home_Hospital_Pre_Post_Plot.png')
+    #im.plt.clf()
 
     #Just home pre/post 
     #label_frame(im.pre_covid_posts_df, 'Home', 'Pre-Covid')
     #label_frame(im.post_covid_posts_df, 'Home', 'Post-Covid')
     #im.plt.savefig('Home_Pre_Post_Plot.png')
+    #im.plt.clf()
 
     #Just hospital pre/post 
     #label_frame(im.pre_covid_posts_df, 'Hospital', 'Pre-Covid')
     #label_frame(im.post_covid_posts_df, 'Hospital', 'Post-Covid')
     #im.plt.savefig('Hospital_Pre_Post_Plot.png')
+    #im.plt.clf()
 
     #Vaginal vs. Cesarian births pre and post Covid
     #label_frames(im.pre_covid_posts_df, 'Vaginal', 'C-Section', 'Pre-Covid')
     #label_frames(im.post_covid_posts_df, 'Vaginal', 'C-Section', 'Post-Covid')
     #im.plt.savefig('Vaginal_Cesarian_Pre_Post_Plot.png')
+    #im.plt.clf()
 
     #Just vaginal pre/post 
     #label_frame(im.pre_covid_posts_df, 'Vaginal', 'Pre-Covid')
     #label_frame(im.post_covid_posts_df, 'Vaginal', 'Post-Covid')
     #im.plt.savefig('Vaginal_Pre_Post_Plot.png')
+    #im.plt.clf()
 
     #Just cesarian pre/post 
     #label_frame(im.pre_covid_posts_df, 'C-Section', 'Pre-Covid')
     #label_frame(im.post_covid_posts_df, 'C-Section', 'Post-Covid')
     #im.plt.savefig('Cesarian_Pre_Post_Plot.png')
+    #im.plt.clf()
 
     #First vs. Second births pre and post Covid
     #label_frames(im.pre_covid_posts_df, 'First', 'Second', 'Pre-Covid')
     #label_frames(im.post_covid_posts_df, 'First', 'Second', 'Post-Covid')
-    #im.plt.savefig('First_Second_Pre_Post_Plot.png')
+    #im.plt.savefig('First_Second_Pre_Post_Plot_scaled.png')
 
     #Just first pre/post 
     #label_frame(im.pre_covid_posts_df, 'First', 'Pre-Covid')
     #label_frame(im.post_covid_posts_df, 'First', 'Post-Covid')
     #im.plt.savefig('First_Pre_Post_Plot.png')
+    #im.plt.clf()
 
     #Just second pre/post 
     #label_frame(im.pre_covid_posts_df, 'Second', 'Pre-Covid')
     #label_frame(im.post_covid_posts_df, 'Second', 'Post-Covid')
     #im.plt.savefig('Second_Pre_Post_Plot.png')
+    #im.plt.clf()
 
     #Stories mentioning Covid vs. Not
     #Starting with Compound Sentiment
@@ -322,6 +341,7 @@ def main():
     #comp_sents(covid_df, 'Mentions Covid')
     #comp_sents(no_covid_df, 'Does Not Mention Covid')
     #im.plt.savefig('Compound_Sentiment_Covid_Mention_Plot.png')
+    #im.plt.clf()
 
     #Now, split based on positive vs. negative sentiment-- this plot should have 4 lines
 
@@ -329,6 +349,7 @@ def main():
     #pos_neg_sents(no_covid_df, 'pos', 'neg', 'Does Not Mention Covid')
     #im.plt.title('Pos/Neg Sentiment: Covid-19')
     #im.plt.savefig('Pos_Neg_Sentiment_Covid_Plot.png')
+    #im.plt.clf()
 
     #sample(im.pre_covid_posts_df, 'Home', 3, 10, 20).to_csv('home_births_pre_covid.csv', index = False)
     #sample(im.post_covid_posts_df, 'Home', 3, 10, 18).to_csv('home_births_post_covid.csv', index = False)
