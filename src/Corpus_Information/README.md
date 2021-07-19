@@ -1,3 +1,4 @@
+# Statistics About Posts in Corpus
 - `corpus_stats.py`: re-implements Maria's code for Table 1 and Figure 1 (left and right): finds statistics about the corpus.
 - `posts_per_month_during_covid.py`: plots bar graph of number of posts made during each month of COVID and generates four dataframes of posts made during each of four pandemic "eras":
   - March 11, 2020-June 1, 2020 (first wave)
