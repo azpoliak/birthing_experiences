@@ -1,11 +1,48 @@
-import imports as im 
+
+import pandas as pd
+import little_mallet_wrapper as lmw
+import os
+import nltk
+from nltk import ngrams
+from nltk import tokenize
+nltk.download('stopwords')
+from nltk.corpus import stopwords
+import numpy as np
+from datetime import datetime
+from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
+from matplotlib import pyplot as plt
+import itertools
+from itertools import chain, zip_longest
+from little_mallet_wrapper import process_string
+import seaborn
+import redditcleaner
+import re
+import warnings
+import itertools
+import compress_json
+warnings.filterwarnings("ignore")
+
+#Read all relevant dataframe jsons 
+
+birth_stories_df = compress_json.load('birth_stories_df.json.gz')
+birth_stories_df = pd.read_json(birth_stories_df)
+
+labels_df = compress_json.load("labeled_df.json.gz")
+labels_df = pd.read_json(labels_df)
+
+pre_covid_posts_df = compress_json.load("pre_covid_posts_df.json.gz")
+pre_covid_posts_df = pd.read_json(pre_covid_posts_df)
+
+post_covid_posts_df = compress_json.load("post_covid_posts_df.json.gz")
+post_covid_posts_df = pd.read_json(post_covid_posts_df)
+
 import labeling_stories as lb
 import posts_per_month_during_covid as cvd
 
 #returns total number of mentions for each persona per story.
 def counter(story, dc):
 	lowered = story.lower()
-	tokenized = im.tokenize.word_tokenize(lowered)
+	tokenized = tokenize.word_tokenize(lowered)
 	total_mentions = []
 	for ngram in list(dc.values()):
 		mentions = []
@@ -19,13 +56,13 @@ def counter(story, dc):
 
 #splits story into ten equal chunks
 def split_story_10(str):
-    tokenized = im.tokenize.word_tokenize(str)
+    tokenized = tokenize.word_tokenize(str)
     rounded = round(len(tokenized)/10)
     if rounded != 0:
-        ind = im.np.arange(0, rounded*10, rounded)
+        ind = np.arange(0, rounded*10, rounded)
         remainder = len(tokenized) % rounded*10
     else:
-        ind = im.np.arange(0, rounded*10)
+        ind = np.arange(0, rounded*10)
         remainder = 0
     split_story = []
     for i in ind:
@@ -43,7 +80,7 @@ def count_chunks(series, dc):
     return mentions
 
 def make_plots(pre_df, normalized, post_df):
-    fig = im.plt.figure()
+    fig = plt.figure()
     ax = fig.add_subplot(111)
     for i in range(pre_df.shape[1]):
         ax.clear()
@@ -59,7 +96,7 @@ def make_plots(pre_df, normalized, post_df):
 
 #makes plots of persona mention over narrative time for any number of dfs
 def make_n_plots(pre_df, norm, m_j_df, j_n_df, n_a_df, a_j_df):
-    fig = im.plt.figure(figsize=(15,10))
+    fig = plt.figure(figsize=(15,10))
     ax = fig.add_subplot(111)
     for i in range(pre_df.shape[1]):
         ax.clear()
@@ -91,14 +128,14 @@ def main():
 
     personas_and_n_grams = {'Author': author, 'We': we, 'Baby': baby, 'Doctor': doctor, 'Partner': partner, 'Nurse': nurse, 'Midwife': midwife, 'Family': family, 'Anesthesiologist': anesthesiologist, 'Doula': doula}
 
-    persona_df = im.birth_stories_df[['selftext']]
+    persona_df = birth_stories_df[['selftext']]
 
     #stories containing mentions:
     total_mentions = persona_df['selftext'].apply(lambda x: counter(x, personas_and_n_grams))
     #print(total_mentions)
 
     #finds sum for all stories
-    a = im.np.array(list(total_mentions))
+    a = np.array(list(total_mentions))
     number_mentions = a.sum(axis=0)
 
     story_counts = lb.create_df_label_list(persona_df, 'selftext', personas_and_n_grams, [])
@@ -114,21 +151,21 @@ def main():
           'Average Mentions per Story': avg_mentions}
 
     #turn dictionary into a dataframe
-    personas_counts_df = im.pd.DataFrame(personas_dict, index=im.np.arange(10))
+    personas_counts_df = pd.DataFrame(personas_dict, index=np.arange(10))
 
     personas_counts_df.set_index('Personas', inplace = True)
     personas_counts_df.to_csv(f'../data/personas_counts_df.csv')
 
     #name the dfs for easy reference inside the for loop
-    im.pre_covid_posts_df.name = 'pre_covid'
-    im.post_covid_posts_df.name = 'post_covid'
+    pre_covid_posts_df.name = 'pre_covid'
+    post_covid_posts_df.name = 'post_covid'
     cvd.mar_june_2020_df.name = 'mar_june'
     cvd.june_nov_2020_df.name = 'june_nov'
     cvd.nov_2020_apr_2021_df.name = 'nov_apr'
     cvd.apr_june_2021_df.name = 'apr_june'
 
     #list of dfs to iterate through in the for loop
-    dfs = (im.pre_covid_posts_df, im.post_covid_posts_df, cvd.mar_june_2020_df, cvd.june_nov_2020_df, cvd.nov_2020_apr_2021_df, cvd.apr_june_2021_df)
+    dfs = (pre_covid_posts_df, post_covid_posts_df, cvd.mar_june_2020_df, cvd.june_nov_2020_df, cvd.nov_2020_apr_2021_df, cvd.apr_june_2021_df)
 
     #dictionary to save the dfs to at the end of the for loop for easy reference for plotting
     d = {}
@@ -148,11 +185,11 @@ def main():
         #print(total_mentions)
 
         #finds sum for all stories
-        a = im.np.array(list(total_mentions))
+        a = np.array(list(total_mentions))
         number_mentions = a.sum(axis=0)
 
         #makes df w all values for t-test in Persona_Stats.py
-        number_mentions_df = im.pd.DataFrame(im.np.row_stack(a))
+        number_mentions_df = pd.DataFrame(np.row_stack(a))
         number_mentions_df.columns = personas_and_n_grams
         dict_for_stats[df_name] = number_mentions_df
 
@@ -169,7 +206,7 @@ def main():
               'Average Mentions per Story': avg_mentions}
 
         #turn dictionary into a dataframe
-        personas_counts_df = im.pd.DataFrame(personas_dict, index=im.np.arange(10))
+        personas_counts_df = pd.DataFrame(personas_dict, index=np.arange(10))
 
         personas_counts_df.set_index('Personas', inplace = True)
         personas_counts_df.to_csv(f'../data/{df_name}_personas_counts_df.csv')
@@ -180,10 +217,10 @@ def main():
         mentions_by_chunk = persona_df['10 chunks/story'].apply(lambda x: count_chunks(x, personas_and_n_grams))
         mentions_by_chunk.to_csv(f'{df_name}_mentions_by_chunk.csv')
 
-        b = im.np.array(list(mentions_by_chunk))
+        b = np.array(list(mentions_by_chunk))
         chunk_mentions = b.mean(axis=0)
 
-        personas_chunks_df = im.pd.DataFrame(chunk_mentions)
+        personas_chunks_df = pd.DataFrame(chunk_mentions)
         personas_chunks_df.set_axis(list(personas_dict['Personas']), axis=1, inplace=True)
 
         d[df_name] = personas_chunks_df

@@ -1,16 +1,51 @@
-import imports as im
+import pandas as pd
+import little_mallet_wrapper as lmw
+import os
+import nltk
+from nltk import ngrams
+from nltk import tokenize
+nltk.download('stopwords')
+from nltk.corpus import stopwords
+import numpy as np
+from datetime import datetime
+from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
+from matplotlib import pyplot as plt
+import itertools
+from itertools import chain, zip_longest
+from little_mallet_wrapper import process_string
+import seaborn
+import redditcleaner
+import re
+import warnings
+import itertools
+import compress_json
 from scipy import stats
 from scipy.stats import norm
+warnings.filterwarnings("ignore")
+
+#Read all relevant dataframe jsons 
+
+birth_stories_df = compress_json.load('birth_stories_df.json.gz')
+birth_stories_df = pd.read_json(birth_stories_df)
+
+labels_df = compress_json.load("labeled_df.json.gz")
+labels_df = pd.read_json(labels_df)
+
+pre_covid_posts_df = compress_json.load("pre_covid_posts_df.json.gz")
+pre_covid_posts_df = pd.read_json(pre_covid_posts_df)
+
+post_covid_posts_df = compress_json.load("post_covid_posts_df.json.gz")
+post_covid_posts_df = pd.read_json(post_covid_posts_df)
 
 #load in everything from Personas.py
 
 #not chunked
-pre_covid_persona_mentions = im.pd.read_csv('persona_csvs/pre_covid_persona_mentions.csv')
-post_covid_persona_mentions = im.pd.read_csv('persona_csvs/post_covid_persona_mentions.csv')
+pre_covid_persona_mentions = pd.read_csv('persona_csvs/pre_covid_persona_mentions.csv')
+post_covid_persona_mentions = pd.read_csv('persona_csvs/post_covid_persona_mentions.csv')
 
 #chunked
-pre_covid_chunk_mentions = im.pd.read_csv('persona_csvs/pre_covid_chunk_mentions.csv')
-post_covid_chunk_mentions = im.pd.read_csv('persona_csvs/post_covid_chunk_mentions.csv')
+pre_covid_chunk_mentions = pd.read_csv('persona_csvs/pre_covid_chunk_mentions.csv')
+post_covid_chunk_mentions = pd.read_csv('persona_csvs/post_covid_chunk_mentions.csv')
 
 pre_covid_persona_mentions = pre_covid_persona_mentions.drop('Unnamed: 0', axis=1)
 post_covid_persona_mentions = post_covid_persona_mentions.drop('Unnamed: 0', axis=1)
@@ -35,7 +70,7 @@ def ttest(df, df2, chunks=False):
 				stat.append(ttest.statistic)
 				p_value.append(ttest.pvalue)
 				index.append(persona_name)
-		ttest_df = im.pd.DataFrame(data = {'Statistics': stat, 'P-Values': p_value}, index = index)
+		ttest_df = pd.DataFrame(data = {'Statistics': stat, 'P-Values': p_value}, index = index)
 		ttest_df.to_csv("normalized_chunk_stats.csv")
 				#print((f"{persona_name} {chunk} t-test: {ttest}"))
 	else:
@@ -47,7 +82,7 @@ def ttest(df, df2, chunks=False):
 			stat.append(ttest.statistic)
 			p_value.append(ttest.pvalue)
 			index.append(persona_name)
-		ttest_df = im.pd.DataFrame(data = {'Statistics': stat, 'P-Values': p_value}, index = index)
+		ttest_df = pd.DataFrame(data = {'Statistics': stat, 'P-Values': p_value}, index = index)
 		ttest_df.to_csv("normalized_persona_stats.csv")
 			#print((f"{persona_name} t-test: {ttest}"))
 
