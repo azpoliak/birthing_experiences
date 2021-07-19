@@ -1,16 +1,51 @@
-import imports as im
-import Test_Sen as ts
+import pandas as pd
+import little_mallet_wrapper as lmw
+import os
+import nltk
+from nltk import ngrams
+from nltk import tokenize
+nltk.download('stopwords')
+from nltk.corpus import stopwords
+import numpy as np
+from datetime import datetime
+from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
+from matplotlib import pyplot as plt
+import itertools
+from itertools import chain, zip_longest
+from little_mallet_wrapper import process_string
+import seaborn
+import redditcleaner
+import re
+import warnings
+import itertools
+import compress_json
 from scipy import stats
+warnings.filterwarnings("ignore")
+import Test_Sen as ts
+
+#Read all relevant dataframe jsons 
+
+birth_stories_df = compress_json.load('birth_stories_df.json.gz')
+birth_stories_df = pd.read_json(birth_stories_df)
+
+labels_df = compress_json.load("labeled_df.json.gz")
+labels_df = pd.read_json(labels_df)
+
+pre_covid_posts_df = compress_json.load("pre_covid_posts_df.json.gz")
+pre_covid_posts_df = pd.read_json(pre_covid_posts_df)
+
+post_covid_posts_df = compress_json.load("post_covid_posts_df.json.gz")
+post_covid_posts_df = pd.read_json(post_covid_posts_df)
 
 def group_raw_scores(df, l):
 	new_df = df[['title', 'selftext']].get(df[l] == True)
-	new_df['tokenized sentences'] = new_df['selftext'].apply(im.tokenize.sent_tokenize)
+	new_df['tokenized sentences'] = new_df['selftext'].apply(tokenize.sent_tokenize)
 	new_df['sentiment groups'] = new_df['tokenized sentences'].apply(ts.split_story_10_sentiment)
 	new_df['comp sent per group'] = new_df['sentiment groups'].apply(ts.per_group, args = ('compound',)) 
-	compressed = im.pd.DataFrame(list(new_df['comp sent per group'])).to_dict(orient='list')
+	compressed = pd.DataFrame(list(new_df['comp sent per group'])).to_dict(orient='list')
 	raw_score_dict = {} 
 	for key in compressed:
-		raw_score_dict[key] = list(im.itertools.chain.from_iterable(compressed[key])) 
+		raw_score_dict[key] = list(itertools.chain.from_iterable(compressed[key])) 
 	return raw_score_dict
 
 def t_test(df_pre, df_post, labels):
@@ -23,7 +58,7 @@ def t_test(df_pre, df_post, labels):
 			t_test = stats.ttest_ind(label_pre[key], label_post[key])
 			stat.append(t_test.statistic)
 			p_value.append(t_test.pvalue)
-		label_frame = im.pd.DataFrame(data = {'Statistics': stat, 'P-Values': p_value}, index = list(label_pre.keys()))
+		label_frame = pd.DataFrame(data = {'Statistics': stat, 'P-Values': p_value}, index = list(label_pre.keys()))
 		label_frame.index.name = f"{label}: Pre-Post Covid"
 		sig_vals = label_frame.get(label_frame['P-Values'] < .05)
 		if not sig_vals.empty:
@@ -44,7 +79,7 @@ def t_test_two_labels(df, label_one, label_two, t):
 			t_test = stats.ttest_ind(label_dc_one[key], label_dc_two[key])
 			stat.append(t_test.statistic)
 			p_value.append(t_test.pvalue)
-		label_frame = im.pd.DataFrame(data = {'Statistics': stat, 'P-Values': p_value}, index = list(label_dc_one.keys()))
+		label_frame = pd.DataFrame(data = {'Statistics': stat, 'P-Values': p_value}, index = list(label_dc_one.keys()))
 		label_frame.index.name = f"{label_one} vs. {label_two}: {t}"
 		sig_vals = label_frame.get(label_frame['P-Values'] < .05)
 		if not sig_vals.empty:
@@ -57,8 +92,7 @@ def t_test_two_labels(df, label_one, label_two, t):
 
 
 def main():
-	im.progress_bar()
-	labels = list(im.labels_df.columns)
+	labels = list(labels_df.columns)
 	labels.remove('title')
 	labels.remove('created_utc')
 	labels.remove('Covid')
@@ -67,18 +101,18 @@ def main():
 	labels.remove('selftext')
 	labels.remove('author')
 '''
-	t_test(im.pre_covid_posts_df, im.post_covid_posts_df, labels)
-	t_test_two_labels(im.pre_covid_posts_df, 'Positive', 'Negative', 'Pre-Covid')
-	t_test_two_labels(im.pre_covid_posts_df, 'Medicated', 'Unmedicated', 'Pre-Covid')
-	t_test_two_labels(im.pre_covid_posts_df, 'Home', 'Hospital', 'Pre-Covid')
-	t_test_two_labels(im.pre_covid_posts_df, 'First', 'Second', 'Pre-Covid')
-	t_test_two_labels(im.pre_covid_posts_df, 'C-Section', 'Vaginal', 'Pre-Covid')
+	t_test(pre_covid_posts_df, post_covid_posts_df, labels)
+	t_test_two_labels(pre_covid_posts_df, 'Positive', 'Negative', 'Pre-Covid')
+	t_test_two_labels(pre_covid_posts_df, 'Medicated', 'Unmedicated', 'Pre-Covid')
+	t_test_two_labels(pre_covid_posts_df, 'Home', 'Hospital', 'Pre-Covid')
+	t_test_two_labels(pre_covid_posts_df, 'First', 'Second', 'Pre-Covid')
+	t_test_two_labels(pre_covid_posts_df, 'C-Section', 'Vaginal', 'Pre-Covid')
 
-	t_test_two_labels(im.post_covid_posts_df, 'Positive', 'Negative', 'Post-Covid')
-	t_test_two_labels(im.post_covid_posts_df, 'Medicated', 'Unmedicated', 'Post-Covid')
-	t_test_two_labels(im.post_covid_posts_df, 'Home', 'Hospital', 'Post-Covid')
-	t_test_two_labels(im.post_covid_posts_df, 'First', 'Second', 'Post-Covid')
-	t_test_two_labels(im.post_covid_posts_df, 'C-Section', 'Vaginal', 'Post-Covid')
+	t_test_two_labels(post_covid_posts_df, 'Positive', 'Negative', 'Post-Covid')
+	t_test_two_labels(post_covid_posts_df, 'Medicated', 'Unmedicated', 'Post-Covid')
+	t_test_two_labels(post_covid_posts_df, 'Home', 'Hospital', 'Post-Covid')
+	t_test_two_labels(post_covid_posts_df, 'First', 'Second', 'Post-Covid')
+	t_test_two_labels(post_covid_posts_df, 'C-Section', 'Vaginal', 'Post-Covid')
 '''
 if __name__ == '__main__':
 	main()

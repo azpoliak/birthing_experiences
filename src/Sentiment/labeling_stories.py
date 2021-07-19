@@ -1,4 +1,39 @@
-import imports as im 
+import pandas as pd
+import little_mallet_wrapper as lmw
+import os
+import nltk
+from nltk import ngrams
+from nltk import tokenize
+nltk.download('stopwords')
+from nltk.corpus import stopwords
+import numpy as np
+from datetime import datetime
+from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
+from matplotlib import pyplot as plt
+import itertools
+from itertools import chain, zip_longest
+from little_mallet_wrapper import process_string
+import seaborn
+import redditcleaner
+import re
+import warnings
+import itertools
+import compress_json
+warnings.filterwarnings("ignore")
+
+#Read all relevant dataframe jsons 
+
+birth_stories_df = compress_json.load('birth_stories_df.json.gz')
+birth_stories_df = pd.read_json(birth_stories_df)
+
+labels_df = compress_json.load("labeled_df.json.gz")
+labels_df = pd.read_json(labels_df)
+
+pre_covid_posts_df = compress_json.load("pre_covid_posts_df.json.gz")
+pre_covid_posts_df = pd.read_json(pre_covid_posts_df)
+
+post_covid_posts_df = compress_json.load("post_covid_posts_df.json.gz")
+post_covid_posts_df = pd.read_json(post_covid_posts_df)
 
 # **Table 3: Labels**
 
@@ -37,13 +72,13 @@ def create_df_label_list(df, column, dct, disallows):
 
 #translate created_utc column into dates
 def get_post_date(series):
-    parsed_date = im.datetime.utcfromtimestamp(series)
+    parsed_date = datetime.utcfromtimestamp(series)
     date = parsed_date
     return date
 
 #True/False column based on before and after pandemic 
 def pandemic(date):
-    start_date = im.datetime.strptime("11 March, 2020", "%d %B, %Y")
+    start_date = datetime.strptime("11 March, 2020", "%d %B, %Y")
     if date > start_date:
         return False
     else:
@@ -51,7 +86,7 @@ def pandemic(date):
 
 def main():
     #Dataframe with only the columns we're working with
-    labels_df = im.birth_stories_df[['title', 'selftext', 'created_utc', 'author']]
+    labels_df = birth_stories_df[['title', 'selftext', 'created_utc', 'author']]
 
     #creating lists of words used to assign labels to story titles 
     positive = ['positive']
@@ -84,16 +119,16 @@ def main():
     'Number of Stories': counts}
 
     #turn dictionary into a dataframe
-    label_counts_df = im.pd.DataFrame(labels_dict, index=im.np.arange(10))
+    label_counts_df = pd.DataFrame(labels_dict, index=np.arange(10))
 
     label_counts_df.set_index('Labels', inplace = True)
     label_counts_df.to_csv('../data/label_counts_df.csv')
 
     #splitting into pre and post pandemic corpuses based on post date
 
-    im.birth_stories_df['date created'] = im.birth_stories_df['created_utc'].apply(get_post_date)
-    im.birth_stories_df = im.birth_stories_df.sort_values(by = 'date created')
-    labels_df['Pre-Covid'] = im.birth_stories_df['date created'].apply(pandemic)
+    birth_stories_df['date created'] = birth_stories_df['created_utc'].apply(get_post_date)
+    birth_stories_df = birth_stories_df.sort_values(by = 'date created')
+    labels_df['Pre-Covid'] = birth_stories_df['date created'].apply(pandemic)
 
     covid = create_df_label_list(labels_df, 'selftext', Covid, [])
     labels_df['Date'] = labels_df['created_utc'].apply(get_post_date)
@@ -105,7 +140,7 @@ def main():
 
     #Convert to Json
     #pre_covid_posts_df = pre_covid_posts_df.to_json()
-    #im.compress_json.dump(pre_covid_posts_df, "pre_covid_posts_df.json.gz")
+    #compress_json.dump(pre_covid_posts_df, "pre_covid_posts_df.json.gz")
 
     #Subreddits after pandemic 
     post_covid_posts_df = labels_df.get(labels_df['Pre-Covid']==False).get(list(labels_df.columns))
@@ -114,11 +149,11 @@ def main():
 
     #Read dataframes to compressed json so we can reference them later
     #labels_df = labels_df.to_json()
-    #im.compress_json.dump(labels_df, "labeled_df.json.gz")
+    #compress_json.dump(labels_df, "labeled_df.json.gz")
     
     #Convert to Json
     #post_covid_posts_df = post_covid_posts_df.to_json()
-    #im.compress_json.dump(post_covid_posts_df, "post_covid_posts_df.json.gz")
+    #compress_json.dump(post_covid_posts_df, "post_covid_posts_df.json.gz")
 
 if __name__ == "__main__":
     main()
