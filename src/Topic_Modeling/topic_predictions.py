@@ -59,8 +59,6 @@ birth_stories_df_cleaned = pd.DataFrame(birth_stories_df_cleaned.groupby(birth_s
 
 birth_stories_df_cleaned.to_csv('birth_stories_df_topics.csv')
 
-#r_squareds = []
-
 def predict_topic_trend(df, df2):
     fig = plt.figure(figsize=(15,10))
     ax = fig.add_subplot(111)
@@ -95,12 +93,4 @@ def predict_topic_trend(df, df2):
         plt.axvline(pd.Timestamp('2020-03-01'),color='r')
         fig1.savefig(f'../data/Topic_Forecasts/{topic_label}_Prediction_Plot.png')
 
-        #metric_df = forecast.set_index('ds')[['yhat']].join(actual.set_index('ds').y).reset_index()
-        #metric_df.dropna(inplace=True)
-        #print(metric_df)
-        #r_squareds.append(r2_score(metric_df.y, metric_df.yhat))
-        #print(f'R-Squared Value for topic: {r2_score(metric_df.y, metric_df.yhat)}')
-        #print(f'R-Squared Value for topic {topic_label}: {r2_score}')
-
 predict_topic_trend(pre_covid, birth_stories_df_cleaned)
-#print(r_squareds)
