@@ -1,14 +1,9 @@
 # Python Files
 - **Path to corpus:**`birthing_experiences/src/birth_stories_df.json.gz`: compressed json file containing the dataframe of our corpus.
 - **Pre and Post COVID corpus:** `birthing_experiences/src/pre_covid_posts_df.json.gz` and `birthing_experiences/src/post_covid_posts_df.json.gz` are compressed json files containing dataframes of the posts made before and after (respectively) March 11, 2020.
+- `Corpus_Information/`: Statistics about the corpus, including data about the subreddits and statistics comparing number of posts made over time.
+- `Personas/`: Analyzing persona frequency pre- and post-COVID.
+- `Sentiment/`: Analyzing post sentiment pre- and post-COVID across several different categories of birthing experiences.
+- `Topic_Modeling/`: Analyzing topic probability over time for 50 topics and comparing the forecasted probability during COVID to actual probability trends during COVID.
+- `notebooks/`: Jupyter notebooks go here.
 - `subreddit_dfs.py`: compiles all the submissions about birth stories that are 500+ words from all nine subreddits into one dataframe birth_stories_df, incorporates author's first comment for empty submissions, and saves it as a compressed json file.
-- `imports.py`: all the packages we use in our code and reads the json file into a dataframe.
-- `corpus_stats.py`: re-implements Maria's code for Table 1 and Figure 1 (left and right): finds statistics about the corpus.
-- `subreddit_stats.py`: gets statistics about number of posts made per year for all nine subreddits.
-- `labeling_stories.py`: re-implements Maria's code for Table 3: assigns labels to stories based on lexicon of key words, finds number of stories assigned each label. Also assigns "COVID" label to posts made after March 11, 2020, when COVID-19 was declared a pandemic by WHO, and separates the pre- and post-pandemic stories into two dataframes.
-- `Topic_Modeling.py`: trains a topic model and plots topic probability over the course of the narrative for 50 topics.
-- `Covid_Topic_Modeling.py`: plots topic probability over time for 50 topics (2010-2021).
-- `Test_Sen.py`: re-implements Maria's code for Figure 2: sentiment analysis over the course of the narrative.
-- `Personas.py`: Determines prevalence of personas in the corpus and plots distribution of personas over story time for any number of dataframes.
-- `Persona_Stats.py`: Statistical analysis of persona results using t-tests.
-- `posts_per_month_during_covid.py`: finds number of posts made during each month from March 2020 to June 2021 and creates four separate dataframes for each era of COVID (March 11 2020-June 1 2020, June 1 2020-November 1 2020, November 1 2020-April 1 2020, and April 1 2021-June 24 2021). These eras were determined based on the New York Times line plot of number of new COVID cases over time.
