@@ -23,16 +23,16 @@ warnings.filterwarnings("ignore")
 
 #Read all relevant dataframe jsons 
 
-birth_stories_df = compress_json.load('birth_stories_df.json.gz')
+birth_stories_df = compress_json.load('../birth_stories_df.json.gz')
 birth_stories_df = pd.read_json(birth_stories_df)
 
-labels_df = compress_json.load("labeled_df.json.gz")
+labels_df = compress_json.load("../labeled_df.json.gz")
 labels_df = pd.read_json(labels_df)
 
-pre_covid_posts_df = compress_json.load("pre_covid_posts_df.json.gz")
+pre_covid_posts_df = compress_json.load("../pre_covid_posts_df.json.gz")
 pre_covid_posts_df = pd.read_json(pre_covid_posts_df)
 
-post_covid_posts_df = compress_json.load("post_covid_posts_df.json.gz")
+post_covid_posts_df = compress_json.load("../post_covid_posts_df.json.gz")
 post_covid_posts_df = pd.read_json(post_covid_posts_df)
 
 #translate created_utc column into years
@@ -71,7 +71,7 @@ def main():
     plt.legend()
     plt.title('Posts per Year')
     plt.show()
-    plt.savefig('Home_vs_Hospital_Births_Covid.png')
+    plt.savefig('../../data/Home_vs_Hospital_Births_Covid.png')
 
 
 if __name__ == "__main__":

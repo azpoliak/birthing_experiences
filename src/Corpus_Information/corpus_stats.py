@@ -23,16 +23,16 @@ warnings.filterwarnings("ignore")
 
 #Read all relevant dataframe jsons 
 
-birth_stories_df = compress_json.load('birth_stories_df.json.gz')
+birth_stories_df = compress_json.load('../birth_stories_df.json.gz')
 birth_stories_df = pd.read_json(birth_stories_df)
 
-labels_df = compress_json.load("labeled_df.json.gz")
+labels_df = compress_json.load("../labeled_df.json.gz")
 labels_df = pd.read_json(labels_df)
 
-pre_covid_posts_df = compress_json.load("pre_covid_posts_df.json.gz")
+pre_covid_posts_df = compress_json.load("../pre_covid_posts_df.json.gz")
 pre_covid_posts_df = pd.read_json(pre_covid_posts_df)
 
-post_covid_posts_df = compress_json.load("post_covid_posts_df.json.gz")
+post_covid_posts_df = compress_json.load("../post_covid_posts_df.json.gz")
 post_covid_posts_df = pd.read_json(post_covid_posts_df)
 
 def show():
@@ -97,20 +97,20 @@ def main():
 
     #turn dictionary into a dataframe
     table1_df = pd.DataFrame(corpus_stats, index=np.arange(4))
-    table1_df.to_csv('../data/corpus_stats.csv')
+    table1_df.to_csv('../../data/corpus_stats.csv')
 
     birth_stories_df['year created'] = birth_stories_df['created_utc'].apply(get_post_year)
     posts_per_year = birth_stories_df['year created'].value_counts()
     fig = plt.figure(figsize=(20,10))
     posts_per_year.sort_index().plot.bar()
     fig.suptitle('Posts per Year')
-    fig.savefig('../data/Posts_per_Year_bar.png')
+    fig.savefig('../../data/Posts_per_Year_bar.png')
     
     #histogram
     fig = plt.figure(figsize=(20,10))
     birth_stories_df['story length'].hist(bins=20)
     fig.suptitle('Story Lengths (number of words)')
-    fig.savefig('../data/Story_Length_Hist.png')
+    fig.savefig('../../data/Story_Length_Hist.png')
 
 if __name__ == "__main__":
     main()

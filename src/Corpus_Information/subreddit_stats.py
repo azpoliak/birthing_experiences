@@ -23,16 +23,16 @@ warnings.filterwarnings("ignore")
 
 #Read all relevant dataframe jsons 
 
-birth_stories_df = compress_json.load('birth_stories_df.json.gz')
+birth_stories_df = compress_json.load('../birth_stories_df.json.gz')
 birth_stories_df = pd.read_json(birth_stories_df)
 
-labels_df = compress_json.load("labeled_df.json.gz")
+labels_df = compress_json.load("../labeled_df.json.gz")
 labels_df = pd.read_json(labels_df)
 
-pre_covid_posts_df = compress_json.load("pre_covid_posts_df.json.gz")
+pre_covid_posts_df = compress_json.load("../pre_covid_posts_df.json.gz")
 pre_covid_posts_df = pd.read_json(pre_covid_posts_df)
 
-post_covid_posts_df = compress_json.load("post_covid_posts_df.json.gz")
+post_covid_posts_df = compress_json.load("../post_covid_posts_df.json.gz")
 post_covid_posts_df = pd.read_json(post_covid_posts_df)
 
 def get_post_year(series):
@@ -45,33 +45,33 @@ def make_plots(series, name):
     posts_per_year = series.value_counts()
     posts_per_year.sort_index().plot.bar()
     fig.suptitle('Number of posts in r/'+str(name)+' per year')
-    fig.savefig('../data/subreddit_years_bar_graphs/'+str(name)+'_years.png')
+    fig.savefig('../../data/subreddit_years_bar_graphs/'+str(name)+'_years.png')
 
-BabyBumps_df = compress_json.load('subreddit_json_gzs/BabyBumps_df.json.gz')
+BabyBumps_df = compress_json.load('../subreddit_json_gzs/BabyBumps_df.json.gz')
 BabyBumps_df = pd.read_json(BabyBumps_df)
 
-beyond_the_bump_df = compress_json.load('subreddit_json_gzs/beyond_the_bump_df.json.gz')
+beyond_the_bump_df = compress_json.load('../subreddit_json_gzs/beyond_the_bump_df.json.gz')
 beyond_the_bump_df = pd.read_json(beyond_the_bump_df)
 
-BirthStories_df = compress_json.load('subreddit_json_gzs/BirthStories_df.json.gz')
+BirthStories_df = compress_json.load('../subreddit_json_gzs/BirthStories_df.json.gz')
 BirthStories_df = pd.read_json(BirthStories_df)
 
-daddit_df = compress_json.load('subreddit_json_gzs/daddit_df.json.gz')
+daddit_df = compress_json.load('../subreddit_json_gzs/daddit_df.json.gz')
 daddit_df = pd.read_json(daddit_df)
 
 predaddit_df = compress_json.load('subreddit_json_gzs/predaddit_df.json.gz')
 predaddit_df = pd.read_json(predaddit_df)
 
-pregnant_df = compress_json.load('subreddit_json_gzs/pregnant_df.json.gz')
+pregnant_df = compress_json.load('../subreddit_json_gzs/pregnant_df.json.gz')
 pregnant_df = pd.read_json(pregnant_df)
 
-Mommit_df = compress_json.load('subreddit_json_gzs/Mommit_df.json.gz')
+Mommit_df = compress_json.load('../subreddit_json_gzs/Mommit_df.json.gz')
 Mommit_df = pd.read_json(Mommit_df)
 
-NewParents_df = compress_json.load('subreddit_json_gzs/NewParents_df.json.gz')
+NewParents_df = compress_json.load('../subreddit_json_gzs/NewParents_df.json.gz')
 NewParents_df = pd.read_json(NewParents_df)
 
-InfertilityBabies_df = compress_json.load('subreddit_json_gzs/InfertilityBabies_df.json.gz')
+InfertilityBabies_df = compress_json.load('../subreddit_json_gzs/InfertilityBabies_df.json.gz')
 InfertilityBabies_df = pd.read_json(InfertilityBabies_df)
 
 def main():
