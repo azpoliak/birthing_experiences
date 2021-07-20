@@ -25,16 +25,16 @@ import Test_Sen as ts
 
 #Read all relevant dataframe jsons 
 
-birth_stories_df = compress_json.load('birth_stories_df.json.gz')
+birth_stories_df = compress_json.load('../birth_stories_df.json.gz')
 birth_stories_df = pd.read_json(birth_stories_df)
 
-labels_df = compress_json.load("labeled_df.json.gz")
+labels_df = compress_json.load("../labeled_df.json.gz")
 labels_df = pd.read_json(labels_df)
 
-pre_covid_posts_df = compress_json.load("pre_covid_posts_df.json.gz")
+pre_covid_posts_df = compress_json.load("../pre_covid_posts_df.json.gz")
 pre_covid_posts_df = pd.read_json(pre_covid_posts_df)
 
-post_covid_posts_df = compress_json.load("post_covid_posts_df.json.gz")
+post_covid_posts_df = compress_json.load("../post_covid_posts_df.json.gz")
 post_covid_posts_df = pd.read_json(post_covid_posts_df)
 
 def group_raw_scores(df, l):
@@ -83,9 +83,9 @@ def t_test_two_labels(df, label_one, label_two, t):
 		label_frame.index.name = f"{label_one} vs. {label_two}: {t}"
 		sig_vals = label_frame.get(label_frame['P-Values'] < .05)
 		if not sig_vals.empty:
-			sig_vals.to_csv(f"T_Test_Results_Sig: {label_one}_{label_two}.csv")
+			sig_vals.to_csv(f"T_Test_Results_Sig:_{label_one}_{label_two}.csv")
 			#sig_vals.to_excel(f"T_Test_Results_Sig: {label_one}_{label_two}.xlsx")
-		label_frame.to_csv(f"T_Test_Results: {label_one}_{label_two}.csv")
+		label_frame.to_csv(f"T_Test_Results:_{label_one}_{label_two}.csv")
 		#label_frame.to_excel(f"T_Test_Results: {label_one}_{label_two}.xlsx")
 		#print(label_frame)
 		#print(f"{label} Birth, Section {key}: {stats.ttest_ind(label_pre[key], label_post[key])}")

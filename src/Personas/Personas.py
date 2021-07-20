@@ -24,16 +24,16 @@ warnings.filterwarnings("ignore")
 
 #Read all relevant dataframe jsons 
 
-birth_stories_df = compress_json.load('birth_stories_df.json.gz')
+birth_stories_df = compress_json.load('../birth_stories_df.json.gz')
 birth_stories_df = pd.read_json(birth_stories_df)
 
-labels_df = compress_json.load("labeled_df.json.gz")
+labels_df = compress_json.load("../labeled_df.json.gz")
 labels_df = pd.read_json(labels_df)
 
-pre_covid_posts_df = compress_json.load("pre_covid_posts_df.json.gz")
+pre_covid_posts_df = compress_json.load("../pre_covid_posts_df.json.gz")
 pre_covid_posts_df = pd.read_json(pre_covid_posts_df)
 
-post_covid_posts_df = compress_json.load("post_covid_posts_df.json.gz")
+post_covid_posts_df = compress_json.load("../post_covid_posts_df.json.gz")
 post_covid_posts_df = pd.read_json(post_covid_posts_df)
 
 import labeling_stories as lb
@@ -92,7 +92,7 @@ def make_plots(pre_df, normalized, post_df):
         ax.set_xlabel('Story Time')
         ax.set_ylabel('Persona Frequency')
         ax.legend()
-        fig.savefig(f'../data/Personas_Pre_Post/{persona_label}_pre_post_frequency.png')
+        fig.savefig(f'../../data/Personas_Pre_Post/{persona_label}_pre_post_frequency.png')
 
 #makes plots of persona mention over narrative time for any number of dfs
 def make_n_plots(pre_df, norm, m_j_df, j_n_df, n_a_df, a_j_df):
@@ -111,7 +111,7 @@ def make_n_plots(pre_df, norm, m_j_df, j_n_df, n_a_df, a_j_df):
         ax.set_xlabel('Story Time')
         ax.set_ylabel('Persona Frequency')
         ax.legend()
-        fig.savefig(f'../data/Personas_Throughout_Covid/{persona_label}_throughout_covid_frequency.png')
+        fig.savefig(f'../../data/Personas_Throughout_Covid/{persona_label}_throughout_covid_frequency.png')
 
 def main():
     #creating lists of words used to assign personas to stories

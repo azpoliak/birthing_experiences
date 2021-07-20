@@ -25,16 +25,16 @@ from sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error
 
 #Read all relevant dataframe jsons 
 
-birth_stories_df = compress_json.load('birth_stories_df.json.gz')
+birth_stories_df = compress_json.load('../birth_stories_df.json.gz')
 birth_stories_df = pd.read_json(birth_stories_df)
 
-labels_df = compress_json.load("labeled_df.json.gz")
+labels_df = compress_json.load("../labeled_df.json.gz")
 labels_df = pd.read_json(labels_df)
 
-pre_covid_posts_df = compress_json.load("pre_covid_posts_df.json.gz")
+pre_covid_posts_df = compress_json.load("../pre_covid_posts_df.json.gz")
 pre_covid_posts_df = pd.read_json(pre_covid_posts_df)
 
-post_covid_posts_df = compress_json.load("post_covid_posts_df.json.gz")
+post_covid_posts_df = compress_json.load("../post_covid_posts_df.json.gz")
 post_covid_posts_df = pd.read_json(post_covid_posts_df)
 
 def get_post_date(series):
@@ -44,7 +44,7 @@ def get_post_date(series):
     months = to_dt.to_period('M')
     return months
 
-birth_stories_df_cleaned = pd.read_csv("birth_stories_df_cleaned.csv")
+birth_stories_df_cleaned = pd.read_csv("../birth_stories_df_cleaned.csv")
 
 birth_stories_df_cleaned['date'] = pd.to_datetime(birth_stories_df_cleaned['Date Created'])
 birth_stories_df_cleaned['year-month'] = birth_stories_df_cleaned['date'].dt.to_period('M')

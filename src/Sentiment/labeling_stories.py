@@ -23,16 +23,16 @@ warnings.filterwarnings("ignore")
 
 #Read all relevant dataframe jsons 
 
-birth_stories_df = compress_json.load('birth_stories_df.json.gz')
+birth_stories_df = compress_json.load('../birth_stories_df.json.gz')
 birth_stories_df = pd.read_json(birth_stories_df)
 
-labels_df = compress_json.load("labeled_df.json.gz")
+labels_df = compress_json.load("../labeled_df.json.gz")
 labels_df = pd.read_json(labels_df)
 
-pre_covid_posts_df = compress_json.load("pre_covid_posts_df.json.gz")
+pre_covid_posts_df = compress_json.load("../pre_covid_posts_df.json.gz")
 pre_covid_posts_df = pd.read_json(pre_covid_posts_df)
 
-post_covid_posts_df = compress_json.load("post_covid_posts_df.json.gz")
+post_covid_posts_df = compress_json.load("../post_covid_posts_df.json.gz")
 post_covid_posts_df = pd.read_json(post_covid_posts_df)
 
 # **Table 3: Labels**
@@ -122,7 +122,7 @@ def main():
     label_counts_df = pd.DataFrame(labels_dict, index=np.arange(10))
 
     label_counts_df.set_index('Labels', inplace = True)
-    label_counts_df.to_csv('../data/label_counts_df.csv')
+    label_counts_df.to_csv('../../data/label_counts_df.csv')
 
     #splitting into pre and post pandemic corpuses based on post date
 
