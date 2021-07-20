@@ -21,7 +21,6 @@ import itertools
 import compress_json
 warnings.filterwarnings("ignore")
 from prophet import Prophet
-from sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error
 
 #Read all relevant dataframe jsons 
 
@@ -37,20 +36,16 @@ pre_covid_posts_df = pd.read_json(pre_covid_posts_df)
 post_covid_posts_df = compress_json.load("../post_covid_posts_df.json.gz")
 post_covid_posts_df = pd.read_json(post_covid_posts_df)
 
-def get_post_date(series):
-    parsed_date = datetime.utcfromtimestamp(series)
-    to_dt = pd.to_datetime(parsed_date)
-    year = to_dt.year
-    months = to_dt.to_period('M')
-    return months
-
 birth_stories_df_cleaned = pd.read_csv("../birth_stories_df_cleaned.csv")
 
 birth_stories_df_cleaned['date'] = pd.to_datetime(birth_stories_df_cleaned['Date Created'])
 birth_stories_df_cleaned['year-month'] = birth_stories_df_cleaned['date'].dt.to_period('M')
-birth_stories_df_cleaned['Date (by month)'] = [month.to_timestamp() for month in birth_stories_df_cleaned['year-month']]
-birth_stories_df_cleaned.drop(columns=['Date Created', 'year-month', 'date'], inplace=True)
-birth_stories_df_cleaned = birth_stories_df_cleaned.set_index('Date (by month)')
+birth_stories_df_cleaned['Date'] = [month.to_timestamp() for month in birth_stories_df_cleaned['year-month']]
+birth_stories_df_cleaned.drop(columns=['Date Created', 'date'], inplace=True)
+dt_object = birth_stories_df_cleaned['Date'].apply(datetime.fromtimestamp)
+birth_stories_df_cleaned = birth_stories_df_cleaned.set_index('Date')
+
+print(dt_object)
 
 pre_covid = birth_stories_df_cleaned[(birth_stories_df_cleaned.index <= '2020-02-01')]
 
@@ -73,15 +68,15 @@ def predict_topic_trend(df, df2):
         actual.reset_index(inplace=True)
         actual.columns = ['ds', 'y']
 
-        m = Prophet()
-        #m.fit(topic)
+        m = Prophet(seasonality_mode='multiplicative')
+        m.fit(topic)
 
-        #future = m.make_future_dataframe(periods=16, freq='MS')
+        future = m.make_future_dataframe(periods=16, freq='MS')
 
-        #forecast = m.predict(future)
+        forecast = m.predict(future)
         #print(forecast)
 
-        #forecast.to_csv(f'topic_forecasts/{topic_label}_forecast.csv')
+        forecast.to_csv(f'topic_forecasts/{topic_label}_forecast.csv')
 
         #load from csv to save time
         forecast = pd.read_csv(f'topic_forecasts/{topic_label}_forecast.csv')
@@ -93,4 +88,4 @@ def predict_topic_trend(df, df2):
         plt.axvline(pd.Timestamp('2020-03-01'),color='r')
         fig1.savefig(f'../data/Topic_Forecasts/{topic_label}_Prediction_Plot.png')
 
-predict_topic_trend(pre_covid, birth_stories_df_cleaned)
+#predict_topic_trend(pre_covid, birth_stories_df_cleaned)
