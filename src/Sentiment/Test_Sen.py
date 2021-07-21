@@ -282,6 +282,18 @@ def main():
     #plt.savefig('Pos_Pre_Post_Plot.png')
     #plt.clf()
 
+    #Positive vs. Negative pre-covid
+    #label_frame(pre_covid_posts_df, 'Positive', 'Pre-Covid')
+    #label_frame(pre_covid_posts_df, 'Negative', 'Pre-Covid')
+    #plt.savefig('Pos_Neg_Pre_Plot.png')
+    #plt.clf()
+
+    #Positive vs. Negative post-covid
+    #label_frame(post_covid_posts_df, 'Positive', 'Post-Covid')
+    #label_frame(post_covid_posts_df, 'Negative', 'Post-Covid')
+    #plt.savefig('Pos_Neg_Post_Plot.png')
+    #plt.clf()
+
     #For the 4 time frames of Covid
     #labels = list(labels_df.columns)
     #labels.remove('title')
@@ -309,6 +321,12 @@ def main():
     #label_frame(pre_covid_posts_df, 'Unmedicated', 'Pre-Covid')
     #label_frame(post_covid_posts_df, 'Unmedicated', 'Post-Covid')
     #plt.savefig('Unmed_Pre_Post_Plot.png')
+    #plt.clf()
+
+    #Medicated vs. Unmedicated pre-covid
+    #label_frame(pre_covid_posts_df, 'Medicated', 'Pre-Covid')
+    #label_frame(pre_covid_posts_df, 'Unmedicated', 'Pre-Covid')
+    #plt.savefig('Med_Unmed_Pre_Plot.png')
     #plt.clf()
 
     #Home vs. Hospital births pre and post Covid
@@ -347,6 +365,18 @@ def main():
     #plt.savefig('Cesarian_Pre_Post_Plot.png')
     #plt.clf()
 
+    #Cesarian vs. Vaginal pre-covid
+    #label_frame(pre_covid_posts_df, 'C-Section', 'Pre-Covid')
+    #label_frame(pre_covid_posts_df, 'Vaginal', 'Pre-Covid')
+    #plt.savefig('Cesarian_Vag_Pre_Plot.png')
+    #plt.clf()
+
+    #Cesarian vs. Vaginal post-covid
+    #label_frame(post_covid_posts_df, 'C-Section', 'Post-Covid')
+    #label_frame(post_covid_posts_df, 'Vaginal', 'Post-Covid')
+    #plt.savefig('Cesarian_Vaginal_Post_Plot.png')
+    #plt.clf()
+
     #First vs. Second births pre and post Covid
     #label_frames(pre_covid_posts_df, 'First', 'Second', 'Pre-Covid')
     #label_frames(post_covid_posts_df, 'First', 'Second', 'Post-Covid')
@@ -362,6 +392,18 @@ def main():
     #label_frame(pre_covid_posts_df, 'Second', 'Pre-Covid')
     #label_frame(post_covid_posts_df, 'Second', 'Post-Covid')
     #plt.savefig('Second_Pre_Post_Plot.png')
+    #plt.clf()
+
+    #First vs. Second pre-covid
+    #label_frame(pre_covid_posts_df, 'First', 'Pre-Covid')
+    #label_frame(pre_covid_posts_df, 'Second', 'Pre-Covid')
+    #plt.savefig('First_Second_Pre_Plot.png')
+    #plt.clf()
+
+    #First vs. Second post-covid
+    #label_frame(post_covid_posts_df, 'First', 'Post-Covid')
+    #label_frame(post_covid_posts_df, 'Second', 'Post-Covid')
+    #plt.savefig('First_Second_Post_Plot.png')
     #plt.clf()
 
     #Stories mentioning Covid vs. Not
