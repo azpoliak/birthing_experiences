@@ -72,7 +72,8 @@ def main():
 	all_actual_lower_post = 0
 	all_change_mean_direction = 0
 
-	ztest_dict = {}
+	pre_ztest_dict = {}
+	post_ztest_dict = {}
 
 	#iterates through all topics and computes statistics about their true values compared to forecasted values
 	for file in os.listdir('topic_forecasts/'):
@@ -109,11 +110,11 @@ def main():
 		all_outside_post = pd.concat([forecast, outside_ci_post], axis=1).dropna()
 
 		#z-test
-		#ztest(actual, forecast, percent)
-		#print(f"Pre-COVID {file_name} z and p-val: {ztest(pre[file_name], forecast_pre['yhat'], percent_pre)}")
-		#print(f"Post-COVID {file_name} z and p-val: {ztest(pre[file_name], forecast_pre['yhat'], percent_post)}")
-		ztest_vals = ztest(pre[file_name], forecast_pre['yhat'], percent_post)
-		ztest_dict[file_name] = ztest_vals
+		ztest_vals_pre = ztest(pre[file_name], forecast_pre['yhat'], percent_pre)
+		pre_ztest_dict[file_name] = ztest_vals_pre
+
+		ztest_vals_post = ztest(pre[file_name], forecast_pre['yhat'], percent_post)
+		post_ztest_dict[file_name] = ztest_vals_post
 
 		#t-test on # of values outside of forecasted confidence interval
 		ttest = stats.ttest_ind(all_outside_pre[file_name], all_outside_post[file_name])
@@ -167,7 +168,12 @@ def main():
 		if mean_diff_pre_all < 0 and mean_diff_post_all > 0:
 			all_change_mean_direction += 1
 
-	print(ztest_dict)
+	pre_ztest_df = pd.DataFrame.from_dict(pre_ztest_dict, orient='index', columns=['Z Statistic Pre', 'P-Value Pre'])
+	post_ztest_df = pd.DataFrame.from_dict(post_ztest_dict, orient='index', columns=['Z Statistic Post', 'P-Value Post'])
+	ztest_df = pd.merge(pre_ztest_df, post_ztest_df, left_index=True, right_index=True)
+	ztest_df = ztest_df[['Z Statistic Pre', 'Z Statistic Post', 'P-Value Pre', 'P-Value Post']]
+	print(ztest_df)
+	ztest_df.to_csv('../../data/Z_Test_Stats.csv')
 
 	print(f'Number of topics where percent of values outside of 95% CI was greater post-COVID: {outside_ci_post_is_greater}')
 	print(f'Number of topics where mean absolute percentage error was greater post-COVID: {MAPE_increased_post}')

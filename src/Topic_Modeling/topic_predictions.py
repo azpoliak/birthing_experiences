@@ -41,11 +41,10 @@ birth_stories_df_cleaned = pd.read_csv("../birth_stories_df_cleaned.csv")
 birth_stories_df_cleaned['date'] = pd.to_datetime(birth_stories_df_cleaned['Date Created'])
 birth_stories_df_cleaned['year-month'] = birth_stories_df_cleaned['date'].dt.to_period('M')
 birth_stories_df_cleaned['Date'] = [month.to_timestamp() for month in birth_stories_df_cleaned['year-month']]
-birth_stories_df_cleaned.drop(columns=['Date Created', 'date'], inplace=True)
-dt_object = birth_stories_df_cleaned['Date'].apply(datetime.fromtimestamp)
+birth_stories_df_cleaned.drop(columns=['Date Created', 'date', 'year-month'], inplace=True)
+birth_stories_df_cleaned['Date'] = birth_stories_df_cleaned['Date'].dt.to_pydatetime()
 birth_stories_df_cleaned = birth_stories_df_cleaned.set_index('Date')
 
-print(dt_object)
 
 pre_covid = birth_stories_df_cleaned[(birth_stories_df_cleaned.index <= '2020-02-01')]
 
@@ -63,10 +62,17 @@ def predict_topic_trend(df, df2):
         topic = pd.DataFrame(df.iloc[:,i])
         topic.reset_index(inplace=True)
         topic.columns = ['ds', 'y']
+        topic['ds'] = topic['ds'].dt.to_pydatetime()
+
+        print(type(topic['ds'][0]))
 
         actual = pd.DataFrame(df2.iloc[:,i])
         actual.reset_index(inplace=True)
         actual.columns = ['ds', 'y']
+        print(type(actual['ds'][0]))
+        actual['ds'] = actual['ds'].dt.to_pydatetime()
+
+        print(type(actual['ds'][0])) 
 
         m = Prophet(seasonality_mode='multiplicative')
         m.fit(topic)
@@ -76,16 +82,16 @@ def predict_topic_trend(df, df2):
         forecast = m.predict(future)
         #print(forecast)
 
-        forecast.to_csv(f'topic_forecasts/{topic_label}_forecast.csv')
+        #forecast.to_csv(f'topic_forecasts/{topic_label}_forecast.csv')
 
         #load from csv to save time
-        forecast = pd.read_csv(f'topic_forecasts/{topic_label}_forecast.csv')
+        #forecast = pd.read_csv(f'topic_forecasts/{topic_label}_forecast.csv')
 
         fig1 = m.plot(forecast, xlabel='Date', ylabel='Topic Probability', ax=ax)
         ax.plot(df2.iloc[:, i], color='k')
         ax = fig.gca()
         ax.set_title(f'{topic_label} Forecast')
         plt.axvline(pd.Timestamp('2020-03-01'),color='r')
-        fig1.savefig(f'../data/Topic_Forecasts/{topic_label}_Prediction_Plot.png')
+        fig1.savefig(f'../../data/Topic_Forecasts/{topic_label}_Prediction_Plot.png')
 
-#predict_topic_trend(pre_covid, birth_stories_df_cleaned)
+predict_topic_trend(pre_covid, birth_stories_df_cleaned)
