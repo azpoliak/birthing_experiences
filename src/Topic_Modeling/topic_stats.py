@@ -25,20 +25,8 @@ warnings.filterwarnings("ignore")
 
 #Read all relevant dataframe jsons 
 
-birth_stories_df = compress_json.load('../birth_stories_df.json.gz')
-birth_stories_df = pd.read_json(birth_stories_df)
-
-labels_df = compress_json.load("../labeled_df.json.gz")
-labels_df = pd.read_json(labels_df)
-
-pre_covid_posts_df = compress_json.load("../pre_covid_posts_df.json.gz")
-pre_covid_posts_df = pd.read_json(pre_covid_posts_df)
-
-post_covid_posts_df = compress_json.load("../post_covid_posts_df.json.gz")
-post_covid_posts_df = pd.read_json(post_covid_posts_df)
-
-birth_stories_df_topics = pd.read_csv("../birth_stories_df_topics.csv")
-birth_stories_df_topics = birth_stories_df_topics.set_index('Date (by month)')
+birth_stories_df_topics = pd.read_csv("birth_stories_df_topics_50.csv")
+birth_stories_df_topics = birth_stories_df_topics.set_index('Date')
 
 
 def ztest(actual, forecast, percent):
@@ -76,9 +64,9 @@ def main():
 	post_ztest_dict = {}
 
 	#iterates through all topics and computes statistics about their true values compared to forecasted values
-	for file in os.listdir('topic_forecasts/'):
-		forecast = pd.read_csv(f'topic_forecasts/{file}')
-		file_name = file.split('_')[0]
+	for file in os.listdir('50_topic_forecasts/'):
+		forecast = pd.read_csv(f'50_topic_forecasts/{file}')
+		file_name = file.split('_')[1]
 		values = birth_stories_df_topics.loc[:, file_name]
 
 		#finds values that are outside of the forecasted confidence interval
@@ -93,8 +81,8 @@ def main():
 
 		#splits up data pre and post covid and finds percentage of values that are outside of the CI for each
 		values_df.reset_index(inplace=True)
-		pre = values_df.get(values_df['Date (by month)'] <= '2020-02-01')
-		post = values_df.get(values_df['Date (by month)'] > '2020-02-01')
+		pre = values_df.get(values_df['Date'] <= '2020-02-01')
+		post = values_df.get(values_df['Date'] > '2020-02-01')
 		outside_ci_pre = pre.get(values_df['inside_forecast']==False)
 		outside_ci_post = post.get(values_df['inside_forecast']==False)
 		percent_pre = (len(outside_ci_pre)/len(pre))
@@ -173,7 +161,7 @@ def main():
 	ztest_df = pd.merge(pre_ztest_df, post_ztest_df, left_index=True, right_index=True)
 	ztest_df = ztest_df[['Z Statistic Pre', 'Z Statistic Post', 'P-Value Pre', 'P-Value Post']]
 	print(ztest_df)
-	ztest_df.to_csv('../../data/Z_Test_Stats.csv')
+	ztest_df.to_csv('../../data/Z_Test_Stats_50.csv')
 
 	print(f'Number of topics where percent of values outside of 95% CI was greater post-COVID: {outside_ci_post_is_greater}')
 	print(f'Number of topics where mean absolute percentage error was greater post-COVID: {MAPE_increased_post}')

@@ -58,6 +58,9 @@ for n in np.arange(5, 55, 5):
     if not os.path.exists(f'../../data/{n}_Topic_Forecasts'):
             os.mkdir(f'../../data/{n}_Topic_Forecasts')
 
+    if not os.path.exists(f'{n}_topic_forecasts'):
+            os.mkdir(f'{n}_topic_forecasts')
+
     def predict_topic_trend(df, df2):
         fig = plt.figure(figsize=(15,10))
         ax = fig.add_subplot(111)
@@ -81,6 +84,7 @@ for n in np.arange(5, 55, 5):
             future = m.make_future_dataframe(periods=16, freq='MS')
 
             forecast = m.predict(future)
+            forecast.to_csv(f'{n}_topic_forecasts/{n}_{topic_label}_forecasts.csv')
 
             fig1 = m.plot(forecast, xlabel='Date', ylabel='Topic Probability', ax=ax)
             ax.plot(df2.iloc[:, i], color='k')
