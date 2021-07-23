@@ -111,12 +111,13 @@ def make_plots(df, df2):
         fig.savefig('Topic'+str(i)+'_'+str(df.iloc[:, i].name)+'_Plot.png')
 
 def main():
+    df = compress_json.load('../all_posts_df.json.gz')
+    df = pd.read_json(df)
 
-	df = compress_json.load('NAME OF NEW CORPUS JSON.GZ')
-	df = pd.read_json(df)
-
-	df.name = 'all_posts'
-	df_name = df.name
+    print(df.shape)
+    
+    df.name = 'all_posts'
+    df_name = df.name
 
     #remove emojis, apply redditcleaner, removed stop words
     df['Cleaned Submission'] = df['selftext'].apply(redditcleaner.clean).apply(remove_emojis).apply(process_s)
@@ -133,10 +134,17 @@ def main():
     #split into 100 word chunks for training
     birth_stories_df_cleaned['100 word chunks'] = birth_stories_df_cleaned['Cleaned Submission'].apply(split_story_100_words)
     training_chunks = get_all_chunks_from_column(birth_stories_df_cleaned['100 word chunks'])
+    
+    if not os.path.exists(f"{df_name}_topic_modeling"):
+        os.mkdir(f"{df_name}_topic_modeling")
+
+    if not os.path.exists(f"{df_name}_topic_modeling_ten_chunks"):
+        os.mkdir(f"{df_name}_topic_modeling_ten_chunks")
 
     #establish variables
     path_to_mallet = 'mallet-2.0.8/bin/mallet'
-    path_to_save = f"topic_modeling_{df_name}"
+    path_to_save = f"{df_name}_topic_modeling"
+    ten_chunks = f"{df_name}_topic_modeling_ten_chunks"
     num_topics = 50
 
     #train topic model
@@ -145,8 +153,6 @@ def main():
     #split into ten equal chunks for inferring topics
     birth_stories_df_cleaned['10 chunks/story'] = birth_stories_df_cleaned['Cleaned Submission'].apply(split_story_10)
     testing_chunks = get_chunks(birth_stories_df_cleaned['10 chunks/story'])
-
-    ten_chunks = f"topic_model_ten_chunks_{df_name}"
 
     #infers topics for the documents split into 10 equal chunks based on the topics trained on the 100 word chunks
     lmw.import_data(path_to_mallet, ten_chunks+"/training_data", ten_chunks+"/formatted_training_data", testing_chunks, training_ids=None, use_pipe_from=None)
@@ -172,6 +178,7 @@ def main():
     topics_over_time_df = average_per_chunk(story_topics_df)
 
     #loads topic keys
+    #**need to label the topic keys with the subreddit that it came from!!**
     topic_keys = lmw.load_topic_keys(path_to_save+'/mallet.topic_keys.50')
     keys_topics = top_5_keys(topic_keys)
 
@@ -182,9 +189,10 @@ def main():
     topics_over_time_df = pd.concat([topics_over_time_df['created_utc'], story_topics_df], axis = 1)
     topics_over_time_df['Date Created'] = topics_over_time_df['created_utc'].apply(get_post_date)
     topics_over_time_df.drop(columns=['created_utc'], inplace=True)
-    topics_over_time_df.to_csv(f'topics_over_time_df.csv')
+    topics_over_time_df.to_csv(f'all_posts_topics_over_time_df.csv')
 
-    
+    #group distributions
+    #plot topic probabilities over time
 
 if __name__ == "__main__":
     main()
