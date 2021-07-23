@@ -225,6 +225,7 @@ def main():
         birth_stories_df_cleaned.reset_index(drop=True, inplace=True)
         birth_stories_df_cleaned = pd.concat([birth_stories_df_cleaned['created_utc'], story_topics_df], axis = 1)
         birth_stories_df_cleaned['Date Created'] = birth_stories_df_cleaned['created_utc'].apply(get_post_date)
+        birth_stories_df_cleaned.drop(columns=['created_utc'], inplace=True)
         birth_stories_df_cleaned.to_csv(f'birth_stories_df_cleaned_{n}.csv')
         #read in csv with content from above to save time
         birth_stories_df_cleaned = pd.read_csv(f"birth_stories_df_cleaned_{n}.csv")
@@ -233,7 +234,7 @@ def main():
         birth_stories_df_cleaned['date'] = pd.to_datetime(birth_stories_df_cleaned['Date Created'])
         birth_stories_df_cleaned['year-month'] = birth_stories_df_cleaned['date'].dt.to_period('M')
         birth_stories_df_cleaned['Date (by month)'] = [month.to_timestamp() for month in birth_stories_df_cleaned['year-month']]
-        birth_stories_df_cleaned.drop(columns=['Date Created', 'created_utc', 'Unnamed: 0', 'year-month', 'date'], inplace=True)
+        birth_stories_df_cleaned.drop(columns=['Date Created', 'Unnamed: 0', 'year-month', 'date'], inplace=True)
         birth_stories_df_cleaned = birth_stories_df_cleaned.set_index('Date (by month)')
 
         #groups stories by month and finds average
