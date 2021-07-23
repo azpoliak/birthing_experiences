@@ -14,7 +14,37 @@ def clean_training_text(row):
     cleaned = row.replace(to_replace=r"[0-9]+ no_label ", value='', regex=True)
     return list(cleaned)
 
-def lmw_coherence(full_path_to_topic_keys=None, full_path_to_training_texts=None, 
+def lmw_coherence(path_to_topic_keys, path_to_training_texts):
+
+    """
+    Computes c_v coherence from LMW model using Gensim
+    parameters:
+        path_to_topic_keys = path to where "mallet.topic_keys.{topic number}" file is saved
+        path_to_training_texts = path to where "training_data" file is saved
+    """
+    #load topics from topic keys
+    topic_keys = lmw.load_topic_keys(path_to_topic_keys)
+
+    #data (texts) from training_data
+    data = pd.read_csv(path_to_training_texts, header=None)
+    data.reset_index(drop=True, inplace=True)
+
+    #format for coherence model
+    data = data.apply(clean_training_text)
+    data = list(data[0])
+
+    #tokenize for coherence model        
+    tokens = [tokenize.word_tokenize(str) for str in data]
+
+    #make dictionary
+    id2word = corpora.Dictionary(tokens)
+
+    #Compute Coherence Score
+    coherence_model_ldamallet = CoherenceModel(topics=topic_keys, texts=tokens, dictionary=id2word, coherence='c_v')
+    coherence_ldamallet = coherence_model_ldamallet.get_coherence()
+    print('Coherence Score: ', coherence_ldamallet)
+
+def coherence(full_path_to_topic_keys=None, full_path_to_training_texts=None, 
     topic_key_folder=None, training_data_folder=None, training_data_file=None, start=None, stop=None, step=None):
 
     """
@@ -100,7 +130,7 @@ def main():
     training_data_folder = 'topic_modeling_ten_chunks'
     training_data_file = 'training_data'
 
-    coherences = lmw_coherence(topic_keys, training_data, topic_key_folder, training_data_folder, training_data_file, start=5, stop=55, step=5)
+    coherences = coherence(topic_keys, training_data, topic_key_folder, training_data_folder, training_data_file, start=5, stop=55, step=5)
     coherence_df = pd.Series(coherences, dtype='float64')
 
     #plot coherences
