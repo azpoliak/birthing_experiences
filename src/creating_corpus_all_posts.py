@@ -137,7 +137,7 @@ def main():
 
     #adding comments into empty posts
     missing_text_df = all_posts_df[all_posts_df['selftext'].map(lambda x: not x)]
-    missing_id_author_df = all_posts_df[['id', 'author', 'Pre-Covid']]
+    missing_id_author_df = missing_text_df[['id', 'author', 'Pre-Covid']]
     missing_id_author_df['body'] = missing_id_author_df.apply(get_first_comment, axis=1)
     missing_id_author_df['body'].map(lambda x: x == None).value_counts()
 
@@ -179,6 +179,12 @@ def main():
 
     all_posts_df = all_posts_df[['author', 'title', 'selftext','story length','created_utc','permalink']]
 
+    warning = 'disclaimer: this is the list that was previously posted'
+    all_posts_df['Valid'] = [findkeyword(sub, warning) for sub in all_posts_df['selftext']]
+    all_posts_df = all_posts_df.get(all_posts_df['Valid'] == False)
+    print(all_posts_df.shape)
+    #print(all_posts_df['selftext'])
+    
     #Convert to compressed json 
     all_posts_df = all_posts_df.to_json()
     compress_json.dump(all_posts_df, "all_posts_df.json.gz")
