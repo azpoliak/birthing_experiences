@@ -5,7 +5,7 @@ import nltk
 from nltk import ngrams
 from nltk import tokenize
 nltk.download('stopwords')
-from nltk.corpus import stopwords
+from nltk.corpus import stopwords 
 import numpy as np
 from datetime import datetime
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
@@ -22,6 +22,8 @@ import compress_json
 from scipy import stats
 from scipy.stats import norm
 warnings.filterwarnings("ignore")
+
+stop = stopwords.words('english')
 
 #processes the story using little mallet wrapper process_string function
 def process_s(s):
@@ -116,8 +118,7 @@ def main():
 
     print(df.shape)
     
-    df.name = 'all_posts'
-    df_name = df.name
+    df_name = 'all_posts'
 
     #remove emojis, apply redditcleaner, removed stop words
     df['Cleaned Submission'] = df['selftext'].apply(redditcleaner.clean).apply(remove_emojis).apply(process_s)
@@ -129,11 +130,11 @@ def main():
     df['Cleaned Submission'] = df['Cleaned Submission'].replace(to_replace=r'NUM*',value='',regex=True)
 
     #remove any missing values
-    birth_stories_df_cleaned = df.dropna()
+    df_cleaned = df.dropna()
     
     #split into 100 word chunks for training
-    birth_stories_df_cleaned['100 word chunks'] = birth_stories_df_cleaned['Cleaned Submission'].apply(split_story_100_words)
-    training_chunks = get_all_chunks_from_column(birth_stories_df_cleaned['100 word chunks'])
+    df_cleaned['100 word chunks'] = df_cleaned['Cleaned Submission'].apply(split_story_100_words)
+    training_chunks = get_all_chunks_from_column(df_cleaned['100 word chunks'])
     
     if not os.path.exists(f"{df_name}_topic_modeling"):
         os.mkdir(f"{df_name}_topic_modeling")
@@ -151,8 +152,8 @@ def main():
     topic_words, topic_doc_distributions = lmw.quick_train_topic_model(path_to_mallet, path_to_save, num_topics, training_chunks)
 
     #split into ten equal chunks for inferring topics
-    birth_stories_df_cleaned['10 chunks/story'] = birth_stories_df_cleaned['Cleaned Submission'].apply(split_story_10)
-    testing_chunks = get_chunks(birth_stories_df_cleaned['10 chunks/story'])
+    df_cleaned['10 chunks/story'] = df_cleaned['Cleaned Submission'].apply(split_story_10)
+    testing_chunks = get_chunks(df_cleaned['10 chunks/story'])
 
     #infers topics for the documents split into 10 equal chunks based on the topics trained on the 100 word chunks
     lmw.import_data(path_to_mallet, ten_chunks+"/training_data", ten_chunks+"/formatted_training_data", testing_chunks, training_ids=None, use_pipe_from=None)
@@ -165,7 +166,7 @@ def main():
 
     #goes through stories and names them based on the story number and chunk number (as a sanity check for when we group)
     chunk_titles = []
-    for i in range(len(birth_stories_df_cleaned)):
+    for i in range(len(df_cleaned)):
         for j in range(10):
             chunk_titles.append(str(i) + ":" + str(j))
 
