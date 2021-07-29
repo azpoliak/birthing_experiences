@@ -95,9 +95,9 @@ def make_plots(pre_df, post_df):
     for i in range(pre_df.shape[1]):
         ax.clear()
         persona_label = pre_df.iloc[:, i].name
-        ax.plot(pre_df.iloc[:,i], label = f"Pre-Covid: Normalized")
-        ax.plot(post_df.iloc[:,i], label = f"Post-Covid")
-        ax.set_title(f"{persona_label} Presence: Covid-19 \n t-stat: {np.round(normalized_persona_stats.loc[persona_label, 'Statistics'], 10)}, p-value: {np.round(normalized_persona_stats.loc[persona_label, 'P-Values'], 10)} ")
+        ax.plot(pre_df.iloc[:,i], label = f"Pre-Covid")
+        ax.plot(post_df.iloc[:,i], label = f"During Covid")
+        ax.set_title(f"{persona_label} Presence: Covid-19", fontsize= 20)
         ax.set_xlabel('Story Time')
         ax.set_ylabel('Persona Frequency')
         ax.legend()
@@ -115,7 +115,7 @@ def make_n_plots(pre_df, m_j_df, j_n_df, n_a_df, a_j_df):
         ax.plot(j_n_df.iloc[:,i], label = f"June-Nov. 2020")
         ax.plot(n_a_df.iloc[:,i], label = f"Nov. 2020-April 2021")
         ax.plot(a_j_df.iloc[:,i], label = f"April-June 2021")
-        ax.set_title(f"{persona_label} Presence: Covid-19")
+        ax.set_title(f"{persona_label} Presence: Covid-19", fontsize= 20)
         ax.set_xlabel('Story Time')
         ax.set_ylabel('Persona Frequency')
         ax.legend()
@@ -261,6 +261,7 @@ def main():
     #post_covid_chunk_mentions.to_csv('persona_csvs/post_covid_chunk_mentions.csv')
 
     #plots each persona across the story for each df.
+    
     make_plots(normalized_pre, post_covid_personas_df)
     #make_n_plots(normalized_pre, mar_june_personas_df, june_nov_personas_df, nov_apr_personas_df, apr_june_personas_df)
 
