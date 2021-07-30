@@ -53,7 +53,7 @@ pre_covid_chunk_mentions = pre_covid_chunk_mentions.drop('Unnamed: 0', axis=1)
 post_covid_chunk_mentions = post_covid_chunk_mentions.drop('Unnamed: 0', axis=1)
 
 #performs the t-test
-def ttest(df, df2, chunks=False):
+def ttest(df, df2, chunks=False, save=True):
 	stat=[]
 	p_value=[]
 	index = []
@@ -82,9 +82,12 @@ def ttest(df, df2, chunks=False):
 			stat.append(ttest.statistic)
 			p_value.append(ttest.pvalue)
 			index.append(persona_name)
-		ttest_df = pd.DataFrame(data = {'Statistics': stat, 'P-Values': p_value}, index = index)
-		ttest_df.to_csv("normalized_persona_stats.csv")
-			#print((f"{persona_name} t-test: {ttest}"))
+			return f"t-statistic: {ttest.statistic}, p-value: {ttest.pvalue, 4}"
+		if save==True:
+			ttest_df = pd.DataFrame(data = {'Statistics': stat, 'P-Values': p_value}, index = index)
+			ttest_df.to_csv("normalized_persona_stats.csv")
+		else:
+			return
 
 def main():
 
@@ -95,11 +98,11 @@ def main():
 
 	#ttest(pre_covid_persona_mentions, post_covid_persona_mentions)
 	#print('-------')
-	ttest(normalized_chunks, post_covid_persona_mentions)
+	#ttest(normalized_chunks, post_covid_persona_mentions)
 
 	#ttest(pre_covid_chunk_mentions, post_covid_chunk_mentions, chunks=True)
 	#print('-------')
-	ttest(normalized_chunk_mentions, post_covid_chunk_mentions, chunks=True)
+	#ttest(normalized_chunk_mentions, post_covid_chunk_mentions, chunks=True)
 
 
 if __name__ == "__main__":

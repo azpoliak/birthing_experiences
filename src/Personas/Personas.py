@@ -21,14 +21,13 @@ import warnings
 import itertools
 import compress_json
 warnings.filterwarnings("ignore")
+import labeling_stories as lb
+import posts_per_month_during_covid as cvd
 
 #Read all relevant dataframe jsons 
 
 birth_stories_df = compress_json.load('../birth_stories_df.json.gz')
 birth_stories_df = pd.read_json(birth_stories_df)
-
-labels_df = compress_json.load("../labeled_df.json.gz")
-labels_df = pd.read_json(labels_df)
 
 pre_covid_posts_df = compress_json.load("../pre_covid_posts_df.json.gz")
 pre_covid_posts_df = pd.read_json(pre_covid_posts_df)
@@ -36,23 +35,26 @@ pre_covid_posts_df = pd.read_json(pre_covid_posts_df)
 post_covid_posts_df = compress_json.load("../post_covid_posts_df.json.gz")
 post_covid_posts_df = pd.read_json(post_covid_posts_df)
 
-import labeling_stories as lb
-import posts_per_month_during_covid as cvd
+#pre_covid_persona_mentions = pd.read_csv('persona_csvs/pre_covid_persona_mentions.csv')
+#post_covid_persona_mentions = pd.read_csv('persona_csvs/post_covid_persona_mentions.csv')
+
+normalized_persona_stats = pd.read_csv('../../data/normalized_persona_stats.csv')
+normalized_persona_stats.set_index(keys='Unnamed: 0', inplace=True)
 
 #returns total number of mentions for each persona per story.
 def counter(story, dc):
-	lowered = story.lower()
-	tokenized = tokenize.word_tokenize(lowered)
-	total_mentions = []
-	for ngram in list(dc.values()):
-		mentions = []
-		for word in tokenized:
-			if word in ngram:
-				mentions.append(word)
-			else:
-				continue
-		total_mentions.append(len(mentions))
-	return total_mentions
+    lowered = story.lower()
+    tokenized = tokenize.word_tokenize(lowered)
+    total_mentions = []
+    for ngram in list(dc.values()):
+        mentions = []
+        for word in tokenized:
+            if word in ngram:
+                mentions.append(word)
+            else:
+                continue
+        total_mentions.append(len(mentions))
+    return total_mentions
 
 #splits story into ten equal chunks
 def split_story_10(str):
@@ -79,35 +81,33 @@ def count_chunks(series, dc):
         mentions.append(counter(chunk, dc))
     return mentions
 
-def make_plots(pre_df, normalized, post_df):
+def make_plots(pre_df, post_df):
     fig = plt.figure()
     ax = fig.add_subplot(111)
     for i in range(pre_df.shape[1]):
         ax.clear()
         persona_label = pre_df.iloc[:, i].name
         ax.plot(pre_df.iloc[:,i], label = f"Pre-Covid")
-        ax.plot(normalized.iloc[:,i], label = f"Pre-Covid: Normalized", linestyle='dashed', color='blue')
-        ax.plot(post_df.iloc[:,i], label = f"Post-Covid")
-        ax.set_title(f"{persona_label} Presence: Covid-19")
+        ax.plot(post_df.iloc[:,i], label = f"During Covid")
+        ax.set_title(f"{persona_label} Presence: Covid-19", fontsize= 20)
         ax.set_xlabel('Story Time')
         ax.set_ylabel('Persona Frequency')
         ax.legend()
         fig.savefig(f'../../data/Personas_Pre_Post/{persona_label}_pre_post_frequency.png')
 
 #makes plots of persona mention over narrative time for any number of dfs
-def make_n_plots(pre_df, norm, m_j_df, j_n_df, n_a_df, a_j_df):
+def make_n_plots(pre_df, m_j_df, j_n_df, n_a_df, a_j_df):
     fig = plt.figure(figsize=(15,10))
     ax = fig.add_subplot(111)
     for i in range(pre_df.shape[1]):
         ax.clear()
         persona_label = pre_df.iloc[:, i].name
-        ax.plot(pre_df.iloc[:,i], label = f"Pre-Covid")
-        ax.plot(norm.iloc[:,i], label = f"Pre-Covid: Normalized for Story Length", linestyle='dashed')
+        ax.plot(pre_df.iloc[:,i], label = f"Pre-Covid: Normalized for Story Length")
         ax.plot(m_j_df.iloc[:,i], label = f"March-June 2020")
         ax.plot(j_n_df.iloc[:,i], label = f"June-Nov. 2020")
         ax.plot(n_a_df.iloc[:,i], label = f"Nov. 2020-April 2021")
         ax.plot(a_j_df.iloc[:,i], label = f"April-June 2021")
-        ax.set_title(f"{persona_label} Presence: Covid-19")
+        ax.set_title(f"{persona_label} Presence: Covid-19", fontsize= 20)
         ax.set_xlabel('Story Time')
         ax.set_ylabel('Persona Frequency')
         ax.legend()
@@ -154,7 +154,7 @@ def main():
     personas_counts_df = pd.DataFrame(personas_dict, index=np.arange(10))
 
     personas_counts_df.set_index('Personas', inplace = True)
-    personas_counts_df.to_csv(f'../data/personas_counts_df.csv')
+    personas_counts_df.to_csv(f'../../data/personas_counts_df.csv')
 
     #name the dfs for easy reference inside the for loop
     pre_covid_posts_df.name = 'pre_covid'
@@ -209,7 +209,7 @@ def main():
         personas_counts_df = pd.DataFrame(personas_dict, index=np.arange(10))
 
         personas_counts_df.set_index('Personas', inplace = True)
-        personas_counts_df.to_csv(f'../data/{df_name}_personas_counts_df.csv')
+        personas_counts_df.to_csv(f'../../data/{df_name}_personas_counts_df.csv')
 
         #distributing across the course of the stories
         persona_df['10 chunks/story'] = persona_df['selftext'].apply(split_story_10)
@@ -236,25 +236,26 @@ def main():
     normalizing_ratio=(1182.53/1427.09)
     normalized_pre = pre_covid_personas_df*normalizing_ratio
 
-    pre_covid_persona_mentions = dict_for_stats['pre_covid']
-    post_covid_persona_mentions = dict_for_stats['post_covid']
+    #pre_covid_persona_mentions = dict_for_stats['pre_covid']
+    #post_covid_persona_mentions = dict_for_stats['post_covid']
 
-    pre_covid_personas_df.to_csv('persona_csvs/pre_covid_personas_df.csv')
-    post_covid_personas_df.to_csv('persona_csvs/post_covid_personas_df.csv')
-    mar_june_personas_df.to_csv('persona_csvs/mar_june_personas_df.csv')
-    june_nov_personas_df.to_csv('persona_csvs/june_nov_personas_df.csv')
-    nov_apr_personas_df.to_csv('persona_csvs/nov_apr_personas_df.csv')
-    apr_june_personas_df.to_csv('persona_csvs/apr_june_personas_df.csv')
+    #pre_covid_personas_df.to_csv('persona_csvs/pre_covid_personas_df.csv')
+    #post_covid_personas_df.to_csv('persona_csvs/post_covid_personas_df.csv')
+    #mar_june_personas_df.to_csv('persona_csvs/mar_june_personas_df.csv')
+    #june_nov_personas_df.to_csv('persona_csvs/june_nov_personas_df.csv')
+    #nov_apr_personas_df.to_csv('persona_csvs/nov_apr_personas_df.csv')
+    #apr_june_personas_df.to_csv('persona_csvs/apr_june_personas_df.csv')
 
-    pre_covid_persona_mentions.to_csv('persona_csvs/pre_covid_persona_mentions.csv')
-    post_covid_persona_mentions.to_csv('persona_csvs/post_covid_persona_mentions.csv')
+    #pre_covid_persona_mentions.to_csv('persona_csvs/pre_covid_persona_mentions.csv')
+    #post_covid_persona_mentions.to_csv('persona_csvs/post_covid_persona_mentions.csv')
 
     #pre_covid_chunk_mentions.to_csv('persona_csvs/pre_covid_chunk_mentions.csv')
     #post_covid_chunk_mentions.to_csv('persona_csvs/post_covid_chunk_mentions.csv')
 
     #plots each persona across the story for each df.
-    #make_plots(pre_covid_personas_df, normalized_pre, post_covid_personas_df)
-    #make_n_plots(pre_covid_personas_df, normalized_pre, mar_june_personas_df, june_nov_personas_df, nov_apr_personas_df, apr_june_personas_df)
+    
+    make_plots(normalized_pre, post_covid_personas_df)
+    #make_n_plots(normalized_pre, mar_june_personas_df, june_nov_personas_df, nov_apr_personas_df, apr_june_personas_df)
 
 if __name__ == "__main__":
     main()
