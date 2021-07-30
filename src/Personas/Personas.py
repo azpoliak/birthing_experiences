@@ -29,25 +29,17 @@ import posts_per_month_during_covid as cvd
 birth_stories_df = compress_json.load('../birth_stories_df.json.gz')
 birth_stories_df = pd.read_json(birth_stories_df)
 
-labels_df = compress_json.load("../labeled_df.json.gz")
-labels_df = pd.read_json(labels_df)
-
 pre_covid_posts_df = compress_json.load("../pre_covid_posts_df.json.gz")
 pre_covid_posts_df = pd.read_json(pre_covid_posts_df)
 
 post_covid_posts_df = compress_json.load("../post_covid_posts_df.json.gz")
 post_covid_posts_df = pd.read_json(post_covid_posts_df)
 
-pre_covid_persona_mentions = pd.read_csv('persona_csvs/pre_covid_persona_mentions.csv')
-post_covid_persona_mentions = pd.read_csv('persona_csvs/post_covid_persona_mentions.csv')
+#pre_covid_persona_mentions = pd.read_csv('persona_csvs/pre_covid_persona_mentions.csv')
+#post_covid_persona_mentions = pd.read_csv('persona_csvs/post_covid_persona_mentions.csv')
 
 normalized_persona_stats = pd.read_csv('../../data/normalized_persona_stats.csv')
 normalized_persona_stats.set_index(keys='Unnamed: 0', inplace=True)
-
-print(normalized_persona_stats)
-
-normalizing_ratio=(1182.53/1427.09)
-normalized_chunks = pre_covid_persona_mentions*normalizing_ratio
 
 #returns total number of mentions for each persona per story.
 def counter(story, dc):
@@ -244,18 +236,18 @@ def main():
     normalizing_ratio=(1182.53/1427.09)
     normalized_pre = pre_covid_personas_df*normalizing_ratio
 
-    pre_covid_persona_mentions = dict_for_stats['pre_covid']
-    post_covid_persona_mentions = dict_for_stats['post_covid']
+    #pre_covid_persona_mentions = dict_for_stats['pre_covid']
+    #post_covid_persona_mentions = dict_for_stats['post_covid']
 
-    pre_covid_personas_df.to_csv('persona_csvs/pre_covid_personas_df.csv')
-    post_covid_personas_df.to_csv('persona_csvs/post_covid_personas_df.csv')
-    mar_june_personas_df.to_csv('persona_csvs/mar_june_personas_df.csv')
-    june_nov_personas_df.to_csv('persona_csvs/june_nov_personas_df.csv')
-    nov_apr_personas_df.to_csv('persona_csvs/nov_apr_personas_df.csv')
-    apr_june_personas_df.to_csv('persona_csvs/apr_june_personas_df.csv')
+    #pre_covid_personas_df.to_csv('persona_csvs/pre_covid_personas_df.csv')
+    #post_covid_personas_df.to_csv('persona_csvs/post_covid_personas_df.csv')
+    #mar_june_personas_df.to_csv('persona_csvs/mar_june_personas_df.csv')
+    #june_nov_personas_df.to_csv('persona_csvs/june_nov_personas_df.csv')
+    #nov_apr_personas_df.to_csv('persona_csvs/nov_apr_personas_df.csv')
+    #apr_june_personas_df.to_csv('persona_csvs/apr_june_personas_df.csv')
 
-    pre_covid_persona_mentions.to_csv('persona_csvs/pre_covid_persona_mentions.csv')
-    post_covid_persona_mentions.to_csv('persona_csvs/post_covid_persona_mentions.csv')
+    #pre_covid_persona_mentions.to_csv('persona_csvs/pre_covid_persona_mentions.csv')
+    #post_covid_persona_mentions.to_csv('persona_csvs/post_covid_persona_mentions.csv')
 
     #pre_covid_chunk_mentions.to_csv('persona_csvs/pre_covid_chunk_mentions.csv')
     #post_covid_chunk_mentions.to_csv('persona_csvs/post_covid_chunk_mentions.csv')
