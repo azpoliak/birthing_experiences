@@ -41,7 +41,7 @@ post_covid_posts_df = pd.read_json(post_covid_posts_df)
 pre_covid_persona_mentions = pd.read_csv('persona_csvs/pre_covid_persona_mentions.csv')
 post_covid_persona_mentions = pd.read_csv('persona_csvs/post_covid_persona_mentions.csv')
 
-normalized_persona_stats = pd.read_csv('../../data/normalized_persona_stats.csv')
+normalized_persona_stats = pd.read_csv('../../data/Personas_Data/normalized_persona_stats.csv')
 normalized_persona_stats.set_index(keys='Unnamed: 0', inplace=True)
 
 print(normalized_persona_stats)
@@ -97,11 +97,11 @@ def make_plots(pre_df, post_df):
         persona_label = pre_df.iloc[:, i].name
         ax.plot(pre_df.iloc[:,i], label = f"Pre-Covid")
         ax.plot(post_df.iloc[:,i], label = f"During Covid")
-        ax.set_title(f"{persona_label} Presence: Covid-19", fontsize= 20)
+        ax.set_title(f"{persona_label}", fontsize=24)
         ax.set_xlabel('Story Time')
         ax.set_ylabel('Persona Frequency')
         ax.legend()
-        fig.savefig(f'../../data/Personas_Pre_Post/{persona_label}_pre_post_frequency.png')
+        fig.savefig(f'../../data/Personas_Data/Personas_Pre_Post/{persona_label}_pre_post_frequency.png')
 
 #makes plots of persona mention over narrative time for any number of dfs
 def make_n_plots(pre_df, m_j_df, j_n_df, n_a_df, a_j_df):
@@ -119,7 +119,7 @@ def make_n_plots(pre_df, m_j_df, j_n_df, n_a_df, a_j_df):
         ax.set_xlabel('Story Time')
         ax.set_ylabel('Persona Frequency')
         ax.legend()
-        fig.savefig(f'../../data/Personas_Throughout_Covid/{persona_label}_throughout_covid_frequency.png')
+        fig.savefig(f'../../data/Personas_Data/Personas_Throughout_Covid/{persona_label}_throughout_covid_frequency.png')
 
 def main():
     #creating lists of words used to assign personas to stories
@@ -162,7 +162,7 @@ def main():
     personas_counts_df = pd.DataFrame(personas_dict, index=np.arange(10))
 
     personas_counts_df.set_index('Personas', inplace = True)
-    personas_counts_df.to_csv(f'../../data/personas_counts_df.csv')
+    personas_counts_df.to_csv(f'../../data/Personas_Data/personas_counts_df.csv')
 
     #name the dfs for easy reference inside the for loop
     pre_covid_posts_df.name = 'pre_covid'
@@ -217,7 +217,7 @@ def main():
         personas_counts_df = pd.DataFrame(personas_dict, index=np.arange(10))
 
         personas_counts_df.set_index('Personas', inplace = True)
-        personas_counts_df.to_csv(f'../../data/{df_name}_personas_counts_df.csv')
+        personas_counts_df.to_csv(f'../../data/Personas_Data/{df_name}_personas_counts_df.csv')
 
         #distributing across the course of the stories
         persona_df['10 chunks/story'] = persona_df['selftext'].apply(split_story_10)
