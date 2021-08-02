@@ -1,4 +1,8 @@
 # Python Files
+
+Run python files from `src`, not inner directories. Call `python -m` and the path to the `.py` file with "." instead of "/" in between directories.
+**Example**: call `Persona_Stats.py` by running `python -m Personas.Persona_Stats` in the `src` directory.
+
 - **Path to corpus:**`birthing_experiences/src/birth_stories_df.json.gz`: compressed json file containing the dataframe of our corpus.
 - **Pre and Post COVID corpus:** `birthing_experiences/src/pre_covid_posts_df.json.gz` and `birthing_experiences/src/post_covid_posts_df.json.gz` are compressed json files containing dataframes of the posts made before and after (respectively) March 11, 2020.
 - `Corpus_Information/`: Statistics about the corpus, including data about the subreddits and statistics comparing number of posts made over time.
