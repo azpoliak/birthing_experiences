@@ -22,41 +22,32 @@ import compress_json
 from scipy import stats
 from scipy.stats import norm
 warnings.filterwarnings("ignore")
+import argparse
 
-#Read all relevant dataframe jsons 
-
-birth_stories_df = compress_json.load('../birth_stories_df.json.gz')
-birth_stories_df = pd.read_json(birth_stories_df)
-
-labels_df = compress_json.load("../labeled_df.json.gz")
-labels_df = pd.read_json(labels_df)
-
-pre_covid_posts_df = compress_json.load("../pre_covid_posts_df.json.gz")
-pre_covid_posts_df = pd.read_json(pre_covid_posts_df)
-
-post_covid_posts_df = compress_json.load("../post_covid_posts_df.json.gz")
-post_covid_posts_df = pd.read_json(post_covid_posts_df)
-
-#load in everything from Personas.py
-
-#not chunked
-pre_covid_persona_mentions = pd.read_csv('persona_csvs/pre_covid_persona_mentions.csv')
-post_covid_persona_mentions = pd.read_csv('persona_csvs/post_covid_persona_mentions.csv')
-
-#chunked
-pre_covid_chunk_mentions = pd.read_csv('persona_csvs/pre_covid_chunk_mentions.csv')
-post_covid_chunk_mentions = pd.read_csv('persona_csvs/post_covid_chunk_mentions.csv')
-
-pre_covid_persona_mentions = pre_covid_persona_mentions.drop('Unnamed: 0', axis=1)
-post_covid_persona_mentions = post_covid_persona_mentions.drop('Unnamed: 0', axis=1)
-pre_covid_chunk_mentions = pre_covid_chunk_mentions.drop('Unnamed: 0', axis=1)
-post_covid_chunk_mentions = post_covid_chunk_mentions.drop('Unnamed: 0', axis=1)
+def get_args():
+    parser = argparse.ArgumentParser()
+    #general dfs with story text
+    parser.add_argument("--birth_stories_df", default="birth_stories_df.json.gz", help="path to df with all birth stories", type=str)
+    parser.add_argument("--pre_covid_df", default="pre_covid_posts_df.json.gz", help="path to df with all stories before March 11, 2020", type=str)
+    parser.add_argument("--post_covid_df", default="post_covid_posts_df.json.gz", help="path to df with all stories on or after March 11, 2020", type=str)
+    parser.add_argument("--labeled_df", default="labeled_df.json.gz", help="path to df of the stories labeled based on their titles", type=str)
+    #for Persona_Stats.py
+    parser.add_argument("--persona_mentions_by_chunk_output", default="../data/Personas_Data/mentions_by_chunk_", help="path to save persona mentions for each persona in each chunk of each story", type=str)
+    parser.add_argument("--pre_covid_persona_mentions", default="../data/Personas_Data/persona_csvs/pre_covid_persona_mentions.csv", help="path to csv with raw counts of number of mentions of each persona in each story before March 11, 2020", type=str)
+    parser.add_argument("--post_covid_persona_mentions", default="../data/Personas_Data/persona_csvs/post_covid_persona_mentions.csv", help="path to csv with raw counts of number of mentions of each persona in each story on and after March 11, 2020", type=str)
+    parser.add_argument("--pre_covid_chunk_mentions", default="../data/Personas_Data/persona_csvs/pre_covid_chunk_mentions.csv", help="path to csv with raw counts of number of mentions of each persona in each chunk of each story before March 11, 2020", type=str)
+    parser.add_argument("--post_covid_chunk_mentions", default="../data/Personas_Data/persona_csvs/post_covid_chunk_mentions.csv", help="path to csv with raw counts of number of mentions of each persona in each chunk of each story on and after March 11, 2020", type=str)
+    parser.add_argument("--persona_stats_output", default="../data/Personas_Data/normalized_persona_stats.csv", help="path to output of ttest results for each persona", type=str)
+    parser.add_argument("--persona_chunk_stats_output", default="../data/Personas_Data/normalized_chunk_stats.csv", help="path to output of ttest results for each chunk of each persona", type=str)
+    args = parser.parse_args()
+    return args
 
 #performs the t-test
 def ttest(df, df2, chunks=False, save=True):
 	stat=[]
 	p_value=[]
 	index = []
+	args = get_args()
 	if chunks==True:
 		for i in range(10):
 			chunk = i
@@ -71,7 +62,7 @@ def ttest(df, df2, chunks=False, save=True):
 				p_value.append(ttest.pvalue)
 				index.append(persona_name)
 		ttest_df = pd.DataFrame(data = {'Statistics': stat, 'P-Values': p_value}, index = index)
-		ttest_df.to_csv("normalized_chunk_stats.csv")
+		ttest_df.to_csv(args.persona_chunk_stats_output)
 				#print((f"{persona_name} {chunk} t-test: {ttest}"))
 	else:
 		for i in range(df.shape[1]):
@@ -85,20 +76,47 @@ def ttest(df, df2, chunks=False, save=True):
 			return f"t-statistic: {ttest.statistic}, p-value: {ttest.pvalue, 4}"
 		if save==True:
 			ttest_df = pd.DataFrame(data = {'Statistics': stat, 'P-Values': p_value}, index = index)
-			ttest_df.to_csv("normalized_persona_stats.csv")
+			ttest_df.to_csv(args.persona_stats_output)
 		else:
 			return
 
 def main():
 
+	args = get_args()
+
+	labels_df = compress_json.load(args.labeled_df)
+	labels_df = pd.read_json(labels_df)
+
+	birth_stories_df = compress_json.load(args.birth_stories_df)
+	birth_stories_df = pd.read_json(birth_stories_df)
+	
+	pre_covid_posts_df = compress_json.load(args.pre_covid_df)
+	pre_covid_posts_df = pd.read_json(pre_covid_posts_df)
+
+	post_covid_posts_df = compress_json.load(args.post_covid_df)
+	post_covid_posts_df = pd.read_json(post_covid_posts_df)
+
+	#not chunked
+	pre_covid_persona_mentions = pd.read_csv(args.pre_covid_persona_mentions)
+	post_covid_persona_mentions = pd.read_csv(args.post_covid_persona_mentions)
+
+	#chunked
+	pre_covid_chunk_mentions = pd.read_csv(args.pre_covid_chunk_mentions)
+	post_covid_chunk_mentions = pd.read_csv(args.post_covid_chunk_mentions)
+
+	pre_covid_persona_mentions = pre_covid_persona_mentions.drop('Unnamed: 0', axis=1)
+	post_covid_persona_mentions = post_covid_persona_mentions.drop('Unnamed: 0', axis=1)
+	pre_covid_chunk_mentions = pre_covid_chunk_mentions.drop('Unnamed: 0', axis=1)
+	post_covid_chunk_mentions = post_covid_chunk_mentions.drop('Unnamed: 0', axis=1)
+
 	#normalize pre-covid dataframe for average story length
 	normalizing_ratio=(1182.53/1427.09)
 	normalized_chunk_mentions = pre_covid_chunk_mentions*normalizing_ratio
-	normalized_chunks = pre_covid_persona_mentions*normalizing_ratio
+	normalized_personas = pre_covid_persona_mentions*normalizing_ratio
 
 	#ttest(pre_covid_persona_mentions, post_covid_persona_mentions)
 	#print('-------')
-	#ttest(normalized_chunks, post_covid_persona_mentions)
+	#ttest(normalized_personas, post_covid_persona_mentions)
 
 	#ttest(pre_covid_chunk_mentions, post_covid_chunk_mentions, chunks=True)
 	#print('-------')
