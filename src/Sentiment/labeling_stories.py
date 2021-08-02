@@ -85,6 +85,10 @@ def pandemic(date):
         return True
 
 def main():
+
+    birth_stories_df = compress_json.load('../birth_stories_df.json.gz')
+    birth_stories_df = pd.read_json(birth_stories_df)
+
     #Dataframe with only the columns we're working with
     labels_df = birth_stories_df[['title', 'selftext', 'created_utc', 'author']]
 
@@ -102,9 +106,10 @@ def main():
     second = ['stm', 'second']
     c_section = ['cesarian', 'section', 'caesar']
     vaginal = ['vaginal', 'vbac']
+    birth_center = ['birth center', 'birth centre', 'birth-center', 'birthing center', 'birthing centre', 'birthing-center', 'birthing-centre', 'birth-centre', 'water birth', 'water-birth']
 
     #applying functions and making a dictionary of the results
-    labels_and_n_grams = {'Positive': [positive, not_positive], 'Negative': [negative], 'Unmedicated': [unmedicated, not_unmedicated], 'Medicated': [medicated, not_medicated], 'Home': [home], 'Hospital': [hospital], 'First': [first], 'Second': [second], 'C-Section': [c_section], 'Vaginal': [vaginal]}
+    labels_and_n_grams = {'Positive': [positive, not_positive], 'Negative': [negative], 'Unmedicated': [unmedicated, not_unmedicated], 'Medicated': [medicated, not_medicated], 'Home': [home], 'Hospital': [hospital], 'First': [first], 'Second': [second], 'C-Section': [c_section], 'Vaginal': [vaginal], 'Birth Center': [birth_center]}
     disallows = ['Positive', 'Unmedicated', 'Medicated']
     Covid = {'Covid': ["2019-ncov", "2019ncov", "corona", "coronavirus", "covid", "covid-19", "covid19" "mers", "outbreak", "pandemic", "rona", "sars", "sars-cov-2", "sars2", "sarscov19", "virus", "wuflu", "wuhan"]}
 
@@ -113,13 +118,13 @@ def main():
     labels_dict = { 'Labels': list(labels_and_n_grams),
     'Description': ['Positively framed', 'Negatively framed', 'Birth without epidural', 'Birth with epidural',
                  'Birth takes place at home', 'Birth takes place at hospital', 'First birth for the author',
-                 'Second birth for the author', 'Birth via cesarean delivery', 'Vaginal births'],
+                 'Second birth for the author', 'Birth via cesarean delivery', 'Vaginal births', 'Birth takes place at birth center'],
     'N-Grams': [positive+not_positive, negative, unmedicated+not_unmedicated, medicated+not_medicated,
-             home, hospital, first, second, c_section, vaginal],
+             home, hospital, first, second, c_section, vaginal, birth_center],
     'Number of Stories': counts}
 
     #turn dictionary into a dataframe
-    label_counts_df = pd.DataFrame(labels_dict, index=np.arange(10))
+    label_counts_df = pd.DataFrame(labels_dict, index=np.arange(11))
 
     label_counts_df.set_index('Labels', inplace = True)
     label_counts_df.to_csv('../../data/label_counts_df.csv')
@@ -139,21 +144,24 @@ def main():
     print(f"Subreddits before pandemic: {len(pre_covid_posts_df)}")
 
     #Convert to Json
-    #pre_covid_posts_df = pre_covid_posts_df.to_json()
-    #compress_json.dump(pre_covid_posts_df, "pre_covid_posts_df.json.gz")
+    pre_covid_posts_df = pre_covid_posts_df.to_json()
+    compress_json.dump(pre_covid_posts_df, "pre_covid_posts_df.json.gz")
 
     #Subreddits after pandemic 
     post_covid_posts_df = labels_df.get(labels_df['Pre-Covid']==False).get(list(labels_df.columns))
     print(post_covid_posts_df)
+    print(f"Subreddits during pandemic: {len(post_covid_posts_df)}")
+
     print(f"Subreddits during/after pandemic: {len(post_covid_posts_df)}")
+    print(len(post_covid_posts_df.get(post_covid_posts_df['Birth Center'] == True)))
 
     #Read dataframes to compressed json so we can reference them later
-    #labels_df = labels_df.to_json()
-    #compress_json.dump(labels_df, "labeled_df.json.gz")
+    labels_df = labels_df.to_json()
+    compress_json.dump(labels_df, "labeled_df.json.gz")
     
     #Convert to Json
-    #post_covid_posts_df = post_covid_posts_df.to_json()
-    #compress_json.dump(post_covid_posts_df, "post_covid_posts_df.json.gz")
+    post_covid_posts_df = post_covid_posts_df.to_json()
+    compress_json.dump(post_covid_posts_df, "post_covid_posts_df.json.gz")
 
 if __name__ == "__main__":
     main()
