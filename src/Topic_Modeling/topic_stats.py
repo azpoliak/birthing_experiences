@@ -1,33 +1,23 @@
 import pandas as pd
-import little_mallet_wrapper as lmw
 import os
-import nltk
-from nltk import ngrams
-from nltk import tokenize
-nltk.download('stopwords')
-from nltk.corpus import stopwords
 import numpy as np
 from datetime import datetime
-from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 from matplotlib import pyplot as plt
-import itertools
-from itertools import chain, zip_longest
-from little_mallet_wrapper import process_string
-import seaborn
-import redditcleaner
 import re
 import warnings
-import itertools
 import compress_json
 from scipy import stats
 from scipy.stats import norm, pearsonr
 warnings.filterwarnings("ignore")
+import argparse
 
-#Read all relevant dataframe jsons 
-
-birth_stories_df_topics = pd.read_csv("birth_stories_df_topics_50.csv")
-birth_stories_df_topics = birth_stories_df_topics.set_index('Date')
-
+def get_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--birth_stories_topics", default="../data/Topic_Modeling_Data/birth_stories_df_topics.csv")
+    parser.add_argument("--topic_forecasts_data", default="../data/Topic_Modeling_Data/topic_forecasts/")
+    parser.add_argument("--ztest_output", default="../data/Topic_Modeling_Data/Z_Test_Stats.csv")
+    args = parser.parse_args()
+    return args
 
 def ztest(actual, forecast, percent):
 	residual = actual - forecast
@@ -45,6 +35,11 @@ def ztest(actual, forecast, percent):
 	return z, pval
 
 def main():
+
+	args = get_args()
+	birth_stories_df_topics = pd.read_csv(args.birth_stories_topics)
+	birth_stories_df_topics = birth_stories_df_topics.set_index('Date')
+	birth_stories_df_topics.drop(columns=["Unnamed: 0"], inplace=True)
 
 	#start counts for number of topics where certain statistics increased post-covid
 	outside_ci_post_is_greater = 0
@@ -64,9 +59,9 @@ def main():
 	post_ztest_dict = {}
 
 	#iterates through all topics and computes statistics about their true values compared to forecasted values
-	for file in os.listdir('50_topic_forecasts/'):
-		forecast = pd.read_csv(f'50_topic_forecasts/{file}')
-		file_name = file.split('_')[1]
+	for file in os.listdir(args.topic_forecasts_data):
+		forecast = pd.read_csv(f'{args.topic_forecasts_data}{file}')
+		file_name = file.split('_')[0]
 		values = birth_stories_df_topics.loc[:, file_name]
 
 		#finds values that are outside of the forecasted confidence interval
@@ -161,7 +156,7 @@ def main():
 	ztest_df = pd.merge(pre_ztest_df, post_ztest_df, left_index=True, right_index=True)
 	ztest_df = ztest_df[['Z Statistic Pre', 'Z Statistic Post', 'P-Value Pre', 'P-Value Post']]
 	print(ztest_df)
-	ztest_df.to_csv('../../data/Z_Test_Stats_50.csv')
+	ztest_df.to_csv(args.ztest_output)
 
 	print(f'Number of topics where percent of values outside of 95% CI was greater post-COVID: {outside_ci_post_is_greater}')
 	print(f'Number of topics where mean absolute percentage error was greater post-COVID: {MAPE_increased_post}')

@@ -11,7 +11,7 @@ import re
 import warnings
 import compress_json
 warnings.filterwarnings("ignore")
-from text_utils import get_post_date, pandemic
+from text_utils import get_post_date, pandemic, create_df_label_list
 import argparse
 import json
 
@@ -49,20 +49,6 @@ def findkeydisallow(title, labels, notlabels):
                 else:
                     x = True
     return x
-
-def create_df_label_list(df, column, dct, disallows):
-    label_counts = []
-    for label in list(dct):
-        if not disallows:
-            df[label] = df[column].apply(lambda x: findkey(x, dct[label]))
-            label_counts.append(df[label].value_counts()[1])
-        elif label not in disallows:
-            df[label] = df[column].apply(lambda x: findkey(x, dct[label][0]))
-            label_counts.append(df[label].value_counts()[1]) 
-        else:
-            df[label] = df[column].apply(lambda x: findkeydisallow(x, dct[label][0], dct[label][1]))
-            label_counts.append(df[label].value_counts()[1]) 
-    return label_counts
 
 def main():
     #Dataframe with only the columns we're working with
