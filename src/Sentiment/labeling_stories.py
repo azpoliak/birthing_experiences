@@ -141,8 +141,7 @@ def main():
     #Subreddits before pandemic 
     pre_covid_posts_df = labels_df.get(labels_df['Pre-Covid']==True).get(list(labels_df.columns))
     print(pre_covid_posts_df)
-    #print(f"Subreddits before pandemic: {len(pre_covid_posts_df)}")
-    print(len(pre_covid_posts_df.get(pre_covid_posts_df['Birth Center'] == True)))
+    print(f"Subreddits before pandemic: {len(pre_covid_posts_df)}")
 
     #Convert to Json
     pre_covid_posts_df = pre_covid_posts_df.to_json()
@@ -151,9 +150,10 @@ def main():
     #Subreddits after pandemic 
     post_covid_posts_df = labels_df.get(labels_df['Pre-Covid']==False).get(list(labels_df.columns))
     print(post_covid_posts_df)
-    
-    #print(f"Subreddits during/after pandemic: {len(post_covid_posts_df)}")
-    #print(len(post_covid_posts_df.get(post_covid_posts_df['Birth Center'] == True)))
+    print(f"Subreddits during pandemic: {len(post_covid_posts_df)}")
+
+    print(f"Subreddits during/after pandemic: {len(post_covid_posts_df)}")
+    print(len(post_covid_posts_df.get(post_covid_posts_df['Birth Center'] == True)))
 
     #Read dataframes to compressed json so we can reference them later
     labels_df = labels_df.to_json()
