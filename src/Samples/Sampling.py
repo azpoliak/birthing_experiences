@@ -35,6 +35,7 @@ pre_covid_posts_df = pd.read_json(pre_covid_posts_df)
 post_covid_posts_df = compress_json.load("../post_covid_posts_df.json.gz")
 post_covid_posts_df = pd.read_json(post_covid_posts_df)
 
+#Finds submissions including topic words 
 def findkey(text, labels):
     x = False
     for label in labels:
@@ -44,11 +45,12 @@ def findkey(text, labels):
 
 def main():
 
+	#create topics below and uncomment last line of code to create excels with these samples
 	topic = ['contractions', 'minutes', 'apart', 'hospital', 'around']
 	post_covid_topics = post_covid_posts_df.get(['selftext', 'Covid', 'title','Date'])
 	post_covid_topics['topic'] = post_covid_posts_df['selftext'].apply(lambda x: findkey(x, topic))
 	topic_sample = post_covid_topics.get(post_covid_topics['topic'] == True).get(post_covid_topics['Covid'] == True).sample(20)
-	topic_sample.to_excel('contractions_topic_sample.xlsx', index = False)
+	#topic_sample.to_excel('contractions_topic_sample.xlsx', index = False)
 
 if __name__ == "__main__":
     main()
