@@ -37,6 +37,7 @@ pre_covid_posts_df = pd.read_json(pre_covid_posts_df)
 post_covid_posts_df = compress_json.load("../post_covid_posts_df.json.gz")
 post_covid_posts_df = pd.read_json(post_covid_posts_df)
 
+#Groups together all the raw sentiment scores--not the averages per section 
 def group_raw_scores(df, l):
 	new_df = df[['title', 'selftext']].get(df[l] == True)
 	new_df['tokenized sentences'] = new_df['selftext'].apply(tokenize.sent_tokenize)
@@ -48,7 +49,23 @@ def group_raw_scores(df, l):
 		raw_score_dict[key] = list(itertools.chain.from_iterable(compressed[key])) 
 	return raw_score_dict
 
+#Runs the t-test for all labels pre and post COVID-19 to see which are significant OVERALL 
 def t_test(df_pre, df_post, labels):
+	stat = []
+	p_value = []
+	for label in labels:
+		label_pre = group_raw_scores(df_pre, label)
+		label_post = group_raw_scores(df_post, label)
+		pre = [value for values in label_pre.values() for value in values]
+		post = [value for values in label_post.values() for value in values]
+		t_test = stats.ttest_ind(pre, post)
+		stat.append(t_test.statistic)
+		p_value.append(t_test.pvalue)
+	label_frame = pd.DataFrame(data = {'Statistics': stat, 'P-Values': p_value}, index = labels)
+	print(label_frame)
+
+#Runs the t-test for all labels pre and post COVID-19 for each CHUNK to see which chunks are significant 
+def t_test_chunks(df_pre, df_post, labels):
 	for label in labels:
 		label_pre = group_raw_scores(df_pre, label)
 		label_post = group_raw_scores(df_post, label)
@@ -61,35 +78,38 @@ def t_test(df_pre, df_post, labels):
 		label_frame = pd.DataFrame(data = {'Statistics': stat, 'P-Values': p_value}, index = list(label_pre.keys()))
 		label_frame.index.name = f"{label}: Pre-Post Covid"
 		sig_vals = label_frame.get(label_frame['P-Values'] < .05)
-		if not sig_vals.empty:
-			sig_vals.to_csv(f"T_Test_Results_Sig: {label}.csv")
-			#sig_vals.to_excel(f"T_Test_Results_Sig: {label}.xlsx")
-		label_frame.to_csv(f"T_Test_Results: {label}.csv")
-		#label_frame.to_excel(f"T_Test_Results: {label}.xlsx")
-		#print(label_frame)
-		#print(f"{label} Birth, Section {key}: {stats.ttest_ind(label_pre[key], label_post[key])}")
+		print(label_frame)
 
-def t_test_two_labels(df, label_one, label_two, t):
-		label_dc_one = group_raw_scores(df, label_one)
-		label_dc_two = group_raw_scores(df, label_two)
-		
-		stat = []
-		p_value = []
-		for key in list(label_dc_one.keys()):
-			t_test = stats.ttest_ind(label_dc_one[key], label_dc_two[key])
-			stat.append(t_test.statistic)
-			p_value.append(t_test.pvalue)
-		label_frame = pd.DataFrame(data = {'Statistics': stat, 'P-Values': p_value}, index = list(label_dc_one.keys()))
-		label_frame.index.name = f"{label_one} vs. {label_two}: {t}"
-		sig_vals = label_frame.get(label_frame['P-Values'] < .05)
-		if not sig_vals.empty:
-			sig_vals.to_csv(f"T_Test_Results_Sig:_{label_one}_{label_two}.csv")
-			#sig_vals.to_excel(f"T_Test_Results_Sig: {label_one}_{label_two}.xlsx")
-		label_frame.to_csv(f"T_Test_Results:_{label_one}_{label_two}.csv")
-		#label_frame.to_excel(f"T_Test_Results: {label_one}_{label_two}.xlsx")
-		#print(label_frame)
-		#print(f"{label} Birth, Section {key}: {stats.ttest_ind(label_pre[key], label_post[key])}")
+#Runs the t-test between each pair of labels pre and post COVID-19 to see how the differences changed in significance
+def t_test_two_labels(df_1, df_2, tuples):
+	stats_pre = []
+	stats_post = []
 
+	p_values_pre = []
+	p_values_post = []
+
+	for tup in tuples: 
+		label_dc_pre_1 = group_raw_scores(df_1, tup[0])
+		label_dc_pre_2 = group_raw_scores(df_1, tup[1])
+
+		label_dc_post_1 = group_raw_scores(df_2, tup[0])
+		label_dc_post_2 = group_raw_scores(df_2, tup[1])
+
+		pre_1 = [value for values in label_dc_pre_1.values() for value in values]
+		pre_2 = [value for values in label_dc_pre_2.values() for value in values]
+		t_test_pre = stats.ttest_ind(pre_1, pre_2)
+		stats_pre.append(t_test_pre.statistic)
+		p_values_pre.append(t_test_pre.pvalue)
+
+		post_1 = [value for values in label_dc_post_1.values() for value in values]
+		post_2 = [value for values in label_dc_post_2.values() for value in values]
+		t_test_post = stats.ttest_ind(post_1, post_2)
+		stats_post.append(t_test_post.statistic)
+		p_values_post.append(t_test_post.pvalue)
+	label_frame = pd.DataFrame(data = {'Statistics: Pre-Covid': stats_pre, 'Statistics: Post-Covid': stats_post, 'P-Values: Pre-Covid': p_values_pre, 'P-Values: Post-Covid': p_values_post}, index = tuples)
+	sig_vals_pre = label_frame.get(label_frame['P-Values: Pre-Covid'] < .05)
+	sig_vals_post = label_frame.get(label_frame['P-Values: Post-Covid'] < .05)
+	print(label_frame)
 
 def main():
 	labels = list(labels_df.columns)
@@ -100,19 +120,10 @@ def main():
 	labels.remove('Date')
 	labels.remove('selftext')
 	labels.remove('author')
-'''
 	t_test(pre_covid_posts_df, post_covid_posts_df, labels)
-	t_test_two_labels(pre_covid_posts_df, 'Positive', 'Negative', 'Pre-Covid')
-	t_test_two_labels(pre_covid_posts_df, 'Medicated', 'Unmedicated', 'Pre-Covid')
-	t_test_two_labels(pre_covid_posts_df, 'Home', 'Hospital', 'Pre-Covid')
-	t_test_two_labels(pre_covid_posts_df, 'First', 'Second', 'Pre-Covid')
-	t_test_two_labels(pre_covid_posts_df, 'C-Section', 'Vaginal', 'Pre-Covid')
+	t_test_chunks(pre_covid_posts_df, post_covid_posts_df, labels)
+	tuples = [('Positive', 'Negative'), ('Medicated', 'Unmedicated'), ('Home', 'Hospital'), ('First', 'Second'), ('C-Section', 'Vaginal')]
+	t_test_two_labels(pre_covid_posts_df,post_covid_posts_df, tuples)
 
-	t_test_two_labels(post_covid_posts_df, 'Positive', 'Negative', 'Post-Covid')
-	t_test_two_labels(post_covid_posts_df, 'Medicated', 'Unmedicated', 'Post-Covid')
-	t_test_two_labels(post_covid_posts_df, 'Home', 'Hospital', 'Post-Covid')
-	t_test_two_labels(post_covid_posts_df, 'First', 'Second', 'Post-Covid')
-	t_test_two_labels(post_covid_posts_df, 'C-Section', 'Vaginal', 'Post-Covid')
-'''
 if __name__ == '__main__':
 	main()
