@@ -1,11 +1,12 @@
 Labels,Description,N-Grams,Number of Stories
-Positive,Positively framed,"['positive', 'less-than positive']",755
-Negative,Negatively framed,"['trauma', 'trigger', 'negative']",266
-Unmedicated,Birth without epidural,"['no epi', 'natural', 'unmedicated', 'epidural free', 'no meds', 'no pain meds', 'unnatural']",350
-Medicated,Birth with epidural,"['epidural', 'epi', 'no epi', 'epidural free']",338
-Home,Birth takes place at home,['home'],90
-Hospital,Birth takes place at hospital,['hospital'],221
-First,First birth for the author,"['ftm', 'first time', 'first pregnancy']",22
-Second,Second birth for the author,"['stm', 'second']",34
-C-Section,Birth via cesarean delivery,"['cesarian', 'section', 'caesar']",441
-Vaginal,Vaginal births,"['vaginal', 'vbac']",174
+Positive,Positively framed,"['positive', 'less-than positive']",927
+Negative,Negatively framed,"['trauma', 'trigger', 'negative']",304
+Unmedicated,Birth without epidural,"['no epi', 'natural', 'unmedicated', 'epidural free', 'no meds', 'no pain meds', 'unnatural']",394
+Medicated,Birth with epidural,"['epidural', 'epi', 'no epi', 'epidural free']",387
+Home,Birth takes place at home,['home'],101
+Hospital,Birth takes place at hospital,['hospital'],238
+First,First birth for the author,"['ftm', 'first time', 'first pregnancy']",25
+Second,Second birth for the author,"['stm', 'second']",44
+C-Section,Birth via cesarean delivery,"['cesarian', 'section', 'caesar']",521
+Vaginal,Vaginal births,"['vaginal', 'vbac']",195
+Birth Center,Birth takes place at birth center,"['birth center', 'birth centre', 'birth-center', 'birthing center', 'birthing centre', 'birthing-center', 'birthing-centre', 'birth-centre', 'water birth', 'water-birth']",77
