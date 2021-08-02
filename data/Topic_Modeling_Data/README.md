@@ -1,10 +1,10 @@
 - `50/`: line plots for each of 50 topics' average monthly probability over time (2010-2021).
-- `50_Topic_Forecasts`: line plots for each of 50 topics' average monthly forecasted probabilities compared to their actual average monthly probabilities over time (2010-2021).
+- `50_Topic_Forecasts/`: line plots for each of 50 topics' average monthly forecasted probabilities compared to their actual average monthly probabilities over time (2010-2021).
 - `Topic_Forecasts/`: line plots for each of another 50 topics' average monthly forecasted probabilities compared to their actual average monthly probabilities over time (2010-2021).
 - `Topic_Models_Over_Time/`: line plots for each of another 50 topics' average monthly probability over time (2010-2021).
 - `Topic_Plots/`: line plots for each of 50 topics distributed across story time.
-- `Week_50_Topic_Forecasts`: line plots for each of 50 topics' average weekly forecasted probabilities compared to their actual average weekly probabilities over time (2010-2021).
-- `Week_Topic_Forecasts`: line plots for each of another 50 topics' average weekly forecasted probabilities compared to their actual average weekly probabilities over time (2010-2021).
+- `Week_50_Topic_Forecasts/`: line plots for each of 50 topics' average weekly forecasted probabilities compared to their actual average weekly probabilities over time (2010-2021).
+- `Week_Topic_Forecasts/`: line plots for each of another 50 topics' average weekly forecasted probabilities compared to their actual average weekly probabilities over time (2010-2021).
 - `Z_Test_Stats.csv`: results of z-test for 50 topics on a monthly level.
 - `Z_Test_Stats_50.csv`: results of z-test for another 50 topics level.
 - `Z_Test_Stats_Week.csv`: results of z-test for 50 topics on a weekly level.
