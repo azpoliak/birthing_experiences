@@ -2,6 +2,13 @@ import nltk
 from nltk import tokenize
 import numpy as np
 import pandas as pd
+from datetime import datetime
+
+def story_lengths(series):
+    lowered = series.lower()
+    tokenized = nltk.word_tokenize(lowered)
+    length = len(tokenized)
+    return length
 
 #splits story into ten equal chunks
 def split_story_10(string):
@@ -20,6 +27,20 @@ def split_story_10(string):
             return split_story
         split_story.append(' '.join(tokenized[i:i+rounded]))
     return split_story
+
+#translate created_utc column into dates
+def get_post_date(series):
+    parsed_date = datetime.utcfromtimestamp(series)
+    date = parsed_date
+    return date
+
+#True/False column based on before and after pandemic 
+def pandemic(date):
+    start_date = datetime.strptime("11 March, 2020", "%d %B, %Y")
+    if date > start_date:
+        return False
+    else:
+        return True
 
 def make_plots(pre_df, post_df):
     fig = plt.figure()
