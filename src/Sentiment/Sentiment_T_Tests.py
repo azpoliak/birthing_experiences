@@ -63,6 +63,7 @@ def t_test(df_pre, df_post, labels):
 		p_value.append(t_test.pvalue)
 	label_frame = pd.DataFrame(data = {'Statistics': stat, 'P-Values': p_value}, index = labels)
 	print(label_frame)
+	return label_frame
 
 #Runs the t-test for all labels pre and post COVID-19 for each CHUNK to see which chunks are significant 
 def t_test_chunks(df_pre, df_post, labels):
@@ -78,6 +79,7 @@ def t_test_chunks(df_pre, df_post, labels):
 		label_frame = pd.DataFrame(data = {'Statistics': stat, 'P-Values': p_value}, index = list(label_pre.keys()))
 		label_frame.index.name = f"{label}: Pre-Post Covid"
 		sig_vals = label_frame.get(label_frame['P-Values'] < .05)
+		label_frame.to_csv(f'{label}_chunks_labels.csv')
 		print(label_frame)
 
 #Runs the t-test between each pair of labels pre and post COVID-19 to see how the differences changed in significance
@@ -110,6 +112,7 @@ def t_test_two_labels(df_1, df_2, tuples):
 	sig_vals_pre = label_frame.get(label_frame['P-Values: Pre-Covid'] < .05)
 	sig_vals_post = label_frame.get(label_frame['P-Values: Post-Covid'] < .05)
 	print(label_frame)
+	return label_frame
 
 def main():
 	labels = list(labels_df.columns)
@@ -120,10 +123,13 @@ def main():
 	labels.remove('Date')
 	labels.remove('selftext')
 	labels.remove('author')
-	t_test(pre_covid_posts_df, post_covid_posts_df, labels)
+'''
+	#Loaded these into CSVs
+	t_test(pre_covid_posts_df, post_covid_posts_df, labels).to_csv('overall_labels.csv')
 	t_test_chunks(pre_covid_posts_df, post_covid_posts_df, labels)
-	tuples = [('Positive', 'Negative'), ('Medicated', 'Unmedicated'), ('Home', 'Hospital'), ('First', 'Second'), ('C-Section', 'Vaginal')]
-	t_test_two_labels(pre_covid_posts_df,post_covid_posts_df, tuples)
+	tuples = [('Positive', 'Negative'), ('Medicated', 'Unmedicated'), ('Home', 'Hospital'), ('Birth Center', 'Hospital'), ('First', 'Second'), ('C-Section', 'Vaginal')]
+	t_test_two_labels(pre_covid_posts_df,post_covid_posts_df, tuples).to_csv('pairs.csv')
+'''
 
 if __name__ == '__main__':
 	main()
