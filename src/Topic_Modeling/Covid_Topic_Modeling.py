@@ -9,14 +9,10 @@ from nltk.corpus import stopwords
 import numpy as np
 from datetime import datetime
 from matplotlib import pyplot as plt
-import itertools
-from itertools import chain, zip_longest
 from little_mallet_wrapper import process_string
-import seaborn
 import redditcleaner
 import re
 import warnings
-import itertools
 import compress_json
 warnings.filterwarnings("ignore")
 from pathlib import Path
@@ -27,7 +23,8 @@ import gensim
 from gensim.models import CoherenceModel
 import argparse
 import json
-from text_utils import split_story_10
+from text_utils import split_story_10, split_story_100_words
+from topic_utils import process_s, remove_emojis, get_all_chunks_from_column, get_chunks, average_per_story, top_5_keys, get_post_month, topic_plots
 
 def get_args():
     parser = argparse.ArgumentParser()
@@ -46,83 +43,6 @@ def get_args():
     return args
 
 stop = stopwords.words('english')
-
-#processes the story using little mallet wrapper process_string function
-def process_s(s):
-    new = lmw.process_string(s,lowercase=True,remove_punctuation=True, stop_words=stop)
-    return new
-
-#removes all emojis
-def remove_emojis(s):
-    regrex_pattern = re.compile(pattern = "["
-      u"\U0001F600-\U0001F64F"  # emoticons
-        u"\U0001F300-\U0001F5FF"  # symbols & pictographs
-                       "]+", flags = re.UNICODE)
-    return regrex_pattern.sub(r'',s)
-
-#splits story into 100 word chunks for topic modeling 
-def split_story_100_words(story):
-    sentiment_story = []
-    s = nltk.word_tokenize(story)
-    n = 100
-    for i in range(0, len(s), n):
-        sentiment_story.append(' '.join(s[i:i + n]))
-    return sentiment_story
-
-def get_all_chunks_from_column(series):
-    #makes list of all chunks from all stories in the df
-    training_chunks = []
-    for story in series:
-        for chunk in story:
-            training_chunks.append(chunk)
-    return training_chunks
-
-#makes list of all the chunks for topic inferring
-def get_chunks(series):
-    testing_chunks = []
-    for story in series:
-        for chunk in story:
-            testing_chunks.append(chunk)
-    return testing_chunks
-
-#finds average probability for each topic for each chunk of story
-def average_per_story(df):
-    dictionary = {}
-    for i in range(len(df)//10):
-        story = df[df['chunk_titles'].str.contains(str(i)+':')]
-        means = story.mean()
-        dictionary[i] = means
-    return pd.DataFrame.from_dict(dictionary, orient='index')
-
-#makes string of the top five keys for each topic
-def top_5_keys(lst):
-    top5_per_list = []
-    for l in lst:
-        joined = ' '.join(l[:5])
-        top5_per_list.append(joined)
-    return top5_per_list
-
-#turns utc timestamp into datetime object
-def get_post_month(series):
-    parsed_date = datetime.utcfromtimestamp(series)
-    to_dt = pd.to_datetime(parsed_date)
-    year = to_dt.year
-    months = to_dt.to_period('M')
-    return months
-
-#makes line plot for each topic over time (2010-2021)
-def make_plots(df):
-    fig = plt.figure(figsize=(15,8))
-    ax = fig.add_subplot(111)
-    for i in range(df.shape[1]):
-        ax.clear()
-        ax.plot(df.iloc[:, i])
-        ax.legend([df.iloc[:, i].name])
-        ax.set_title('Birth Story Topics Over Time')
-        ax.set_xlabel('Month')
-        ax.set_ylabel('Topic Probability')
-        plt.axvline(pd.Timestamp('2020-03-01'),color='r')
-        fig.savefig(f'{args.plots_output}Topic_{str(df.iloc[:, i].name)}_Over_Time.png')
 
 def main():
 
@@ -217,7 +137,7 @@ def main():
     birth_stories_df_cleaned = pd.DataFrame(birth_stories_df_cleaned.groupby(birth_stories_df_cleaned.index).mean())
 
     #makes plots for each topics over time
-    #make_plots(birth_stories_df_cleaned)
+    #topic_plots(birth_stories_df_cleaned)
 
 if __name__ == "__main__":
     main()
