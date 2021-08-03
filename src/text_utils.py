@@ -43,6 +43,11 @@ def get_post_date(series):
     date = parsed_date
     return date
 
+def get_post_year(series):
+    parsed_date = datetime.utcfromtimestamp(series)
+    year = parsed_date.year
+    return year
+
 #True/False column based on before and after pandemic 
 def pandemic(date):
     start_date = datetime.strptime("11 March, 2020", "%d %B, %Y")
