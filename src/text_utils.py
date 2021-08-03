@@ -10,6 +10,15 @@ def story_lengths(series):
     length = len(tokenized)
     return length
 
+#splits story into 100 word chunks for topic modeling 
+def split_story_100_words(story):
+    sentiment_story = []
+    s = nltk.word_tokenize(story)
+    n = 100
+    for i in range(0, len(s), n):
+        sentiment_story.append(' '.join(s[i:i + n]))
+    return sentiment_story
+
 #splits story into ten equal chunks
 def split_story_10(string):
     tokenized = tokenize.word_tokenize(string)
@@ -41,6 +50,20 @@ def pandemic(date):
         return False
     else:
         return True
+
+def create_df_label_list(df, column, dct, disallows):
+    label_counts = []
+    for label in list(dct):
+        if not disallows:
+            df[label] = df[column].apply(lambda x: findkey(x, dct[label]))
+            label_counts.append(df[label].value_counts()[1])
+        elif label not in disallows:
+            df[label] = df[column].apply(lambda x: findkey(x, dct[label][0]))
+            label_counts.append(df[label].value_counts()[1]) 
+        else:
+            df[label] = df[column].apply(lambda x: findkeydisallow(x, dct[label][0], dct[label][1]))
+            label_counts.append(df[label].value_counts()[1]) 
+    return label_counts
 
 def make_plots(pre_df, post_df):
     fig = plt.figure()
