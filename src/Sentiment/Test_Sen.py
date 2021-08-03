@@ -328,8 +328,8 @@ def main():
     #Compound sentiment--entire dataset 
     comp_sents([birth_stories_df], "Overall")
 
-    #Positive vs. Negative Title Frame--entire dataset
-    label_frames([pre_covid_posts_df, post_covid_posts_df, labels_df], tuples, True)
+    #Comparing labels--entire dataset
+    label_frames([labels_df], tuples, True)
 
     #Pre and Post Covid Sentiments
     #Starting with Compound Sentiment
