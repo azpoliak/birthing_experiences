@@ -24,9 +24,9 @@ def get_args():
     parser = argparse.ArgumentParser()
     #general dfs with story text
     parser.add_argument("--birth_stories_df", default="birth_stories_df.json.gz", help="path to df with all birth stories", type=str)
-    parser.add_argument("--pre_covid_df", default="pre_covid_posts_df.json.gz", help="path to df with all stories before March 11, 2020", type=str)
-    parser.add_argument("--post_covid_df", default="post_covid_posts_df.json.gz", help="path to df with all stories on or after March 11, 2020", type=str)
-    parser.add_argument("--labeled_df", default="labeled_df.json.gz", help="path to df of the stories labeled based on their titles", type=str)
+    parser.add_argument("--pre_covid_df", default="relevant_jsons/pre_covid_posts_df.json.gz", help="path to df with all stories before March 11, 2020", type=str)
+    parser.add_argument("--post_covid_df", default="relevant_jsons/post_covid_posts_df.json.gz", help="path to df with all stories on or after March 11, 2020", type=str)
+    parser.add_argument("--labeled_df", default="relevant_jsons/labeled_df.json.gz", help="path to df of the stories labeled based on their titles", type=str)
     args = parser.parse_args()
     return args
 
@@ -79,3 +79,16 @@ mar_june_2020_df = post_covid_posts_df.get(post_covid_posts_df['Mar 11-June 1 20
 june_nov_2020_df = post_covid_posts_df.get(post_covid_posts_df['June 1-Nov 1 2020']==True).get(list(post_covid_posts_df.columns))
 nov_2020_apr_2021_df = post_covid_posts_df.get(post_covid_posts_df['Nov 1 2020-Apr 1 2021']==True).get(list(post_covid_posts_df.columns))
 apr_june_2021_df = post_covid_posts_df.get(post_covid_posts_df['Apr 1-June 24 2021']==True).get(list(post_covid_posts_df.columns))
+
+#Load into Jsons
+#mar_june_2020_df = mar_june_2020_df.to_json()
+#compress_json.dump(mar_june_2020_df, "mar_june_2020_df.json.gz")
+
+#june_nov_2020_df = june_nov_2020_df.to_json()
+#compress_json.dump(june_nov_2020_df, "june_nov_2020_df.json.gz")
+
+nov_2020_apr_2021_df = nov_2020_apr_2021_df.to_json()
+compress_json.dump(nov_2020_apr_2021_df, "nov_2020_apr_2021_df.json.gz")
+
+#apr_june_2021_df = apr_june_2021_df.to_json()
+#compress_json.dump(apr_june_2021_df, "apr_june_2021_df.json.gz")
