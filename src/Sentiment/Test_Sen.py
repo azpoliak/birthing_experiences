@@ -33,6 +33,13 @@ def get_args():
     parser.add_argument("--june_nov_2020_df", default="../relevant_jsons/june_nov_2020_df.json.gz", help="path to df of the stories from COVID era 2", type=str)
     parser.add_argument("--nov_2020_apr_2021_df", default="../relevant_jsons/nov_2020_apr_2021_df.json.gz", help="path to df of the stories from COVID era 3", type=str)
     parser.add_argument("--apr_june_2021_df", default="../relevant_jsons/apr_june_2021_df.json.gz", help="path to df of the stories from COVID era 4", type=str)
+    parser.add_argument("--compound_sent_output", default="../../data/Sentiment_Plots/Compound_Sentiment_Plot_", help="path to save png plot with compound sentiment of stories", type=str)
+    parser.add_argument("--pos_neg_sent_output", default="../../data/Sentiment_Plots/Pos_Neg_Sentiment_Plot_", help="path to save png plot with pos/neg sentiment of stories", type=str)
+    parser.add_argument("--all", default="../../data/Sentiment_Plots/All_Plot_", help="path to save png plot with sentiment of all stories", type=str)
+    parser.add_argument("--pre_post", default="../../data/Sentiment_Plots/Pre_Post_Covid/Pre_Post_Plot_", help="path to save png plot with sentiment of stories per label pair, 4 lines per graph", type=str)
+    parser.add_argument("--four_sects", default="../../data/Sentiment_Plots/4_Section_Sentiment_Plots/4_Sects_Pre_Post_Plot_", help="path to save png plot with sentiment of stories per label with 4 COVID eras", type=str)
+    parser.add_argument("--label", default="../../data/Sentiment_Plots/Singular_Labels/Pre_Post_Plot_", help="path to save png plot with sentiment of stories per label", type=str)
+    parser.add_argument("--diff", default="../../data/Sentiment_Plots/Differences_Plotted/Diff_Plot_", help="path to save png plot with differences of sentiment of stories betweem label pairs", type=str)
     args = parser.parse_args()
     return args
 
@@ -106,6 +113,7 @@ def dict_to_frame(lst):
 
 #Plots Compound sentiment ONLY
 def comp_sents(dfs, name):
+    args = get_args()
     for df in dfs:
         #tokenize stories by sentence
         df['tokenized sentences'] = df['selftext'].apply(tokenize.sent_tokenize)
@@ -118,10 +126,12 @@ def comp_sents(dfs, name):
         plt.xlabel('Story Time')
         plt.ylabel('Sentiment')
         plt.legend()
-    plt.savefig(f'{name}_Compound_Sentiment_Plot.png')
+    plt.savefig(f'{args.compound_sent_output}{name}.png')
 
 #Plots Positive vs. Negative Sentiment 
 def pos_neg_sents(dfs):
+    args = get_args()
+
     for df in dfs:
         #tokenize stories by sentence
         df['tokenized sentences'] = df['selftext'].apply(tokenize.sent_tokenize)
@@ -145,11 +155,13 @@ def pos_neg_sents(dfs):
         plt.ylabel('Sentiment')
         plt.title('Positive vs. Negative Sentiment')
         plt.legend()
-        plt.savefig(f'{df.name}_Pos_Neg_Sentiment_Plot.png')
+        plt.savefig(f'{args.pos_neg_sent_output}{df.name}.png')
     plt.clf()
 
 #Plots two labels (ex. medicated vs. unmedicated) 
 def label_frames(dfs, tuples, x):
+    args = get_args()
+
     for tup in tuples:
         for df in dfs:
             label_one = df[['title', 'selftext']].get(df[tup[0]] == True)
@@ -181,13 +193,15 @@ def label_frames(dfs, tuples, x):
             plt.title(f'{tup[0]} vs. {tup[1]} Birth Sentiments')
             plt.legend()
             if x == True:
-                plt.savefig(f'{tup[0]}_{tup[1]}_All_Plot.png')
+                plt.savefig(f'{args.all}{tup[0]}_{tup[1]}.png')
             else:
-                plt.savefig(f'{tup[0]}_{tup[1]}_Pre_Post_Plot.png')
+                plt.savefig(f'{args.pre_post}{tup[0]}_{tup[1]}.png')
         plt.clf()
 
 #Plots a single label
 def label_frame(dfs, labels, t):
+    args = get_args()
+
     for label in labels:
         for df in dfs:
             df_one = df[['title', 'selftext']].get(df[label] == True)
@@ -208,13 +222,15 @@ def label_frame(dfs, labels, t):
             plt.title(f'{label} Birth Sentiments')
             plt.legend()
             if t == True:
-                plt.savefig(f'{label}_4_Sects_Pre_Post_Plot.png')
+                plt.savefig(f'{args.four_sects}{label}.png')
             else:
-                plt.savefig(f'{label}_Pre_Post_Plot.png')
+                plt.savefig(f'{args.label}{label}.png')
         plt.clf()
 
 #Plots only the difference between pre and post COVID-19 between the two labels 
 def difference_pre_post(dfs, tuples):
+    args = get_args()
+    
         for tup in tuples:
             for df in dfs:
                 label_one = df[['title', 'selftext']].get(df[tup[0]] == True)
@@ -246,7 +262,7 @@ def difference_pre_post(dfs, tuples):
                 plt.ylabel('Difference between Sentiments')
                 plt.title(f'{tup[0]} vs. {tup[1]} Birth Sentiments')
                 plt.legend()
-                plt.savefig(f'{tup[0]}_{tup[1]}_Diff_Plot.png')
+                plt.savefig(f'{args.diff}{tup[0]}_{tup[1]}.png')
             plt.clf()
 
 #Samples the split stories from a dataframe 
@@ -312,7 +328,8 @@ def main():
     apr_june_2021_df.name = 'April-June 2021'
 
     tuples = [('Positive', 'Negative'), ('Medicated', 'Unmedicated'), ('Home', 'Hospital'), ('Birth Center', 'Hospital'), ('First', 'Second'), ('C-Section', 'Vaginal')]
-  
+
+    '''
     #Plots per label
     label_frame([pre_covid_posts_df, post_covid_posts_df], labels, False)
     
@@ -329,7 +346,7 @@ def main():
     comp_sents([birth_stories_df], "Overall")
 
     #Comparing labels--entire dataset
-    label_frames([labels_df], tuples, True)
+    #label_frames([labels_df], tuples, True)
 
     #Pre and Post Covid Sentiments
     #Starting with Compound Sentiment
@@ -356,6 +373,8 @@ def main():
 
     #Now, split based on positive vs. negative sentiment-- this plot should have 4 lines
     pos_neg_sents([pre_covid_posts_df, post_covid_posts_df])
+
+    '''
 
 if __name__ == '__main__':
     main()
