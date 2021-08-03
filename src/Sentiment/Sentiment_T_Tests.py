@@ -34,6 +34,8 @@ def get_args():
     parser.add_argument("--labeled_df", default="../relevant_jsons/labeled_df.json.gz", help="path to df of the stories labeled based on their titles", type=str)
     parser.add_argument("--overall_labels", default="../data/Sentiment_T_Tests/overall_labels.csv", help="path to the t-test folder for all story labels", type=str)
     parser.add_argument("--pairs", default="../data/Sentiment_T_Tests/pairs.csv", help="path to the t-test folder for all story pair labels", type=str)
+    parser.add_argument("--chunks", default="../../data/Sentiment_T_Tests/chunks_labels_", help="path to the t-test folder for each story label, broken up into chunks", type=str)
+
     args = parser.parse_args()
     return args
 
@@ -67,6 +69,8 @@ def t_test(df_pre, df_post, labels):
 
 #Runs the t-test for all labels pre and post COVID-19 for each CHUNK to see which chunks are significant 
 def t_test_chunks(df_pre, df_post, labels):
+	args = get_args()
+
 	for label in labels:
 		label_pre = group_raw_scores(df_pre, label)
 		label_post = group_raw_scores(df_post, label)
@@ -79,7 +83,7 @@ def t_test_chunks(df_pre, df_post, labels):
 		label_frame = pd.DataFrame(data = {'Statistics': stat, 'P-Values': p_value}, index = list(label_pre.keys()))
 		label_frame.index.name = f"{label}: Pre-Post Covid"
 		sig_vals = label_frame.get(label_frame['P-Values'] < .05)
-		label_frame.to_csv(f'{label}_chunks_labels.csv')
+		label_frame.to_csv(f'{args.chunks}{label}.csv')
 		print(label_frame)
 
 #Runs the t-test between each pair of labels pre and post COVID-19 to see how the differences changed in significance
