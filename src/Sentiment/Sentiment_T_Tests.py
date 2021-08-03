@@ -26,11 +26,14 @@ warnings.filterwarnings("ignore")
 
 def get_args():
     parser = argparse.ArgumentParser()
+
     #general dfs with story text
     parser.add_argument("--birth_stories_df", default="../birth_stories_df.json.gz", help="path to df with all birth stories", type=str)
     parser.add_argument("--pre_covid_df", default="../relevant_jsons/pre_covid_posts_df.json.gz", help="path to df with all stories before March 11, 2020", type=str)
     parser.add_argument("--post_covid_df", default="../relevant_jsons/post_covid_posts_df.json.gz", help="path to df with all stories on or after March 11, 2020", type=str)
     parser.add_argument("--labeled_df", default="../relevant_jsons/labeled_df.json.gz", help="path to df of the stories labeled based on their titles", type=str)
+    parser.add_argument("--overall_labels", default="../data/Sentiment_T_Tests/overall_labels.csv", help="path to the t-test folder for all story labels", type=str)
+    parser.add_argument("--pairs", default="../data/Sentiment_T_Tests/pairs.csv", help="path to the t-test folder for all story pair labels", type=str)
     args = parser.parse_args()
     return args
 
@@ -137,10 +140,10 @@ def main():
 
 	'''
 	#Loaded these into CSVs
-	t_test(pre_covid_posts_df, post_covid_posts_df, labels).to_csv('overall_labels.csv')
+	t_test(pre_covid_posts_df, post_covid_posts_df, labels).to_csv(args.overall_labels)
 	t_test_chunks(pre_covid_posts_df, post_covid_posts_df, labels)
 	tuples = [('Positive', 'Negative'), ('Medicated', 'Unmedicated'), ('Home', 'Hospital'), ('Birth Center', 'Hospital'), ('First', 'Second'), ('C-Section', 'Vaginal')]
-	t_test_two_labels(pre_covid_posts_df,post_covid_posts_df, tuples).to_csv('pairs.csv')
+	t_test_two_labels(pre_covid_posts_df,post_covid_posts_df, tuples).to_csv(arg.pairs)
 	'''
 
 if __name__ == '__main__':
