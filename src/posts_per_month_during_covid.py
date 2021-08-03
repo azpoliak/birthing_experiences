@@ -14,6 +14,7 @@ import re
 import warnings
 import compress_json
 warnings.filterwarnings("ignore")
+from date_utils import pandemic_eras
 from text_utils import story_lengths
 import argparse
 
@@ -28,20 +29,6 @@ def get_args():
     parser.add_argument("--labeled_df", default="relevant_jsons/labeled_df.json.gz", help="path to df of the stories labeled based on their titles", type=str)
     args = parser.parse_args()
     return args
-
-#labels the dataframe with True or False based on whether the date the post was created falls within the inputed start and end date
-def pandemic_eras(series, start_date, end_date):
-	date = str(series)
-	if end_date == '2021-06':
-		if date >= start_date and date <= end_date:
-			return True
-		else:
-			return False
-	else:
-		if date >= start_date and date < end_date:
-			return True
-		else:
-			return False
 
 args = get_args()
 

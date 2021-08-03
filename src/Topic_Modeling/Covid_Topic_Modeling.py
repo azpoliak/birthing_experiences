@@ -24,7 +24,8 @@ from gensim.models import CoherenceModel
 import argparse
 import json
 from text_utils import split_story_10, split_story_100_words
-from topic_utils import process_s, remove_emojis, get_all_chunks_from_column, get_chunks, average_per_story, top_5_keys, get_post_month, topic_plots
+from date_utils import get_post_month
+from topic_utils import process_s, remove_emojis, get_all_chunks_from_column, get_chunks, average_per_story, top_5_keys, topic_plots
 
 def get_args():
     parser = argparse.ArgumentParser()
