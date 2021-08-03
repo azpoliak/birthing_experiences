@@ -79,15 +79,15 @@ def main():
     training_chunks = get_all_chunks_from_column(birth_stories_df_cleaned['100 word chunks'])
 
     #train model
-    #topic_words, topic_doc_distributions = lmw.quick_train_topic_model(args.path_to_mallet, args.path_to_save, num_topics, training_chunks)
+    topic_words, topic_doc_distributions = lmw.quick_train_topic_model(args.path_to_mallet, args.path_to_save, num_topics, training_chunks)
 
     birth_stories_df_cleaned['10 chunks/story'] = birth_stories_df_cleaned['Cleaned Submission'].apply(split_story_10)
 
     testing_chunks = get_chunks(birth_stories_df_cleaned['10 chunks/story'])
 
     #infers topics for the documents split into 10 equal chunks based on the topics trained on the 100 word chunks
-    #lmw.import_data(args.path_to_mallet, f'{args.ten_chunks}/training_data', f'{args.ten_chunks}/formatted_training_data', testing_chunks, training_ids=None, use_pipe_from=None)
-    #lmw.infer_topics(args.path_to_mallet, f'{args.path_to_save}/mallet.model.50', f'{args.ten_chunks}/formatted_training_data', f'{args.ten_chunks}/topic_distributions')
+    lmw.import_data(args.path_to_mallet, f'{args.ten_chunks}/training_data', f'{args.ten_chunks}/formatted_training_data', testing_chunks, training_ids=None, use_pipe_from=None)
+    lmw.infer_topics(args.path_to_mallet, f'{args.path_to_save}/mallet.model.50', f'{args.ten_chunks}/formatted_training_data', f'{args.ten_chunks}/topic_distributions')
 
     #makes df of the probabilities for each topic for each chunk of each story
     topic_distributions = lmw.load_topic_distributions(f'{args.ten_chunks}/topic_distributions')
@@ -137,7 +137,7 @@ def main():
     birth_stories_df_cleaned = pd.DataFrame(birth_stories_df_cleaned.groupby(birth_stories_df_cleaned.index).mean())
 
     #makes plots for each topics over time
-    #topic_plots(birth_stories_df_cleaned)
+    topic_plots(birth_stories_df_cleaned, args.plots_output)
 
 if __name__ == "__main__":
     main()
