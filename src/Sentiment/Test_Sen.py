@@ -24,18 +24,18 @@ warnings.filterwarnings("ignore")
 
 def get_args():
     parser = argparse.ArgumentParser()
+
     #general dfs with story text
     parser.add_argument("--birth_stories_df", default="../birth_stories_df.json.gz", help="path to df with all birth stories", type=str)
-    parser.add_argument("--pre_covid_df", default="../relevant_jsons/pre_covid_posts_df.json.gz", help="path to df with all stories before March 11, 2020", type=str)
-    parser.add_argument("--post_covid_df", default="../relevant_jsons/post_covid_posts_df.json.gz", help="path to df with all stories on or after March 11, 2020", type=str)
-    parser.add_argument("--labeled_df", default="../relevant_jsons/labeled_df.json.gz", help="path to df of the stories labeled based on their titles", type=str)
+    parser.add_argument("--pre_covid_posts_df", default="../relevant_jsons/pre_covid_posts_df.json.gz", help="path to df with all stories before March 11, 2020", type=str)
+    parser.add_argument("--post_covid_posts_df", default="../relevant_jsons/post_covid_posts_df.json.gz", help="path to df with all stories on or after March 11, 2020", type=str)
+    parser.add_argument("--labels_df", default="../relevant_jsons/labeled_df.json.gz", help="path to df of the stories labeled based on their titles", type=str)
     parser.add_argument("--mar_june_2020_df", default="../relevant_jsons/mar_june_2020_df.json.gz", help="path to df of the stories from COVID era 1", type=str)
     parser.add_argument("--june_nov_2020_df", default="../relevant_jsons/june_nov_2020_df.json.gz", help="path to df of the stories from COVID era 2", type=str)
     parser.add_argument("--nov_2020_apr_2021_df", default="../relevant_jsons/nov_2020_apr_2021_df.json.gz", help="path to df of the stories from COVID era 3", type=str)
     parser.add_argument("--apr_june_2021_df", default="../relevant_jsons/apr_june_2021_df.json.gz", help="path to df of the stories from COVID era 4", type=str)
-    
-    '''
 
+    #where to save
     parser.add_argument("--compound_sent_output", default="../../data/Sentiment_Plots/Compound_Sentiment_Plot_", help="path to save png plot with compound sentiment of stories", type=str)
     parser.add_argument("--pos_neg_sent_output", default="../../data/Sentiment_Plots/Pos_Neg_Sentiment_Plot_", help="path to save png plot with pos/neg sentiment of stories", type=str)
     parser.add_argument("--all", default="../../data/Sentiment_Plots/All_Plot_", help="path to save png plot with sentiment of all stories", type=str)
@@ -43,15 +43,6 @@ def get_args():
     parser.add_argument("--four_sects", default="../../data/Sentiment_Plots/4_Section_Sentiment_Plots/4_Sects_Pre_Post_Plot_", help="path to save png plot with sentiment of stories per label with 4 COVID eras", type=str)
     parser.add_argument("--label", default="../../data/Sentiment_Plots/Singular_Labels/Pre_Post_Plot_", help="path to save png plot with sentiment of stories per label", type=str)
     parser.add_argument("--diff", default="../../data/Sentiment_Plots/Differences_Plotted/Diff_Plot_", help="path to save png plot with differences of sentiment of stories betweem label pairs", type=str)
-    
-    '''
-    parser.add_argument("--compound_sent_output", default="../../data/Sentiment_Plots/Testing/Compound_Sentiment_Plot_", help="path to save png plot with compound sentiment of stories", type=str)
-    parser.add_argument("--pos_neg_sent_output", default="../../data/Sentiment_Plots/Testing/Pos_Neg_Sentiment_Plot_", help="path to save png plot with pos/neg sentiment of stories", type=str)
-    parser.add_argument("--all", default="../../data/Sentiment_Plots/Testing/All_Plot_", help="path to save png plot with sentiment of all stories", type=str)
-    parser.add_argument("--pre_post", default="../../data/Sentiment_Plots/Testing/Pre_Post_Plot_", help="path to save png plot with sentiment of stories per label pair, 4 lines per graph", type=str)
-    parser.add_argument("--four_sects", default="../../data/Sentiment_Plots/Testing/4_Sects_Pre_Post_Plot_", help="path to save png plot with sentiment of stories per label with 4 COVID eras", type=str)
-    parser.add_argument("--label", default="../../data/Sentiment_Plots/Testing/Pre_Post_Plot_", help="path to save png plot with sentiment of stories per label", type=str)
-    parser.add_argument("--diff", default="../../data/Sentiment_Plots/Testing/Diff_Plot_", help="path to save png plot with differences of sentiment of stories betweem label pairs", type=str)
     
     args = parser.parse_args()
     return args
@@ -299,16 +290,16 @@ def main():
 
     args = get_args()
 
-    labels_df = compress_json.load(args.labeled_df)
+    labels_df = compress_json.load(args.labels_df)
     labels_df = pd.read_json(labels_df)
 
     birth_stories_df = compress_json.load(args.birth_stories_df)
     birth_stories_df = pd.read_json(birth_stories_df)
     
-    pre_covid_posts_df = compress_json.load(args.pre_covid_df)
+    pre_covid_posts_df = compress_json.load(args.pre_covid_posts_df)
     pre_covid_posts_df = pd.read_json(pre_covid_posts_df)
 
-    post_covid_posts_df = compress_json.load(args.post_covid_df)
+    post_covid_posts_df = compress_json.load(args.post_covid_posts_df)
     post_covid_posts_df = pd.read_json(post_covid_posts_df)
     
     mar_june_2020_df = compress_json.load(args.mar_june_2020_df)
@@ -346,7 +337,6 @@ def main():
     #Plots per COVID era
     label_frame([pre_covid_posts_df, mar_june_2020_df, june_nov_2020_df, nov_2020_apr_2021_df, apr_june_2021_df], labels, True)
     
-'''
     #Plots per label
     label_frame([pre_covid_posts_df, post_covid_posts_df], labels, False)
     
@@ -390,6 +380,6 @@ def main():
     no_covid_df.name = 'No_Covid_Mention'
 
     comp_sents([covid_df, no_covid_df], 'Covid')
-'''
+
 if __name__ == '__main__':
     main()
