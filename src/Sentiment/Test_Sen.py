@@ -47,6 +47,34 @@ def get_args():
     args = parser.parse_args()
     return args
 
+#Function to read all dataframes 
+def load_data(path_to_birth_stories, path_to_pre_covid, path_to_post_covid, path_to_labels, path_to_e1, path_to_e2, path_to_e3, path_to_e4):
+    labels_df = compress_json.load(path_to_labels)
+    labels_df = pd.read_json(labels_df)
+
+    birth_stories_df = compress_json.load(path_to_birth_stories)
+    birth_stories_df = pd.read_json(birth_stories_df)
+    
+    pre_covid_posts_df = compress_json.load(path_to_pre_covid)
+    pre_covid_posts_df = pd.read_json(pre_covid_posts_df)
+
+    post_covid_posts_df = compress_json.load(path_to_post_covid)
+    post_covid_posts_df = pd.read_json(post_covid_posts_df)
+    
+    mar_june_2020_df = compress_json.load(path_to_e1)
+    mar_june_2020_df = pd.read_json(mar_june_2020_df)
+
+    june_nov_2020_df = compress_json.load(path_to_e2)
+    june_nov_2020_df = pd.read_json(june_nov_2020_df)
+
+    nov_2020_apr_2021_df = compress_json.load(path_to_e3)
+    nov_2020_apr_2021_df = pd.read_json(nov_2020_apr_2021_df)
+
+    apr_june_2021_df = compress_json.load(path_to_e4)
+    apr_june_2021_df = pd.read_json(apr_june_2021_df)
+
+    return labels_df, birth_stories_df, pre_covid_posts_df, post_covid_posts_df, mar_june_2020_df, june_nov_2020_df, nov_2020_apr_2021_df, apr_june_2021_df    
+
 # **Figure 2: Sentiment Analysis**
 
 #set up sentiment analyzer
@@ -290,29 +318,8 @@ def main():
 
     args = get_args()
 
-    labels_df = compress_json.load(args.labels_df)
-    labels_df = pd.read_json(labels_df)
-
-    birth_stories_df = compress_json.load(args.birth_stories_df)
-    birth_stories_df = pd.read_json(birth_stories_df)
-    
-    pre_covid_posts_df = compress_json.load(args.pre_covid_posts_df)
-    pre_covid_posts_df = pd.read_json(pre_covid_posts_df)
-
-    post_covid_posts_df = compress_json.load(args.post_covid_posts_df)
-    post_covid_posts_df = pd.read_json(post_covid_posts_df)
-    
-    mar_june_2020_df = compress_json.load(args.mar_june_2020_df)
-    mar_june_2020_df = pd.read_json(mar_june_2020_df)
-
-    june_nov_2020_df = compress_json.load(args.june_nov_2020_df)
-    june_nov_2020_df = pd.read_json(june_nov_2020_df)
-
-    nov_2020_apr_2021_df = compress_json.load(args.nov_2020_apr_2021_df)
-    nov_2020_apr_2021_df = pd.read_json(nov_2020_apr_2021_df)
-
-    apr_june_2021_df = compress_json.load(args.apr_june_2021_df)
-    apr_june_2021_df = pd.read_json(apr_june_2021_df)
+    dfs = load_data(args.birth_stories_df, args.pre_covid_posts_df, args.post_covid_posts_df, args.labels_df, args.mar_june_2020_df, args.june_nov_2020_df, args.nov_2020_apr_2021_df, args.apr_june_2021_df)
+    birth_stories_df, pre_covid_posts_df, post_covid_posts_df, labels_df, mar_june_2020_df, june_nov_2020_df, nov_2020_apr_2021_df, apr_june_2021_df = dfs
 
     labels = list(labels_df.columns)
     labels.remove('title')
@@ -333,6 +340,9 @@ def main():
     apr_june_2021_df.name = 'April-June 2021'
 
     tuples = [('Positive', 'Negative'), ('Medicated', 'Unmedicated'), ('Home', 'Hospital'), ('Birth Center', 'Hospital'), ('First', 'Second'), ('C-Section', 'Vaginal')]
+    
+    #Compound sentiment--entire dataset 
+    comp_sents([birth_stories_df], "Overall")
 
     #Plots per COVID era
     label_frame([pre_covid_posts_df, mar_june_2020_df, june_nov_2020_df, nov_2020_apr_2021_df, apr_june_2021_df], labels, True)

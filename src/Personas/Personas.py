@@ -63,6 +63,7 @@ def count_chunks(series, dc):
     return mentions
 
 def load_data_for_personas(path_to_birth_stories, path_to_pre_covid, path_to_post_covid, path_to_personas_ngrams):
+    
     birth_stories_df = compress_json.load(path_to_birth_stories)
     birth_stories_df = pd.read_json(birth_stories_df)
 
@@ -82,8 +83,9 @@ def main():
 
     args = get_args()
 
-    load_data_for_personas(args.birth_stories_df, args.pre_covid_df, args.post_covid_df, args.persona_ngrams)
-
+    dfs = load_data_for_personas(args.birth_stories_df, args.pre_covid_df, args.post_covid_df, args.persona_ngrams)
+    birth_stories_df, pre_covid_posts_df, post_covid_posts_df, personas_and_n_grams = dfs
+    
     #name the dfs for easy reference inside the for loop
     birth_stories_df.name = 'all_stories'
     pre_covid_posts_df.name = 'pre_covid'
