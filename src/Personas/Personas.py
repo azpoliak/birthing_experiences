@@ -62,21 +62,27 @@ def count_chunks(series, dc):
         mentions.append(counter(chunk, dc))
     return mentions
 
+def load_data_for_personas(path_to_birth_stories, path_to_pre_covid, path_to_post_covid, path_to_personas_ngrams):
+    birth_stories_df = compress_json.load(path_to_birth_stories)
+    birth_stories_df = pd.read_json(birth_stories_df)
+
+    pre_covid_posts_df = compress_json.load(path_to_pre_covid)
+    pre_covid_posts_df = pd.read_json(pre_covid_posts_df)
+
+    post_covid_posts_df = compress_json.load(path_to_post_covid)
+    post_covid_posts_df = pd.read_json(post_covid_posts_df)
+
+    with open(path_to_personas_ngrams, 'r') as fp:
+        personas_and_n_grams = json.load(fp)
+
+    return birth_stories_df, pre_covid_posts_df, post_covid_posts_df, personas_and_n_grams
+
+
 def main():
 
     args = get_args()
 
-    birth_stories_df = compress_json.load(args.birth_stories_df)
-    birth_stories_df = pd.read_json(birth_stories_df)
-
-    pre_covid_posts_df = compress_json.load(args.pre_covid_df)
-    pre_covid_posts_df = pd.read_json(pre_covid_posts_df)
-
-    post_covid_posts_df = compress_json.load(args.post_covid_df)
-    post_covid_posts_df = pd.read_json(post_covid_posts_df)
-
-    with open(args.persona_ngrams, 'r') as fp:
-        personas_and_n_grams = json.load(fp)
+    load_data_for_personas(args.birth_stories_df, args.pre_covid_df, args.post_covid_df, args.persona_ngrams)
 
     #name the dfs for easy reference inside the for loop
     birth_stories_df.name = 'all_stories'
