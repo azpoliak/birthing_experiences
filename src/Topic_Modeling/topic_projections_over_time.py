@@ -5,14 +5,17 @@ import argparse
 from matplotlib import pyplot as plt
 from scipy import stats
 from scipy.stats import norm, pearsonr
+import compress_json
 from date_utils import get_post_month
 from topic_utils import average_per_story, top_5_keys
 
 #import pdb; pdb.set_trace()
 
 def get_args():
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser("Load topic distributions, train Prophet model for projection, apply z-test for statistical significance, plot topics that are statistically significant.")
     parser.add_argument("--birth_stories_df", default="/home/daphnaspira/birthing_experiences/src/birth_stories_df.json.gz", help="path to df with all birth stories", type=str)    
+    parser.add_argument("--topic_key_path", default="/home/daphnaspira/birthing_experiences/src/Topic_Modeling/output/50/mallet.topic_keys.50")
+    parser.add_argument("--topic_dist_path", default="/home/daphnaspira/birthing_experiences/src/Topic_Modeling/output/50/mallet.topic_distributions.50")
     parser.add_argument("--topic_forecasts_data_output", default="../data/Topic_Modeling_Data/topic_forecasts", help="path to where topic forecast data is saved")
     parser.add_argument("--topic_forecasts_plots_output", default="../data/Topic_Modeling_Data/Topic_Forecasts", help="path to where topic forecast plots are saved")
     parser.add_argument("--birth_stories_topics", default="../data/Topic_Modeling_Data/birth_stories_df_topics.csv")
@@ -20,18 +23,26 @@ def get_args():
     args = parser.parse_args()
     return args
 
-def topic_distributions(file_path):
+def topic_distributions(file_path, topic_key_path):
 	#makes df of the probabilities for each topic for each chunk of each story
     topic_distributions = lmw.load_topic_distributions(file_path)
     story_distributions =  pd.Series(topic_distributions)
     story_topics_df = story_distributions.apply(pd.Series)
+
+    #goes through stories and names them based on the story number and chunk number
+    chunk_titles = []
+    for i in range(len(story_topics_df)//10):
+        for j in range(10):
+            chunk_titles.append(str(i) + ":" + str(j))
+
+    story_topics_df['chunk_titles'] = chunk_titles
 
     #groups every ten stories together and finds the average for each story
     story_topics_df.groupby(story_topics_df.index // 10)
     story_topics_df = average_per_story(story_topics_df)
 
     #loads topic keys
-    topic_keys = lmw.load_topic_keys(f'Topic_Modeling/output/50/mallet.topic_keys.50')
+    topic_keys = lmw.load_topic_keys(topic_key_path)
     five_keys = top_5_keys(topic_keys)
 
     #adds the keys as the names of the topic columns
@@ -40,55 +51,73 @@ def topic_distributions(file_path):
 
 def combine_topics_and_months(birth_stories_df, story_topics_df):
     #load in data so that we can attach dates to stories
-    birth_stories_df = compress_json.load(birth_stories_df)
+	birth_stories_df = compress_json.load(birth_stories_df)
 	birth_stories_df = pd.read_json(birth_stories_df)
 
-    #makes it even
-    birth_stories_df.drop(birth_stories_df.head(3).index, inplace=True)
+	#makes it even
+	birth_stories_df.drop(birth_stories_df.head(3).index, inplace=True)
 
-    #combines story dates with topic distributions
-    birth_stories_df.reset_index(drop=True, inplace=True)
-    dates_topics_df = pd.concat([birth_stories_df['created_utc'], story_topics_df], axis=1)
+	#combines story dates with topic distributions
+	birth_stories_df.reset_index(drop=True, inplace=True)
+	dates_topics_df = pd.concat([birth_stories_df['created_utc'], story_topics_df], axis=1)
 
-    #converts the date into datetime object for year and month
-    dates_topics_df['Date Created'] = dates_topics_df['created_utc'].apply(get_post_month)
-    dates_topics_df['date'] = pd.to_datetime(dates_topics_df['Date Created'])
-    dates_topics_df['year-month'] = dates_topics_df['date'].dt.to_period('M')
-    dates_topics_df['Date'] = [month.to_timestamp() for month in dates_topics_df['year-month']]
-    dates_topics_df.drop(columns=['Date Created', 'Unnamed: 0', 'created_utc', 'year-month', 'date'], inplace=True)
-    dates_topics_df = dates_topics_df.set_index('Date')
+	#converts the date into datetime object for year and month
+	dates_topics_df['Date Created'] = dates_topics_df['created_utc'].apply(get_post_month)
+	dates_topics_df['date'] = pd.to_datetime(dates_topics_df['Date Created'])
+	dates_topics_df['year-month'] = dates_topics_df['date'].dt.to_period('M')
+	dates_topics_df['Date'] = [month.to_timestamp() for month in dates_topics_df['year-month']]
+	dates_topics_df.drop(columns=['Date Created', 'created_utc', 'year-month', 'date'], inplace=True)
 
-    #groups stories by month and finds average
-    dates_topics_df = pd.DataFrame(dates_topics_df.groupby(dates_topics_df.index).mean())
-    return dates_topics_df
+	dates_topics_df = dates_topics_df.set_index('Date')
 
+	#groups stories by month and finds average
+	dates_topics_df = pd.DataFrame(dates_topics_df.groupby(dates_topics_df.index).mean())
+	#import pdb; pdb.set_trace()
+	return dates_topics_df
+
+#todo look into why < 03-01 doesnt work
 def pre_covid_posts(df):
 	pre_covid = df[(df.index <= '2020-02-01')]
 	return pre_covid
 
-def predict_topic_trend(df, df2, ztest_output):
-    fig = plt.figure(figsize=(15,10))
-    ax = fig.add_subplot(111)
-    for i in range(df.shape[1]):
-        ax.clear()
-        topic_label = df.iloc[:, i].name
-        topic = pd.DataFrame(df.iloc[:,i])
-        topic.reset_index(inplace=True)
-        topic.columns = ['ds', 'y']
-        topic['ds'] = topic['ds'].dt.to_pydatetime()
+def ztest(actual, forecast, percent):
+	residual = actual - forecast
+	residual = list(residual)
 
-        actual = pd.DataFrame(df2.iloc[:,i])
-        actual.reset_index(inplace=True)
-        actual.columns = ['ds', 'y']
-        actual['ds'] = actual['ds'].dt.to_pydatetime()
+	#compute correlation between data points for pre-covid data (using pearsonr)
+	corr = pearsonr(residual[:-1], residual[1:])[0]
 
-        m = Prophet()
-        m.fit(topic)
+	#plug correlation as r into z test (function from biester)
+	#calculate z test for pre and post covid data
+	z = (percent - 0.05) / np.sqrt((0.05*(1-0.05))/len(actual))
 
-        future = m.make_future_dataframe(periods=15, freq='M')
+	#find p-value
+	pval = norm.sf(np.abs(z))
+	return z, pval
 
-        forecast_df = m.predict(future)
-        #forecast.to_csv(f'{args.topic_forecasts_data_output}/{topic_label}_forecasts.csv')
+def predict_topic_trend(df, df2, topic_forecasts_plots_output, ztest_output):
+	fig = plt.figure(figsize=(15,10))
+	ax = fig.add_subplot(111)
+	for i in range(df.shape[1]):
+		ax.clear()
+		topic_label = df.iloc[:, i].name
+		topic = pd.DataFrame(df.iloc[:,i])
+		topic.reset_index(inplace=True)
+		topic.columns = ['ds', 'y']
+		topic['ds'] = topic['ds'].dt.to_pydatetime()
+
+		actual = pd.DataFrame(df2.iloc[:,i])
+		actual.reset_index(inplace=True)
+		actual.columns = ['ds', 'y']
+		actual['ds'] = actual['ds'].dt.to_pydatetime()
+
+		m = Prophet()
+		m.fit(topic)
+
+		future = m.make_future_dataframe(periods=15, freq='MS')
+
+		forecast_df = m.predict(future)
+		#forecast.to_csv(f'{args.topic_forecasts_data_output}/{topic_label}_forecasts.csv')
 
 		values = df2.loc[:, topic_label]
 
@@ -119,12 +148,12 @@ def predict_topic_trend(df, df2, ztest_output):
 		post_ztest_dict[file_name] = ztest_vals_post
 
 		if ztest_vals_post[1] < 0.05:
-		    fig1 = m.plot(forecast, xlabel='Date', ylabel='Topic Probability', ax=ax)
-		    ax.plot(df2.iloc[:, i], color='k')
-		    ax = fig.gca()
-		    ax.set_title(f'{topic_label} Forecast', fontsize=20)
-		    plt.axvline(pd.Timestamp('2020-03-01'),color='r')
-		    fig1.savefig(f'{args.topic_forecasts_plots_output}/{topic_label}_Prediction_Plot.png')
+			fig1 = m.plot(forecast, xlabel='Date', ylabel='Topic Probability', ax=ax)
+			ax.plot(df2.iloc[:, i], color='k')
+			ax = fig.gca()
+			ax.set_title(f'{topic_label} Forecast', fontsize=20)
+			plt.axvline(pd.Timestamp('2020-03-01'),color='r')
+			fig1.savefig(f'{topic_forecasts_plots_output}/{topic_label}_Prediction_Plot.png')
 
 	pre_ztest_df = pd.DataFrame.from_dict(pre_ztest_dict, orient='index', columns=['Z Statistic Pre', 'P-Value Pre'])
 	post_ztest_df = pd.DataFrame.from_dict(post_ztest_dict, orient='index', columns=['Z Statistic Post', 'P-Value Post'])
@@ -136,8 +165,8 @@ def main():
 	args = get_args()
 
 	#1. load topic model
-	story_topics_df = topic_distributions('Topic_Modeling/output/50/mallet.topic_distributions.50')
-	dates_topics_df == combine_topics_and_months(args.birth_stories_df, story_topics_df)
+	story_topics_df = topic_distributions(args.topic_dist_path, args.topic_key_path)
+	dates_topics_df = combine_topics_and_months(args.birth_stories_df, story_topics_df)
 
 	#2. for every topic:
 		#train a model
@@ -150,11 +179,10 @@ def main():
 		os.mkdir(args.topic_forecasts_plots_output)
 
 	if not os.path.exists(args.topic_forecasts_data_output):
-	        os.mkdir(args.topic_forecasts_data_output)
+		os.mkdir(args.topic_forecasts_data_output)
 
-    pre_covid = pre_covid_posts(dates_topics_df)
-	predict_topic_trend(pre_covid, dates_topics_df, args.ztest_output)
-
+	pre_covid = pre_covid_posts(dates_topics_df)
+	predict_topic_trend(pre_covid, dates_topics_df, args.topic_forecasts_plots_output, args.ztest_output)
 
 if __name__ == "__main__":
     main()
