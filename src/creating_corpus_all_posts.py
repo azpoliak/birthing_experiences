@@ -11,27 +11,8 @@ import seaborn as sns
 import nltk
 from nltk.stem.wordnet import WordNetLemmatizer
 from collections import defaultdict
-
-#find number of words in each story
-def story_lengths(series):
-    lowered = series.lower()
-    tokenized = nltk.word_tokenize(lowered)
-    length = len(tokenized)
-    return length
-
-#translate created_utc column into years
-def get_post_year(series):
-    parsed_date = datetime.utcfromtimestamp(series)
-    date = parsed_date
-    return date
-
-#True/False column based on before and after pandemic 
-def pandemic(date):
-    start_date = datetime.strptime("11 March, 2020", "%d %B, %Y")
-    if date > start_date:
-        return False
-    else:
-        return True
+from text_utils import story_lengths
+from date_utils import get_post_year, pandemic
 
 def get_first_comment(row):
     curr_id, author = row.id, row.author

@@ -20,22 +20,24 @@ import warnings
 import itertools
 import compress_json
 from scipy import stats
-warnings.filterwarnings("ignore")
+import argparse
 import Test_Sen as ts
+warnings.filterwarnings("ignore")
 
-#Read all relevant dataframe jsons 
+def get_args():
+    parser = argparse.ArgumentParser()
 
-birth_stories_df = compress_json.load('../birth_stories_df.json.gz')
-birth_stories_df = pd.read_json(birth_stories_df)
+    #general dfs with story text
+    parser.add_argument("--birth_stories_df", default="../birth_stories_df.json.gz", help="path to df with all birth stories", type=str)
+    parser.add_argument("--pre_covid_df", default="../relevant_jsons/pre_covid_posts_df.json.gz", help="path to df with all stories before March 11, 2020", type=str)
+    parser.add_argument("--post_covid_df", default="../relevant_jsons/post_covid_posts_df.json.gz", help="path to df with all stories on or after March 11, 2020", type=str)
+    parser.add_argument("--labeled_df", default="../relevant_jsons/labeled_df.json.gz", help="path to df of the stories labeled based on their titles", type=str)
+    parser.add_argument("--overall_labels", default="../data/Sentiment_T_Tests/overall_labels.csv", help="path to the t-test folder for all story labels", type=str)
+    parser.add_argument("--pairs", default="../data/Sentiment_T_Tests/pairs.csv", help="path to the t-test folder for all story pair labels", type=str)
+    parser.add_argument("--chunks", default="../../data/Sentiment_T_Tests/chunks_labels_", help="path to the t-test folder for each story label, broken up into chunks", type=str)
 
-labels_df = compress_json.load("../labeled_df.json.gz")
-labels_df = pd.read_json(labels_df)
-
-pre_covid_posts_df = compress_json.load("../pre_covid_posts_df.json.gz")
-pre_covid_posts_df = pd.read_json(pre_covid_posts_df)
-
-post_covid_posts_df = compress_json.load("../post_covid_posts_df.json.gz")
-post_covid_posts_df = pd.read_json(post_covid_posts_df)
+    args = parser.parse_args()
+    return args
 
 #Groups together all the raw sentiment scores--not the averages per section 
 def group_raw_scores(df, l):
@@ -67,6 +69,8 @@ def t_test(df_pre, df_post, labels):
 
 #Runs the t-test for all labels pre and post COVID-19 for each CHUNK to see which chunks are significant 
 def t_test_chunks(df_pre, df_post, labels):
+	args = get_args()
+
 	for label in labels:
 		label_pre = group_raw_scores(df_pre, label)
 		label_post = group_raw_scores(df_post, label)
@@ -79,7 +83,7 @@ def t_test_chunks(df_pre, df_post, labels):
 		label_frame = pd.DataFrame(data = {'Statistics': stat, 'P-Values': p_value}, index = list(label_pre.keys()))
 		label_frame.index.name = f"{label}: Pre-Post Covid"
 		sig_vals = label_frame.get(label_frame['P-Values'] < .05)
-		label_frame.to_csv(f'{label}_chunks_labels.csv')
+		label_frame.to_csv(f'{args.chunks}{label}.csv')
 		print(label_frame)
 
 #Runs the t-test between each pair of labels pre and post COVID-19 to see how the differences changed in significance
@@ -115,6 +119,20 @@ def t_test_two_labels(df_1, df_2, tuples):
 	return label_frame
 
 def main():
+	args = get_args()
+
+    labels_df = compress_json.load(args.labeled_df)
+    labels_df = pd.read_json(labels_df)
+
+    birth_stories_df = compress_json.load(args.birth_stories_df)
+    birth_stories_df = pd.read_json(birth_stories_df)
+    
+    pre_covid_posts_df = compress_json.load(args.pre_covid_df)
+    pre_covid_posts_df = pd.read_json(pre_covid_posts_df)
+
+    post_covid_posts_df = compress_json.load(args.post_covid_df)
+    post_covid_posts_df = pd.read_json(post_covid_posts_df)
+
 	labels = list(labels_df.columns)
 	labels.remove('title')
 	labels.remove('created_utc')
@@ -123,13 +141,14 @@ def main():
 	labels.remove('Date')
 	labels.remove('selftext')
 	labels.remove('author')
-'''
+
+	'''
 	#Loaded these into CSVs
-	t_test(pre_covid_posts_df, post_covid_posts_df, labels).to_csv('overall_labels.csv')
+	t_test(pre_covid_posts_df, post_covid_posts_df, labels).to_csv(args.overall_labels)
 	t_test_chunks(pre_covid_posts_df, post_covid_posts_df, labels)
 	tuples = [('Positive', 'Negative'), ('Medicated', 'Unmedicated'), ('Home', 'Hospital'), ('Birth Center', 'Hospital'), ('First', 'Second'), ('C-Section', 'Vaginal')]
-	t_test_two_labels(pre_covid_posts_df,post_covid_posts_df, tuples).to_csv('pairs.csv')
-'''
+	t_test_two_labels(pre_covid_posts_df,post_covid_posts_df, tuples).to_csv(arg.pairs)
+	'''
 
 if __name__ == '__main__':
 	main()
