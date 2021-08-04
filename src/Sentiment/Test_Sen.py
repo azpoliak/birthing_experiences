@@ -33,6 +33,9 @@ def get_args():
     parser.add_argument("--june_nov_2020_df", default="../relevant_jsons/june_nov_2020_df.json.gz", help="path to df of the stories from COVID era 2", type=str)
     parser.add_argument("--nov_2020_apr_2021_df", default="../relevant_jsons/nov_2020_apr_2021_df.json.gz", help="path to df of the stories from COVID era 3", type=str)
     parser.add_argument("--apr_june_2021_df", default="../relevant_jsons/apr_june_2021_df.json.gz", help="path to df of the stories from COVID era 4", type=str)
+    
+    '''
+
     parser.add_argument("--compound_sent_output", default="../../data/Sentiment_Plots/Compound_Sentiment_Plot_", help="path to save png plot with compound sentiment of stories", type=str)
     parser.add_argument("--pos_neg_sent_output", default="../../data/Sentiment_Plots/Pos_Neg_Sentiment_Plot_", help="path to save png plot with pos/neg sentiment of stories", type=str)
     parser.add_argument("--all", default="../../data/Sentiment_Plots/All_Plot_", help="path to save png plot with sentiment of all stories", type=str)
@@ -40,6 +43,16 @@ def get_args():
     parser.add_argument("--four_sects", default="../../data/Sentiment_Plots/4_Section_Sentiment_Plots/4_Sects_Pre_Post_Plot_", help="path to save png plot with sentiment of stories per label with 4 COVID eras", type=str)
     parser.add_argument("--label", default="../../data/Sentiment_Plots/Singular_Labels/Pre_Post_Plot_", help="path to save png plot with sentiment of stories per label", type=str)
     parser.add_argument("--diff", default="../../data/Sentiment_Plots/Differences_Plotted/Diff_Plot_", help="path to save png plot with differences of sentiment of stories betweem label pairs", type=str)
+    
+    '''
+    parser.add_argument("--compound_sent_output", default="../../data/Sentiment_Plots/Testing/Compound_Sentiment_Plot_", help="path to save png plot with compound sentiment of stories", type=str)
+    parser.add_argument("--pos_neg_sent_output", default="../../data/Sentiment_Plots/Testing/Pos_Neg_Sentiment_Plot_", help="path to save png plot with pos/neg sentiment of stories", type=str)
+    parser.add_argument("--all", default="../../data/Sentiment_Plots/Testing/All_Plot_", help="path to save png plot with sentiment of all stories", type=str)
+    parser.add_argument("--pre_post", default="../../data/Sentiment_Plots/Testing/Pre_Post_Plot_", help="path to save png plot with sentiment of stories per label pair, 4 lines per graph", type=str)
+    parser.add_argument("--four_sects", default="../../data/Sentiment_Plots/Testing/4_Sects_Pre_Post_Plot_", help="path to save png plot with sentiment of stories per label with 4 COVID eras", type=str)
+    parser.add_argument("--label", default="../../data/Sentiment_Plots/Testing/Pre_Post_Plot_", help="path to save png plot with sentiment of stories per label", type=str)
+    parser.add_argument("--diff", default="../../data/Sentiment_Plots/Testing/Diff_Plot_", help="path to save png plot with differences of sentiment of stories betweem label pairs", type=str)
+    
     args = parser.parse_args()
     return args
 
@@ -127,6 +140,7 @@ def comp_sents(dfs, name):
         plt.ylabel('Sentiment')
         plt.legend()
     plt.savefig(f'{args.compound_sent_output}{name}.png')
+    plt.clf()
 
 #Plots Positive vs. Negative Sentiment 
 def pos_neg_sents(dfs):
@@ -156,7 +170,7 @@ def pos_neg_sents(dfs):
         plt.title('Positive vs. Negative Sentiment')
         plt.legend()
         plt.savefig(f'{args.pos_neg_sent_output}{df.name}.png')
-    plt.clf()
+        plt.clf()
 
 #Plots two labels (ex. medicated vs. unmedicated) 
 def label_frames(dfs, tuples, x):
@@ -230,40 +244,40 @@ def label_frame(dfs, labels, t):
 #Plots only the difference between pre and post COVID-19 between the two labels 
 def difference_pre_post(dfs, tuples):
     args = get_args()
-    
-        for tup in tuples:
-            for df in dfs:
-                label_one = df[['title', 'selftext']].get(df[tup[0]] == True)
-                label_two = df[['title', 'selftext']].get(df[tup[1]] == True)
 
-                label_one['tokenized sentences'] = label_one['selftext'].apply(tokenize.sent_tokenize)    
-                label_two['tokenized sentences'] = label_two['selftext'].apply(tokenize.sent_tokenize)    
+    for tup in tuples:
+        for df in dfs:
+            label_one = df[['title', 'selftext']].get(df[tup[0]] == True)
+            label_two = df[['title', 'selftext']].get(df[tup[1]] == True)
 
-                label_one['sentiment groups'] = label_one['tokenized sentences'].apply(split_story_10_sentiment)
-                label_two['sentiment groups'] = label_two['tokenized sentences'].apply(split_story_10_sentiment)
+            label_one['tokenized sentences'] = label_one['selftext'].apply(tokenize.sent_tokenize)    
+            label_two['tokenized sentences'] = label_two['selftext'].apply(tokenize.sent_tokenize)    
 
-                label_one['comp sent per group'] = label_one['sentiment groups'].apply(per_group, args = ('compound',))
-                label_two['comp sent per group'] = label_two['sentiment groups'].apply(per_group, args = ('compound',))
+            label_one['sentiment groups'] = label_one['tokenized sentences'].apply(split_story_10_sentiment)
+            label_two['sentiment groups'] = label_two['tokenized sentences'].apply(split_story_10_sentiment)
 
-                sentiment_over_narrative_one = dict_to_frame(label_one['comp sent per group'])
-                sentiment_over_narrative_one.index.name = 'Sections'
+            label_one['comp sent per group'] = label_one['sentiment groups'].apply(per_group, args = ('compound',))
+            label_two['comp sent per group'] = label_two['sentiment groups'].apply(per_group, args = ('compound',))
 
-                sentiment_over_narrative_two = dict_to_frame(label_two['comp sent per group'])
-                sentiment_over_narrative_two.index.name = 'Sections'
+            sentiment_over_narrative_one = dict_to_frame(label_one['comp sent per group'])
+            sentiment_over_narrative_one.index.name = 'Sections'
 
-                if tup[0] == 'Negative' or 'Second' or 'Birth Center' or tup[1] == 'Negative' or 'Second' or 'Birth Center':
-                    sentiment_over_narrative_two['Sentiments']*=-1
+            sentiment_over_narrative_two = dict_to_frame(label_two['comp sent per group'])
+            sentiment_over_narrative_two.index.name = 'Sections'
 
-                #Plotting each difference over narrative time
-                d = sentiment_over_narrative_one['Sentiments'] - sentiment_over_narrative_two['Sentiments']
-                
-                plt.plot(d, label = df.name)
-                plt.xlabel('Story Time')
-                plt.ylabel('Difference between Sentiments')
-                plt.title(f'{tup[0]} vs. {tup[1]} Birth Sentiments')
-                plt.legend()
-                plt.savefig(f'{args.diff}{tup[0]}_{tup[1]}.png')
-            plt.clf()
+            if tup[0] == 'Negative' or 'Second' or 'Birth Center' or tup[1] == 'Negative' or 'Second' or 'Birth Center':
+                sentiment_over_narrative_two['Sentiments']*=-1
+
+            #Plotting each difference over narrative time
+            d = sentiment_over_narrative_one['Sentiments'] - sentiment_over_narrative_two['Sentiments']
+            
+            plt.plot(d, label = df.name)
+            plt.xlabel('Story Time')
+            plt.ylabel('Difference between Sentiments')
+            plt.title(f'{tup[0]} vs. {tup[1]} Birth Sentiments')
+            plt.legend()
+            plt.savefig(f'{args.diff}{tup[0]}_{tup[1]}.png')
+        plt.clf()
 
 #Samples the split stories from a dataframe 
 #Start is the starting section and end is the ending section, ex. sec1-7
@@ -329,12 +343,15 @@ def main():
 
     tuples = [('Positive', 'Negative'), ('Medicated', 'Unmedicated'), ('Home', 'Hospital'), ('Birth Center', 'Hospital'), ('First', 'Second'), ('C-Section', 'Vaginal')]
 
-    '''
+    #Plots per COVID era
+    label_frame([pre_covid_posts_df, mar_june_2020_df, june_nov_2020_df, nov_2020_apr_2021_df, apr_june_2021_df], labels, True)
+    
+'''
     #Plots per label
     label_frame([pre_covid_posts_df, post_covid_posts_df], labels, False)
     
     #Plots per COVID era
-    label_frame([mar_june_2020_df, june_nov_2020_df, nov_2020_apr_2021_df, apr_june_2021_df], labels, True)
+    label_frame([pre_covid_posts_df, mar_june_2020_df, june_nov_2020_df, nov_2020_apr_2021_df, apr_june_2021_df], labels, True)
     
     #Plots per pair of labels (4 lines)
     label_frames([pre_covid_posts_df, post_covid_posts_df], tuples, False)
@@ -345,15 +362,21 @@ def main():
     #Compound sentiment--entire dataset 
     comp_sents([birth_stories_df], "Overall")
 
-    #Comparing labels--entire dataset
-    #label_frames([labels_df], tuples, True)
+    #Split based on positive vs. negative sentiment--entire dataset 
+    pos_neg_sents([birth_stories_df])
+
+    #Now, split based on positive vs. negative sentiment-- this plot should have 4 lines
+    pos_neg_sents([pre_covid_posts_df, post_covid_posts_df])
+
+    #Comparing labels--entire dataset--only relevant for pos vs. neg framed stories
+    label_frames([labels_df], tuples, True)
 
     #Pre and Post Covid Sentiments
     #Starting with Compound Sentiment
     comp_sents([pre_covid_posts_df, post_covid_posts_df], "Pre_Post")
 
-    #For the 4 time frames of Covid
-    comp_sents([mar_june_2020_df, june_nov_2020_df, nov_2020_apr_2021_df, apr_june_2021_df], "4_Sects")
+    #For the 4 time frames of Covid + pre-covid
+    comp_sents([pre_covid_posts_df, mar_june_2020_df, june_nov_2020_df, nov_2020_apr_2021_df, apr_june_2021_df], "4_Sects")
 
     #Stories mentioning Covid vs. Not
     #Compound Sentiment
@@ -367,14 +390,6 @@ def main():
     no_covid_df.name = 'No_Covid_Mention'
 
     comp_sents([covid_df, no_covid_df], 'Covid')
-
-    #Split based on positive vs. negative sentiment--entire dataset 
-    pos_neg_sents([birth_stories_df])
-
-    #Now, split based on positive vs. negative sentiment-- this plot should have 4 lines
-    pos_neg_sents([pre_covid_posts_df, post_covid_posts_df])
-
-    '''
-
+'''
 if __name__ == '__main__':
     main()
