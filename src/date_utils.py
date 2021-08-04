@@ -15,14 +15,6 @@ def get_post_year(series):
     year = parsed_date.year
     return year
 
-#True/False column based on before and after pandemic 
-def pandemic(date):
-    start_date = datetime.strptime("11 March, 2020", "%d %B, %Y")
-    if date > start_date:
-        return False
-    else:
-        return True
-
 #turns utc timestamp into datetime object
 def get_post_month(series):
     parsed_date = datetime.utcfromtimestamp(series)
@@ -36,6 +28,14 @@ def this_year(date, y):
         return True
     else:
         return False
+
+#True/False column based on before and after pandemic 
+def pandemic(date):
+    start_date = datetime.strptime("11 March, 2020", "%d %B, %Y")
+    if date > start_date:
+        return False
+    else:
+        return True
 
 #labels the dataframe with True or False based on whether the date the post was created falls within the inputed start and end date
 def pandemic_eras(series, start_date, end_date):

@@ -1,3 +1,6 @@
+"""
+Trains topic models for any range of topics and chooses best model based on computed c_v coherence
+"""
 import argparse
 import pandas as pd
 import compress_json
@@ -11,8 +14,8 @@ from gensim.models import CoherenceModel
 
 from matplotlib import pyplot as plt
 
-from topic_utils import remove_emojis, process_s, get_all_chunks_from_column
-from text_utils import split_story_10
+from topic_utils import get_all_chunks_from_column
+from text_utils import remove_emojis, process_s, split_story_10
 
 
 def get_args():
@@ -23,6 +26,9 @@ def get_args():
     parser.add_argument("--path_to_mallet", default="/home/daphnaspira/birthing_experiences/src/mallet-2.0.8/bin/mallet", help="path where mallet is installed", type=str)
     parser.add_argument("--path_to_save", default="Topic_Modeling/output", help="output path to store topic modeling training data", type=str)
     parser.add_argument("--output_coherence_plot", default="/home/daphnaspira/birthing_experiences/data/Topic_Modeling_Data/topic_coherences.png", help="output path to store line plot of coherence scores")
+    parser.add_argument("--start", default=5, help="start value for range of numbers of topics to train the model on")
+    parser.add_argument("--stop", default=55, help="stop value for range of numbers of topics to train the model on")
+    parser.add_argument("--step", default=5, help="step value for range of numbers of topics to train the model on")
     args = parser.parse_args()
     print(args)
     return args
@@ -101,7 +107,7 @@ def main():
 
 	coherences = {}
 	highest_coherence = 0
-	for k in range(5, 55, 5):
+	for k in range(args.start, args.stop, args.step):
 
 		if not os.path.exists(f"{args.path_to_save}/{k}"):
 			os.mkdir(f"{args.path_to_save}/{k}")
@@ -119,9 +125,6 @@ def main():
 
 	#4. which score had the highest coherence
 	print(highest_coherence)
-
-	#5. only store whichever topic model had the best
-
 
 if __name__ == "__main__":
     main()

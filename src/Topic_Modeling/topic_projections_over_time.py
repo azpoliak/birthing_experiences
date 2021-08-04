@@ -1,18 +1,25 @@
+"""
+Loads topic distributions, groups scores by post month, trains a Prophet forecast model on posts before COVID,
+projects probabilities for COVID-era months, compares forecasted data to actual data with a z-test,
+plots forecasted data (with 95% confidence interval) compared to actual data for topics that were 
+statistically significant in their differences.
+"""
 
-import little_mallet_wrapper as lmw
 import pandas as pd
-import argparse
-from matplotlib import pyplot as plt
-from scipy import stats
-from scipy.stats import norm, pearsonr
 import compress_json
 import os
 import numpy as np 
+import argparse
+
+import little_mallet_wrapper as lmw
 from prophet import Prophet
+from scipy import stats
+from scipy.stats import norm, pearsonr
+
+from matplotlib import pyplot as plt
+
 from date_utils import get_post_month
 from topic_utils import average_per_story, top_5_keys
-
-#import pdb; pdb.set_trace()
 
 def get_args():
     parser = argparse.ArgumentParser("Load topic distributions, train Prophet model for projection, apply z-test for statistical significance, plot topics that are statistically significant.")
