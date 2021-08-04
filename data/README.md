@@ -4,14 +4,13 @@ Put data in this repository
 
 ### Structure
 
-- `Corpus_Stats_Plots` - bar graph of number of posts made per year and histogram of number of words in stories.
-- `Personas_Plots` - line plots of persona mention over story time and table with persona statistics.
-- `Personas_Pre_Post` - line plots of persona mention over story time, compared between the pre- and post-COVID corpuses.
-- `Personas_Throughout_COVID` - line plots of persona mention over story time, compared between the pre-COVID and four eras of COVID.
-- `Sentiment_Plots` - line plots for story sentiment over story time.
-- `Topic_Models_Over_Time` - line plots for each of 50 topics' probability over time (2010-2021).
-- `Topic_Plots` - line plots for each of 50 topics distributed across story time.
-- `original-reddit` - put the original downloaded reddit data here. Do not push the data from that directory to the remote server
-- `subreddit_years_bar_graphs` - bar graphs showing the number of posts made in each subreddit per year.
-- `Posts_per_Month_Covid_bar.png` - bar graph showing number of posts made during each month of COVID (March 2020 to June 2021).
-- `label_counts_df.csv` - table with number of counts for each label.
+- `Corpus_Stats_Plots/`: contains bar graph of number of posts made per year and histogram of number of words in stories.
+- `Personas_Data/`: contains data and plots related to persona analysis.
+- `Sentiment_Plots/`: contains line plots for story sentiment over story time.
+- `Sentiment_T_Tests/`: statistical analysis on sentiment differences before and during COVID-19.
+- `Topic_Modeling_Data/`: contains data and plots related to topic modeling.
+- `Home_vs_Hospital_Births_Covid.png`: bar graph showing number of posts in each year labeled as "home" or "hospital".
+- `original-reddit/`: put the original downloaded reddit data here. Do not push the data from that directory to the remote server.
+- `covid_ngrams.json`: dictionary with the n-grams that map to the "COVID" label used to label posts as mentioning COVID-19.
+- `label_counts_df.csv`: table with number of counts for each label.
+- `labels_ngrams.json`: dictionary with labels used to label the posts based on their titles and the n-grams that map to each label.
