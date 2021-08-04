@@ -71,14 +71,6 @@ def top_5_keys(lst):
         top5_per_list.append(joined)
     return top5_per_list
 
-#turns utc timestamp into datetime object
-def get_post_month(series):
-    parsed_date = datetime.utcfromtimestamp(series)
-    to_dt = pd.to_datetime(parsed_date)
-    year = to_dt.year
-    months = to_dt.to_period('M')
-    return months
-
 #makes line plot for each topic over time (2010-2021)
 def topic_plots(df, output_path):
     fig = plt.figure(figsize=(15,8))
