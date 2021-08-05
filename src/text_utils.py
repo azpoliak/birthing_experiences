@@ -3,7 +3,26 @@ from nltk import tokenize
 import numpy as np
 import pandas as pd
 from datetime import datetime
+import compress_json
 
+#Function to read all dataframes 
+def load_data(path_to_birth_stories, path_to_pre_covid, path_to_post_covid, path_to_labels):
+    
+    labels_df = compress_json.load(path_to_labels)
+    labels_df = pd.read_json(labels_df)
+
+    birth_stories_df = compress_json.load(path_to_birth_stories)
+    birth_stories_df = pd.read_json(birth_stories_df)
+    
+    pre_covid_posts_df = compress_json.load(path_to_pre_covid)
+    pre_covid_posts_df = pd.read_json(pre_covid_posts_df)
+
+    post_covid_posts_df = compress_json.load(path_to_post_covid)
+    post_covid_posts_df = pd.read_json(post_covid_posts_df)
+
+    return labels_df, birth_stories_df, pre_covid_posts_df, post_covid_posts_df
+
+#Function for story length
 def story_lengths(series):
     lowered = series.lower()
     tokenized = nltk.word_tokenize(lowered)
@@ -55,6 +74,25 @@ def pandemic(date):
         return False
     else:
         return True
+
+#functions to assign labels to posts based on their titles
+def findkey(title, labels):
+    x = False
+    for label in labels:
+        if label in title:
+            x = True
+    return x
+
+def findkeydisallow(title, labels, notlabels):
+    x = False
+    for label in labels:
+        if label in title:
+            for notlabel in notlabels:
+                if notlabel in title:
+                    return x
+                else:
+                    x = True
+    return x
 
 def create_df_label_list(df, column, dct, disallows):
     label_counts = []
