@@ -1,15 +1,25 @@
+"""
+Loads topic distributions, groups scores by post month, trains a Prophet forecast model on posts before COVID,
+projects probabilities for COVID-era months, compares forecasted data to actual data with a z-test,
+plots forecasted data (with 95% confidence interval) compared to actual data for topics that were 
+statistically significant in their differences.
+"""
+
+import pandas as pd
+import compress_json
+import os
+import numpy as np 
+import argparse
 
 import little_mallet_wrapper as lmw
-import pandas as pd
-import argparse
-from matplotlib import pyplot as plt
+from prophet import Prophet
 from scipy import stats
 from scipy.stats import norm, pearsonr
-import compress_json
+
+from matplotlib import pyplot as plt
+
 from date_utils import get_post_month
 from topic_utils import average_per_story, top_5_keys
-
-#import pdb; pdb.set_trace()
 
 def get_args():
     parser = argparse.ArgumentParser("Load topic distributions, train Prophet model for projection, apply z-test for statistical significance, plot topics that are statistically significant.")
@@ -50,7 +60,7 @@ def topic_distributions(file_path, topic_key_path):
     return story_topics_df
 
 def combine_topics_and_months(birth_stories_df, story_topics_df):
-    #load in data so that we can attach dates to stories
+	#load in data so that we can attach dates to stories
 	birth_stories_df = compress_json.load(birth_stories_df)
 	birth_stories_df = pd.read_json(birth_stories_df)
 
@@ -98,6 +108,8 @@ def ztest(actual, forecast, percent):
 def predict_topic_trend(df, df2, topic_forecasts_plots_output, ztest_output):
 	fig = plt.figure(figsize=(15,10))
 	ax = fig.add_subplot(111)
+	pre_ztest_dict = {}
+	post_ztest_dict = {}
 	for i in range(df.shape[1]):
 		ax.clear()
 		topic_label = df.iloc[:, i].name
@@ -114,17 +126,18 @@ def predict_topic_trend(df, df2, topic_forecasts_plots_output, ztest_output):
 		m = Prophet()
 		m.fit(topic)
 
-		future = m.make_future_dataframe(periods=15, freq='MS')
+		future = m.make_future_dataframe(periods=16, freq='MS')
 
-		forecast_df = m.predict(future)
-		#forecast.to_csv(f'{args.topic_forecasts_data_output}/{topic_label}_forecasts.csv')
+		forecast = m.predict(future)
 
 		values = df2.loc[:, topic_label]
 
+		#import pdb; pdb.set_trace()
+
 		#finds values that are outside of the forecasted confidence interval
 		inside_forecast = []
-		for i in range(len(values)):
-			inside_forecast.append(forecast["yhat_lower"][i] <= values[i] <= forecast["yhat_upper"][i])
+		for j in range(len(values)):
+			inside_forecast.append(forecast["yhat_lower"][j] <= values[j] <= forecast["yhat_upper"][j])
 		values_df = values.to_frame()
 		values_df['inside_forecast'] = inside_forecast
 
@@ -141,11 +154,11 @@ def predict_topic_trend(df, df2, topic_forecasts_plots_output, ztest_output):
 		percent_post = (len(outside_ci_post)/len(post))
 		
 		#z-test
-		ztest_vals_pre = ztest(pre[file_name], forecast_pre['yhat'], percent_pre)
-		pre_ztest_dict[file_name] = ztest_vals_pre
+		ztest_vals_pre = ztest(pre[topic_label], forecast_pre['yhat'], percent_pre)
+		pre_ztest_dict[topic_label] = ztest_vals_pre
 
-		ztest_vals_post = ztest(pre[file_name], forecast_pre['yhat'], percent_post)
-		post_ztest_dict[file_name] = ztest_vals_post
+		ztest_vals_post = ztest(pre[topic_label], forecast_pre['yhat'], percent_post)
+		post_ztest_dict[topic_label] = ztest_vals_post
 
 		if ztest_vals_post[1] < 0.05:
 			fig1 = m.plot(forecast, xlabel='Date', ylabel='Topic Probability', ax=ax)
