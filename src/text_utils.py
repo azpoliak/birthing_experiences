@@ -56,6 +56,25 @@ def pandemic(date):
     else:
         return True
 
+#functions to assign labels to posts based on their titles
+def findkey(title, labels):
+    x = False
+    for label in labels:
+        if label in title:
+            x = True
+    return x
+
+def findkeydisallow(title, labels, notlabels):
+    x = False
+    for label in labels:
+        if label in title:
+            for notlabel in notlabels:
+                if notlabel in title:
+                    return x
+                else:
+                    x = True
+    return x
+
 def create_df_label_list(df, column, dct, disallows):
     label_counts = []
     for label in list(dct):
