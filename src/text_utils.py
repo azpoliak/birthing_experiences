@@ -107,3 +107,11 @@ def create_df_label_list(df, column, dct, disallows):
             df[label] = df[column].apply(lambda x: findkeydisallow(x, dct[label][0], dct[label][1]))
             label_counts.append(df[label].value_counts()[1]) 
     return label_counts
+
+#Function to read all dataframes 
+def load_data(path_to_birth_stories):
+
+    birth_stories_df = compress_json.load(path_to_birth_stories)
+    birth_stories_df = pd.read_json(birth_stories_df)
+
+    return birth_stories_df
