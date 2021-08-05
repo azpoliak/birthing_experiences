@@ -11,7 +11,7 @@ import re
 import warnings
 import compress_json
 warnings.filterwarnings("ignore")
-from text_utils import get_post_date, pandemic, create_df_label_list, load_data
+from text_utils import get_post_date, pandemic, create_df_label_list, load_data_bf
 import argparse
 import json
 
@@ -86,7 +86,7 @@ def main():
 
     args = get_args()
 
-    birth_stories_df = load_data(args.birth_stories_df)
+    birth_stories_df = load_data_bf(args.birth_stories_df)
 
     with open(args.labels_ngrams, 'r') as fp:
         labels_and_n_grams = json.load(fp)
