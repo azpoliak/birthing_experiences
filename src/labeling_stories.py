@@ -11,7 +11,7 @@ import re
 import warnings
 import compress_json
 warnings.filterwarnings("ignore")
-from text_utils import get_post_date, pandemic, create_df_label_list
+from text_utils import get_post_date, pandemic, create_df_label_list, load_data
 import argparse
 import json
 
@@ -33,14 +33,6 @@ def get_args():
 
     args = parser.parse_args()
     return args
-
-#Function to read all dataframes 
-def load_data(path_to_birth_stories):
-
-    birth_stories_df = compress_json.load(path_to_birth_stories)
-    birth_stories_df = pd.read_json(birth_stories_df)
-
-    return birth_stories_df
 
 def create_dict(df, labels, not_labels, descriptions):
     args = get_args()
