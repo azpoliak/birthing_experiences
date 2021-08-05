@@ -1,10 +1,7 @@
 import pandas as pd
 import numpy as np
 from matplotlib import pyplot as plt
-from little_mallet_wrapper import process_string
-import warnings
 import compress_json
-warnings.filterwarnings("ignore")
 import argparse
 import nltk
 from nltk import tokenize
@@ -74,60 +71,52 @@ def count_chunks(series, dc):
         mentions.append(counter(chunk, dc))
     return mentions
 
-def create_personas_dict(dfs, personas_and_n_grams, persona_counts_output):
-    #dictionary to save the dfs to at the end of the for loop for easy reference for plotting
-    d = {}
-    dict_for_stats = {}
-    #iterate through each df in the list above and return a df of average mentions for each persona for each chunk of the average story
-    for df in dfs:
-        df_name = df.name
-        
-        #Dataframe with only story text column
-        persona_df = df[['selftext']]
+def get_personas_stats(persona_df, df_name, personas_and_n_grams, dict_for_stats, persona_counts_output):
+    #stories containing mentions of personas:
+    total_mentions = persona_df['selftext'].apply(lambda x: counter(x, personas_and_n_grams))
 
-        #stories containing mentions of personas:
-        total_mentions = persona_df['selftext'].apply(lambda x: counter(x, personas_and_n_grams))
+    #finds sum for all stories
+    a = np.array(list(total_mentions))
+    number_mentions = a.sum(axis=0)
 
-        #finds sum for all stories
-        a = np.array(list(total_mentions))
-        number_mentions = a.sum(axis=0)
+    #makes df w all values for t-test in Persona_Stats.py
+    number_mentions_df = pd.DataFrame(np.row_stack(a))
+    number_mentions_df.columns = personas_and_n_grams
+    dict_for_stats[df_name] = number_mentions_df
 
-        #makes df w all values for t-test in Persona_Stats.py
-        number_mentions_df = pd.DataFrame(np.row_stack(a))
-        number_mentions_df.columns = personas_and_n_grams
-        dict_for_stats[df_name] = number_mentions_df
+    story_counts = create_df_label_list(persona_df, 'selftext', personas_and_n_grams, [])
 
-        story_counts = create_df_label_list(persona_df, 'selftext', personas_and_n_grams, [])
+    #average number of mentions per story
+    avg_mentions = number_mentions/story_counts
 
-        #average number of mentions per story
-        avg_mentions = number_mentions/story_counts
+    #applying functions and making a dictionary of the results for mentions accross stories
+    personas_dict = {'Personas': list(personas_and_n_grams),
+          'N-Grams': list(personas_and_n_grams.values()),
+          'Total Mentions': number_mentions,
+          'Stories Containing Mentions': story_counts, 
+          'Average Mentions per Story': avg_mentions}
 
-        #applying functions and making a dictionary of the results for mentions accross stories
-        personas_dict = {'Personas': list(personas_and_n_grams),
-              'N-Grams': list(personas_and_n_grams.values()),
-              'Total Mentions': number_mentions,
-              'Stories Containing Mentions': story_counts, 
-              'Average Mentions per Story': avg_mentions}
+    #turn dictionary into a dataframe
+    personas_counts_df = pd.DataFrame(personas_dict, index=np.arange(10))
 
-        #turn dictionary into a dataframe
-        personas_counts_df = pd.DataFrame(personas_dict, index=np.arange(10))
+    personas_counts_df.set_index('Personas', inplace = True)
+    personas_counts_df.to_csv(f'{persona_counts_output}{df_name}.csv')
+    return personas_dict, dict_for_stats[df_name]
 
-        personas_counts_df.set_index('Personas', inplace = True)
-        personas_counts_df.to_csv(f'{persona_counts_output}{df_name}.csv')
+def count_personas_by_chunk(persona_df, df_name, personas_and_n_grams, personas_dict, d):
+    #distributing across the course of the stories
+    persona_df['10 chunks/story'] = persona_df['selftext'].apply(split_story_10)
 
-        #distributing across the course of the stories
-        persona_df['10 chunks/story'] = persona_df['selftext'].apply(split_story_10)
+    mentions_by_chunk = persona_df['10 chunks/story'].apply(lambda x: count_chunks(x, personas_and_n_grams))
 
-        mentions_by_chunk = persona_df['10 chunks/story'].apply(lambda x: count_chunks(x, personas_and_n_grams))
+    b = np.array(list(mentions_by_chunk))
+    chunk_mentions = b.mean(axis=0)
 
-        b = np.array(list(mentions_by_chunk))
-        chunk_mentions = b.mean(axis=0)
+    personas_chunks_df = pd.DataFrame(chunk_mentions)
+    personas_chunks_df.set_axis(list(personas_dict['Personas']), axis=1, inplace=True)
 
-        personas_chunks_df = pd.DataFrame(chunk_mentions)
-        personas_chunks_df.set_axis(list(personas_dict['Personas']), axis=1, inplace=True)
-
-        d[df_name] = personas_chunks_df
-    return d, dict_for_stats
+    d[df_name] = personas_chunks_df
+    return d[df_name]
 
 #performs the t-test
 def ttest(df, df2, chunks=False, save=True, persona_chunk_stats_output=False, persona_stats_output=True):
@@ -166,9 +155,9 @@ def ttest(df, df2, chunks=False, save=True, persona_chunk_stats_output=False, pe
         else:
             return
 
-def run_ttest(dict_for_stats, persona_stats_output, normalizing_ratio):
-    pre_covid_persona_mentions = dict_for_stats['pre_covid']
-    post_covid_persona_mentions = dict_for_stats['post_covid']
+def run_ttest(dict_for_stats, pre_covid, post_covid, persona_stats_output, normalizing_ratio):
+    pre_covid_persona_mentions = dict_for_stats[pre_covid]
+    post_covid_persona_mentions = dict_for_stats[post_covid]
 
     normalized_personas = pre_covid_persona_mentions*normalizing_ratio
 
@@ -186,13 +175,12 @@ def plot_personas(d, normalizing_ratio, pre_post_plot_output_folder, throughout_
     normalized_pre = pre_covid_personas_df*normalizing_ratio
 
     #plots each persona across the story for each df.
-    make_plots(normalized_pre, post_covid_personas_df, pre_post_plot_output_folder)
-    make_plots(normalized_pre, mar_june_personas_df, june_nov_personas_df, nov_apr_personas_df, apr_june_personas_df, throughout_covid_output_folder)
+    make_plots(pre_df=normalized_pre, post_df=post_covid_personas_df, pre_post_plot_output_folder=pre_post_plot_output_folder)
+    make_plots(pre_df=normalized_pre, throughout=True, m_j_df=mar_june_personas_df, j_n_df=june_nov_personas_df, n_a_df=nov_apr_personas_df, a_j_df=apr_june_personas_df, throughout_covid_output_folder=throughout_covid_output_folder)
 
 def main():
     args = get_args()
     normalizing_ratio=(1182.53/1427.09)
-
     #loads data
     labels_df, birth_stories_df, pre_covid_posts_df, post_covid_posts_df, personas_and_n_grams = load_data_for_personas(args.labeled_df, args.birth_stories_df, args.pre_covid_df, args.post_covid_df, args.persona_ngrams)
     
@@ -207,13 +195,21 @@ def main():
 
     #list of dfs to iterate through in the for loop
     dfs = (birth_stories_df, pre_covid_posts_df, post_covid_posts_df, cvd.mar_june_2020_df, cvd.june_nov_2020_df, cvd.nov_2020_apr_2021_df, cvd.apr_june_2021_df)
-
-    #counts personas for all the dfs in the list dfs
-    d, dict_for_stats = create_personas_dict(dfs, personas_and_n_grams, args.persona_counts_output)
+    
+    #dictionary to save the dfs to at the end of the for loop for easy reference for plotting
+    d = {}
+    dict_for_stats = {}
+    #iterate through each df in the list above and return a df of average mentions for each persona for each chunk of the average story
+    for df in dfs:
+        df_name = df.name
+        #Dataframe with only story text column
+        persona_df = df[['selftext']]
+        personas_dict, dict_for_stats[df_name] = get_personas_stats(persona_df, df_name, personas_and_n_grams, dict_for_stats, args.persona_counts_output)
+        d[df_name] = count_personas_by_chunk(persona_df, df_name, personas_and_n_grams, personas_dict, d)
 
     #computes statistical significance
-    run_ttest(dict_for_stats, args.persona_stats_output, normalizing_ratio)
-    #plots persona frequencies
+    run_ttest(dict_for_stats, 'pre_covid', 'post_covid', args.persona_stats_output, normalizing_ratio)
+    #plots persona frequencies over narrative time
     plot_personas(d, normalizing_ratio, args.pre_post_plot_output_folder, args.throughout_covid_output_folder)
 
 if __name__ == "__main__":
