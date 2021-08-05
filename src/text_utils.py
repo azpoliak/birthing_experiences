@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 from datetime import datetime
 
+#Function for story length
 def story_lengths(series):
     lowered = series.lower()
     tokenized = nltk.word_tokenize(lowered)
