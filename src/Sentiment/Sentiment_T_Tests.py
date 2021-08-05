@@ -22,6 +22,7 @@ import compress_json
 from scipy import stats
 import argparse
 import Test_Sen as ts
+from text_utils import load_data
 warnings.filterwarnings("ignore")
 
 def get_args():
@@ -38,24 +39,6 @@ def get_args():
 
     args = parser.parse_args()
     return args
-
-#Function to read all dataframes 
-def load_data(path_to_birth_stories, path_to_pre_covid, path_to_post_covid, path_to_labels):
-	args = get_args()
-
-	labels_df = compress_json.load(path_to_labels)
-    labels_df = pd.read_json(labels_df)
-
-    birth_stories_df = compress_json.load(path_to_birth_stories)
-    birth_stories_df = pd.read_json(birth_stories_df)
-    
-    pre_covid_posts_df = compress_json.load(path_to_pre_covid)
-    pre_covid_posts_df = pd.read_json(pre_covid_posts_df)
-
-    post_covid_posts_df = compress_json.load(path_to_post_covid)
-    post_covid_posts_df = pd.read_json(post_covid_posts_df)
-
-    return labels_df, birth_stories_df, pre_covid_posts_df, post_covid_posts_df
 
 #Groups together all the raw sentiment scores--not the averages per section 
 def group_raw_scores(df, l):
