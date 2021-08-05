@@ -122,7 +122,7 @@ def t_test_two_labels(df_1, df_2, tuples):
 def main():
 	args = get_args()
 
-	dfs = labels_df, birth_stories_df, pre_covid_posts_df, post_covid_posts_df
+	dfs = birth_stories_df, pre_covid_posts_df, post_covid_posts_df, labels_df
 	dfs = load_data(args.birth_stories_df, args.pre_covid_posts_df, args.post_covid_posts_df, args.labels_df)
 
 	labels = list(labels_df.columns)
