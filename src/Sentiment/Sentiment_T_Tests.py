@@ -29,15 +29,33 @@ def get_args():
 
     #general dfs with story text
     parser.add_argument("--birth_stories_df", default="../birth_stories_df.json.gz", help="path to df with all birth stories", type=str)
-    parser.add_argument("--pre_covid_df", default="../relevant_jsons/pre_covid_posts_df.json.gz", help="path to df with all stories before March 11, 2020", type=str)
-    parser.add_argument("--post_covid_df", default="../relevant_jsons/post_covid_posts_df.json.gz", help="path to df with all stories on or after March 11, 2020", type=str)
-    parser.add_argument("--labeled_df", default="../relevant_jsons/labeled_df.json.gz", help="path to df of the stories labeled based on their titles", type=str)
+    parser.add_argument("--pre_covid_posts_df", default="../relevant_jsons/pre_covid_posts_df.json.gz", help="path to df with all stories before March 11, 2020", type=str)
+    parser.add_argument("--post_covid_posts_df", default="../relevant_jsons/post_covid_posts_df.json.gz", help="path to df with all stories on or after March 11, 2020", type=str)
+    parser.add_argument("--labels_df", default="../relevant_jsons/labeled_df.json.gz", help="path to df of the stories labeled based on their titles", type=str)
     parser.add_argument("--overall_labels", default="../data/Sentiment_T_Tests/overall_labels.csv", help="path to the t-test folder for all story labels", type=str)
     parser.add_argument("--pairs", default="../data/Sentiment_T_Tests/pairs.csv", help="path to the t-test folder for all story pair labels", type=str)
     parser.add_argument("--chunks", default="../../data/Sentiment_T_Tests/chunks_labels_", help="path to the t-test folder for each story label, broken up into chunks", type=str)
 
     args = parser.parse_args()
     return args
+
+#Function to read all dataframes 
+def load_data(path_to_birth_stories, path_to_pre_covid, path_to_post_covid, path_to_labels):
+	args = get_args()
+
+	labels_df = compress_json.load(path_to_labels)
+    labels_df = pd.read_json(labels_df)
+
+    birth_stories_df = compress_json.load(path_to_birth_stories)
+    birth_stories_df = pd.read_json(birth_stories_df)
+    
+    pre_covid_posts_df = compress_json.load(path_to_pre_covid)
+    pre_covid_posts_df = pd.read_json(pre_covid_posts_df)
+
+    post_covid_posts_df = compress_json.load(path_to_post_covid)
+    post_covid_posts_df = pd.read_json(post_covid_posts_df)
+
+    return labels_df, birth_stories_df, pre_covid_posts_df, post_covid_posts_df
 
 #Groups together all the raw sentiment scores--not the averages per section 
 def group_raw_scores(df, l):
@@ -121,17 +139,8 @@ def t_test_two_labels(df_1, df_2, tuples):
 def main():
 	args = get_args()
 
-    labels_df = compress_json.load(args.labeled_df)
-    labels_df = pd.read_json(labels_df)
-
-    birth_stories_df = compress_json.load(args.birth_stories_df)
-    birth_stories_df = pd.read_json(birth_stories_df)
-    
-    pre_covid_posts_df = compress_json.load(args.pre_covid_df)
-    pre_covid_posts_df = pd.read_json(pre_covid_posts_df)
-
-    post_covid_posts_df = compress_json.load(args.post_covid_df)
-    post_covid_posts_df = pd.read_json(post_covid_posts_df)
+	dfs = labels_df, birth_stories_df, pre_covid_posts_df, post_covid_posts_df
+	dfs = load_data(args.birth_stories_df, args.pre_covid_posts_df, args.post_covid_posts_df, args.labels_df)
 
 	labels = list(labels_df.columns)
 	labels.remove('title')
