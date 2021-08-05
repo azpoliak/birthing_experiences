@@ -20,8 +20,8 @@ import warnings
 import itertools
 import compress_json
 import argparse
-from text_utils import load_data 
-from date_utils import get_post_month
+from text_utils import load_data_bf
+from date_utils import get_post_month, pandemic 
 from topic_utils import average_per_story, top_5_keys, topic_distributions
 
 warnings.filterwarnings("ignore")
@@ -42,23 +42,35 @@ def combine_topics_and_months(birth_stories_df, story_topics_df):
 
     #combines story dates with topic distributions
     birth_stories_df.reset_index(drop=True, inplace=True)
-    dates_topics_df = pd.concat([birth_stories_df['created_utc', 'title', 'Pre-Covid'], story_topics_df], axis=1)
+    dates_topics_df = pd.concat([birth_stories_df['created_utc'], birth_stories_df['title'], birth_stories_df['selftext'], story_topics_df], axis=1)
 
     #converts the date into datetime object for year and month
     dates_topics_df['Date Created'] = dates_topics_df['created_utc'].apply(get_post_month)
     dates_topics_df['date'] = pd.to_datetime(dates_topics_df['Date Created'])
-    dates_topics_df.drop(columns=['Date Created', 'created_utc'], inplace=True)
 
     dates_topics_df = dates_topics_df.set_index('date')
-    print(dates_topics_df)
     return dates_topics_df
+
+def get_post_covid_posts(df):
+    df = df.sort_values(by = 'Date Created')
+    df['Pre-Covid'] = df['Date Created'].apply(pandemic)
+    df.drop(columns=['created_utc', 'Date Created'], inplace=True)
+    post_df = (df.get(df['Pre-Covid'] == False))
+    return post_df
+
+def get_samples(post_df, topics):
+    for topic in topics:
+        post_df = post_df.sort_values(by = topic)
+        topic_df = post_df.get(post_df[topic])
+        print(topic_df)
 
 def main():
     args = get_args()
-    birth_stories_df = load_data(args.birth_stories_df)
-
+    birth_stories_df = load_data_bf(args.birth_stories_df)
     story_topics_df = topic_distributions(args.topic_dist_path, args.topic_key_path)
     dates_topics_df = combine_topics_and_months(birth_stories_df, story_topics_df)
+    post_covid_posts = get_post_covid_posts(dates_topics_df)
+    get_samples(post_covid_posts, [''])
 
 if __name__ == "__main__":
     main()
