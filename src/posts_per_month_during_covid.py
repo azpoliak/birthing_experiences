@@ -45,16 +45,6 @@ def get_args():
     args = parser.parse_args()
     return args
 
-#to find the average story length between pre and post covid
-def avg_story_length(dfs):
-    for df in dfs: 
-        df['story length'] = df['selftext'].apply(story_lengths)
-
-        story_lens = list(df['story length'])
-        avg_story_length = np.round(np.mean(story_lens),2)
-
-        print(f'Average story length {df.name}: {avg_story_length}')
-
 #Turns the date column into a year-month datetime object
 def convert_datetime(post_covid_df):
 
@@ -109,11 +99,6 @@ def main():
     args = get_args()
 
     birth_stories_df, pre_covid_posts_df, post_covid_posts_df, labels_df = load_data(args.birth_stories_df, args.pre_covid_posts_df, args.post_covid_posts_df, args.labels_df)
-
-    pre_covid_posts_df.name = 'pre-covid'
-    post_covid_posts_df.name = 'post-covid'
-
-    #avg_story_length([pre_covid_posts_df, post_covid_posts_df])
 
     convert_datetime(post_covid_posts_df)
 
