@@ -1,8 +1,15 @@
 import nltk
 from nltk import tokenize
+nltk.download('stopwords')
+from nltk.corpus import stopwords
 import numpy as np
 import pandas as pd
 from datetime import datetime
+from matplotlib import pyplot as plt
+import little_mallet_wrapper as lmw
+from little_mallet_wrapper import process_string
+import redditcleaner
+import re
 import compress_json
 
 #Function to read all dataframes 
@@ -56,24 +63,19 @@ def split_story_10(string):
         split_story.append(' '.join(tokenized[i:i+rounded]))
     return split_story
 
-#translate created_utc column into dates
-def get_post_date(series):
-    parsed_date = datetime.utcfromtimestamp(series)
-    date = parsed_date
-    return date
+#processes the story using little mallet wrapper process_string function
+def process_s(s):
+    stop = stopwords.words('english')
+    new = lmw.process_string(s,lowercase=True,remove_punctuation=True, stop_words=stop)
+    return new
 
-def get_post_year(series):
-    parsed_date = datetime.utcfromtimestamp(series)
-    year = parsed_date.year
-    return year
-
-#True/False column based on before and after pandemic 
-def pandemic(date):
-    start_date = datetime.strptime("11 March, 2020", "%d %B, %Y")
-    if date > start_date:
-        return False
-    else:
-        return True
+#removes all emojis
+def remove_emojis(s):
+    regrex_pattern = re.compile(pattern = "["
+      u"\U0001F600-\U0001F64F"  # emoticons
+        u"\U0001F300-\U0001F5FF"  # symbols & pictographs
+                       "]+", flags = re.UNICODE)
+    return regrex_pattern.sub(r'',s)
 
 #functions to assign labels to posts based on their titles
 def findkey(title, labels):
@@ -108,36 +110,10 @@ def create_df_label_list(df, column, dct, disallows):
             label_counts.append(df[label].value_counts()[1]) 
     return label_counts
 
-def make_plots(pre_df, post_df):
-    fig = plt.figure()
-    ax = fig.add_subplot(111)
-    for i in range(pre_df.shape[1]):
-        ax.clear()
-        persona_label = pre_df.iloc[:, i].name
-        ax.plot(pre_df.iloc[:,i], label = f"Pre-Covid")
-        ax.plot(post_df.iloc[:,i], label = f"During Covid")
-        ax.set_title(f"{persona_label}", fontsize=24)
-        ax.set_xlabel('Story Time')
-        ax.set_ylabel('Persona Frequency')
-        ax.legend()
-        args = get_args()
-        fig.savefig(f'{args.pre_post_plot_output_folder}{persona_label}_pre_post_frequency.png')
+#Function to read all dataframes 
+def load_data_bf(path_to_birth_stories):
 
-#makes plots of persona mention over narrative time for any number of dfs
-def make_n_plots(pre_df, m_j_df, j_n_df, n_a_df, a_j_df):
-    fig = plt.figure(figsize=(15,10))
-    ax = fig.add_subplot(111)
-    for i in range(pre_df.shape[1]):
-        ax.clear()
-        persona_label = pre_df.iloc[:, i].name
-        ax.plot(pre_df.iloc[:,i], label = f"Pre-Covid: Normalized for Story Length")
-        ax.plot(m_j_df.iloc[:,i], label = f"March-June 2020")
-        ax.plot(j_n_df.iloc[:,i], label = f"June-Nov. 2020")
-        ax.plot(n_a_df.iloc[:,i], label = f"Nov. 2020-April 2021")
-        ax.plot(a_j_df.iloc[:,i], label = f"April-June 2021")
-        ax.set_title(f"{persona_label} Presence: Covid-19", fontsize= 20)
-        ax.set_xlabel('Story Time')
-        ax.set_ylabel('Persona Frequency')
-        ax.legend()
-        args = get_args()
-        fig.savefig(f'{args.throughout_covid_output_folder}{persona_label}_throughout_covid_frequency.png')
+    birth_stories_df = compress_json.load(path_to_birth_stories)
+    birth_stories_df = pd.read_json(birth_stories_df)
+
+    return birth_stories_df

@@ -106,7 +106,7 @@ def main():
 		#score the topic model
 
 	coherences = {}
-	highest_coherence = 0
+	highest_coherence = ()
 	for k in range(args.start, args.stop, args.step):
 
 		if not os.path.exists(f"{args.path_to_save}/{k}"):
@@ -117,7 +117,7 @@ def main():
 		coherence_score = lmw_coherence(topic_keys, training_data)
 
 		if coherence_score > highest_coherence:
-			highest_coherence = coherence_score
+			highest_coherence = (f"{k} topics: {coherence_score}")
 
 	coherences[k] = coherence_score
 	coherence_df = pd.Series(coherences, dtype='float64')

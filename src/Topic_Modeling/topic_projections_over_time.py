@@ -19,7 +19,7 @@ from scipy.stats import norm, pearsonr
 from matplotlib import pyplot as plt
 
 from date_utils import get_post_month
-from topic_utils import average_per_story, top_5_keys
+from topic_utils import average_per_story, top_5_keys, topic_distributions
 
 def get_args():
     parser = argparse.ArgumentParser("Load topic distributions, train Prophet model for projection, apply z-test for statistical significance, plot topics that are statistically significant.")
@@ -32,32 +32,6 @@ def get_args():
     parser.add_argument("--ztest_output", default="../data/Topic_Modeling_Data/Z_Test_Stats.csv")
     args = parser.parse_args()
     return args
-
-def topic_distributions(file_path, topic_key_path):
-	#makes df of the probabilities for each topic for each chunk of each story
-    topic_distributions = lmw.load_topic_distributions(file_path)
-    story_distributions =  pd.Series(topic_distributions)
-    story_topics_df = story_distributions.apply(pd.Series)
-
-    #goes through stories and names them based on the story number and chunk number
-    chunk_titles = []
-    for i in range(len(story_topics_df)//10):
-        for j in range(10):
-            chunk_titles.append(str(i) + ":" + str(j))
-
-    story_topics_df['chunk_titles'] = chunk_titles
-
-    #groups every ten stories together and finds the average for each story
-    story_topics_df.groupby(story_topics_df.index // 10)
-    story_topics_df = average_per_story(story_topics_df)
-
-    #loads topic keys
-    topic_keys = lmw.load_topic_keys(topic_key_path)
-    five_keys = top_5_keys(topic_keys)
-
-    #adds the keys as the names of the topic columns
-    story_topics_df.set_axis(five_keys, axis=1, inplace=True)
-    return story_topics_df
 
 def combine_topics_and_months(birth_stories_df, story_topics_df):
 	#load in data so that we can attach dates to stories
@@ -105,7 +79,55 @@ def ztest(actual, forecast, percent):
 	pval = norm.sf(np.abs(z))
 	return z, pval
 
-def predict_topic_trend(df, df2, topic_forecasts_plots_output, ztest_output):
+def prophet_projection(df, df2, topic_label, i, m, periods, frequency):
+	topic = pd.DataFrame(df.iloc[:,i])
+	topic.reset_index(inplace=True)
+	topic.columns = ['ds', 'y']
+	topic['ds'] = topic['ds'].dt.to_pydatetime()
+
+	actual = pd.DataFrame(df2.iloc[:,i])
+	actual.reset_index(inplace=True)
+	actual.columns = ['ds', 'y']
+	actual['ds'] = actual['ds'].dt.to_pydatetime()
+
+	m.fit(topic)
+
+	future = m.make_future_dataframe(periods=periods, freq=frequency)
+
+	forecast = m.predict(future)
+	return forecast
+
+def projection_percent_outside_ci_and_ztest(forecast, df2, topic_label, pre_ztest_dict, post_ztest_dict):
+	values = df2.loc[:, topic_label]
+
+	#finds values that are outside of the forecasted confidence interval
+	inside_forecast = []
+	for j in range(len(values)):
+		inside_forecast.append(forecast["yhat_lower"][j] <= values[j] <= forecast["yhat_upper"][j])
+	values_df = values.to_frame()
+	values_df['inside_forecast'] = inside_forecast
+
+	forecast_pre = forecast.get(forecast['ds'] <= '2020-02-01')
+	forecast_post = forecast.get(forecast['ds'] > '2020-02-01')
+
+	#splits up data pre and post covid and finds percentage of values that are outside of the CI for each
+	values_df.reset_index(inplace=True)
+	pre = values_df.get(values_df['Date'] <= '2020-02-01')
+	post = values_df.get(values_df['Date'] > '2020-02-01')
+	outside_ci_pre = pre.get(values_df['inside_forecast']==False)
+	outside_ci_post = post.get(values_df['inside_forecast']==False)
+	percent_pre = (len(outside_ci_pre)/len(pre))
+	percent_post = (len(outside_ci_post)/len(post))
+
+	#z-test
+	ztest_vals_pre = ztest(pre[topic_label], forecast_pre['yhat'], percent_pre)
+	pre_ztest_dict[topic_label] = ztest_vals_pre
+
+	ztest_vals_post = ztest(pre[topic_label], forecast_pre['yhat'], percent_post)
+	post_ztest_dict[topic_label] = ztest_vals_post
+	return ztest_vals_post, pre_ztest_dict[topic_label], post_ztest_dict[topic_label]
+
+def predict_topic_trend_and_plot_significant_differences(df, df2, topic_forecasts_plots_output, ztest_output):
 	fig = plt.figure(figsize=(15,10))
 	ax = fig.add_subplot(111)
 	pre_ztest_dict = {}
@@ -113,52 +135,11 @@ def predict_topic_trend(df, df2, topic_forecasts_plots_output, ztest_output):
 	for i in range(df.shape[1]):
 		ax.clear()
 		topic_label = df.iloc[:, i].name
-		topic = pd.DataFrame(df.iloc[:,i])
-		topic.reset_index(inplace=True)
-		topic.columns = ['ds', 'y']
-		topic['ds'] = topic['ds'].dt.to_pydatetime()
-
-		actual = pd.DataFrame(df2.iloc[:,i])
-		actual.reset_index(inplace=True)
-		actual.columns = ['ds', 'y']
-		actual['ds'] = actual['ds'].dt.to_pydatetime()
-
+		#train a prophet model
 		m = Prophet()
-		m.fit(topic)
-
-		future = m.make_future_dataframe(periods=16, freq='MS')
-
-		forecast = m.predict(future)
-
-		values = df2.loc[:, topic_label]
-
-		#import pdb; pdb.set_trace()
-
-		#finds values that are outside of the forecasted confidence interval
-		inside_forecast = []
-		for j in range(len(values)):
-			inside_forecast.append(forecast["yhat_lower"][j] <= values[j] <= forecast["yhat_upper"][j])
-		values_df = values.to_frame()
-		values_df['inside_forecast'] = inside_forecast
-
-		forecast_pre = forecast.get(forecast['ds'] <= '2020-02-01')
-		forecast_post = forecast.get(forecast['ds'] > '2020-02-01')
-
-		#splits up data pre and post covid and finds percentage of values that are outside of the CI for each
-		values_df.reset_index(inplace=True)
-		pre = values_df.get(values_df['Date'] <= '2020-02-01')
-		post = values_df.get(values_df['Date'] > '2020-02-01')
-		outside_ci_pre = pre.get(values_df['inside_forecast']==False)
-		outside_ci_post = post.get(values_df['inside_forecast']==False)
-		percent_pre = (len(outside_ci_pre)/len(pre))
-		percent_post = (len(outside_ci_post)/len(post))
-		
-		#z-test
-		ztest_vals_pre = ztest(pre[topic_label], forecast_pre['yhat'], percent_pre)
-		pre_ztest_dict[topic_label] = ztest_vals_pre
-
-		ztest_vals_post = ztest(pre[topic_label], forecast_pre['yhat'], percent_post)
-		post_ztest_dict[topic_label] = ztest_vals_post
+		forecast = prophet_projection(df, df2, topic_label, i, m, 16, 'MS')
+		#do statistical analysis (find percent of values outside the CI and do a z-test on the forecasted values compared to actual values)
+		ztest_vals_post, pre_ztest_dict[topic_label], post_ztest_dict[topic_label] = projection_percent_outside_ci_and_ztest(forecast, df2, topic_label, pre_ztest_dict, post_ztest_dict)
 
 		if ztest_vals_post[1] < 0.05:
 			fig1 = m.plot(forecast, xlabel='Date', ylabel='Topic Probability', ax=ax)
@@ -195,7 +176,7 @@ def main():
 		os.mkdir(args.topic_forecasts_data_output)
 
 	pre_covid = pre_covid_posts(dates_topics_df)
-	predict_topic_trend(pre_covid, dates_topics_df, args.topic_forecasts_plots_output, args.ztest_output)
+	predict_topic_trend_and_plot_significant_differences(pre_covid, dates_topics_df, args.topic_forecasts_plots_output, args.ztest_output)
 
 if __name__ == "__main__":
     main()
