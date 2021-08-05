@@ -1,5 +1,7 @@
 import nltk
 from nltk import tokenize
+nltk.download('stopwords')
+from nltk.corpus import stopwords
 import numpy as np
 import pandas as pd
 from datetime import datetime
