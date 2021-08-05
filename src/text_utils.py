@@ -109,7 +109,7 @@ def create_df_label_list(df, column, dct, disallows):
     return label_counts
 
 #Function to read all dataframes 
-def load_data(path_to_birth_stories):
+def load_data_bf(path_to_birth_stories):
 
     birth_stories_df = compress_json.load(path_to_birth_stories)
     birth_stories_df = pd.read_json(birth_stories_df)
