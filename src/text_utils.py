@@ -107,22 +107,3 @@ def create_df_label_list(df, column, dct, disallows):
             df[label] = df[column].apply(lambda x: findkeydisallow(x, dct[label][0], dct[label][1]))
             label_counts.append(df[label].value_counts()[1]) 
     return label_counts
-
-#functions to assign labels to posts based on their titles
-def findkey(title, labels):
-    x = False
-    for label in labels:
-        if label in title:
-            x = True
-    return x
-
-def findkeydisallow(title, labels, notlabels):
-    x = False
-    for label in labels:
-        if label in title:
-            for notlabel in notlabels:
-                if notlabel in title:
-                    return x
-                else:
-                    x = True
-    return x
