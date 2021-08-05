@@ -151,13 +151,11 @@ def main():
 	labels.remove('selftext')
 	labels.remove('author')
 
-	'''
-	#Loaded these into CSVs
+	#Ran t-tests and loaded these into CSVs
 	t_test(pre_covid_posts_df, post_covid_posts_df, labels).to_csv(args.overall_labels)
 	t_test_chunks(pre_covid_posts_df, post_covid_posts_df, labels)
 	tuples = [('Positive', 'Negative'), ('Medicated', 'Unmedicated'), ('Home', 'Hospital'), ('Birth Center', 'Hospital'), ('First', 'Second'), ('C-Section', 'Vaginal')]
 	t_test_two_labels(pre_covid_posts_df,post_covid_posts_df, tuples).to_csv(arg.pairs)
-	'''
 
 if __name__ == '__main__':
 	main()
