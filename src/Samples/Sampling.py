@@ -30,9 +30,6 @@ def get_args():
     parser = argparse.ArgumentParser()
     #general dfs with story text
     parser.add_argument("--birth_stories_df", default="birth_stories_df.json.gz", help="path to df with all birth stories", type=str)
-    parser.add_argument("--pre_covid_posts_df", default="relevant_jsons/pre_covid_posts_df.json.gz", help="path to df with all stories before March 11, 2020", type=str)
-    parser.add_argument("--post_covid_posts_df", default="relevant_jsons/post_covid_posts_df.json.gz", help="path to df with all stories on or after March 11, 2020", type=str)
-    parser.add_argument("--labels_df", default="relevant_jsons/labeled_df.json.gz", help="path to df of the stories labeled based on their titles", type=str)
     #parser.add_argument("--topic_sample", default="../data/Samples/contractions_topic_sample.xlsx", help="path to sample of topics", type=str)
     parser.add_argument("--topic_key_path", default="/home/daphnaspira/birthing_experiences/src/Topic_Modeling/output/50/mallet.topic_keys.50")
     parser.add_argument("--topic_dist_path", default="/home/daphnaspira/birthing_experiences/src/Topic_Modeling/output/50/mallet.topic_distributions.50")
@@ -45,7 +42,7 @@ def combine_topics_and_months(birth_stories_df, story_topics_df):
 
     #combines story dates with topic distributions
     birth_stories_df.reset_index(drop=True, inplace=True)
-    dates_topics_df = pd.concat([birth_stories_df['created_utc', 'title'], story_topics_df], axis=1)
+    dates_topics_df = pd.concat([birth_stories_df['created_utc', 'title', 'Pre-Covid'], story_topics_df], axis=1)
 
     #converts the date into datetime object for year and month
     dates_topics_df['Date Created'] = dates_topics_df['created_utc'].apply(get_post_month)
@@ -53,13 +50,12 @@ def combine_topics_and_months(birth_stories_df, story_topics_df):
     dates_topics_df.drop(columns=['Date Created', 'created_utc'], inplace=True)
 
     dates_topics_df = dates_topics_df.set_index('date')
-
-    import pdb; pdb.set_trace()
+    print(dates_topics_df)
     return dates_topics_df
 
 def main():
     args = get_args()
-    birth_stories_df, pre_covid_posts_df, post_covid_posts_df, labels_df = load_data(args.birth_stories_df, args.pre_covid_posts_df, args.post_covid_posts_df, args.labels_df)
+    birth_stories_df = load_data(args.birth_stories_df)
 
     story_topics_df = topic_distributions(args.topic_dist_path, args.topic_key_path)
     dates_topics_df = combine_topics_and_months(birth_stories_df, story_topics_df)
