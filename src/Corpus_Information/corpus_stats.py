@@ -22,6 +22,7 @@ import compress_json
 warnings.filterwarnings("ignore")
 import argparse
 from date_utils import get_post_year, get_post_date, this_year
+from text_utils import avg_story_length
 
 def get_args():
     parser = argparse.ArgumentParser()
@@ -100,6 +101,8 @@ def main():
     birth_stories_df['story length'].hist(bins=20)
     fig.suptitle('Story Lengths (number of words)')
     fig.savefig(args.story_length_hist)
+
+    avg_story_length([pre_covid_posts_df, post_covid_posts_df])
 
 if __name__ == "__main__":
     main()

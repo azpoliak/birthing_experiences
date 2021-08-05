@@ -36,6 +36,16 @@ def story_lengths(series):
     length = len(tokenized)
     return length
 
+#to find the average story length between pre and post covid
+def avg_story_length(dfs):
+    for df in dfs: 
+        df['story length'] = df['selftext'].apply(story_lengths)
+
+        story_lens = list(df['story length'])
+        avg_story_length = np.round(np.mean(story_lens),2)
+
+        return f'Average story length {df.name}: {avg_story_length}'
+
 #splits story into 100 word chunks for topic modeling 
 def split_story_100_words(story):
     sentiment_story = []
