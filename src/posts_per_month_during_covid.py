@@ -15,6 +15,7 @@ import warnings
 import compress_json
 warnings.filterwarnings("ignore")
 from date_utils import pandemic_eras
+from date_utils import get_post_month
 from text_utils import story_lengths
 from text_utils import load_data
 import argparse
@@ -59,7 +60,8 @@ def convert_datetime(post_covid_df):
 
     post_covid_df['Date Created'] = pd.to_datetime(post_covid_df['Date'])
     post_covid_df['year-month'] = post_covid_df['Date Created'].dt.to_period('M')
-    post_covid_df.drop(columns=['Date Created', 'Date'], inplace=True)
+    post_covid_df['year-month'] = [month.to_timestamp() for month in post_covid_df['year-month']]
+    post_covid_df.drop(columns=['Date', 'Date Created'], inplace=True)
 
 #Generates bar graph of number of posts made each month of the pandemic
 def graph(post_covid_df):
@@ -76,17 +78,19 @@ def graph(post_covid_df):
 def four_eras(post_covid_df):
     args = get_args()
 
-    post_covid_df['Mar 11-June 1 2020'] = post_covid_df['year-month'].apply(lambda x: pandemic_eras(x, '2020-03', '2020-06'))
-    post_covid_df['June 1-Nov 1 2020'] = post_covid_df['year-month'].apply(lambda x: pandemic_eras(x, '2020-06', '2020-11'))
-    post_covid_df['Nov 1 2020-Apr 1 2021'] = post_covid_df['year-month'].apply(lambda x: pandemic_eras(x, '2020-11', '2021-04'))
-    post_covid_df['Apr 1-June 24 2021'] = post_covid_df['year-month'].apply(lambda x: pandemic_eras(x, '2021-04', '2021-06'))
+    post_covid_df['Mar 11-June 1 2020'] = post_covid_df['year-month'].apply(pandemic_eras, args = ('2020-03-01', '2020-06-01')).get(list(post_covid_df.columns))
+    post_covid_df['June 1-Nov 1 2020'] = post_covid_df['year-month'].apply(pandemic_eras, args =('2020-06-01', '2020-11-01')).get(list(post_covid_df.columns))
+    post_covid_df['Nov 1 2020-Apr 1 2021'] = post_covid_df['year-month'].apply(pandemic_eras, args = ('2020-11-01', '2021-04-01')).get(list(post_covid_df.columns))
+    post_covid_df['Apr 1-June 24 2021'] = post_covid_df['year-month'].apply(pandemic_eras, args = ('2021-04-01', '2021-06-01')).get(list(post_covid_df.columns))
 
-    mar_june_2020_df = post_covid_df.get(post_covid_df['Mar 11-June 1 2020']==True).get(list(post_covid_df.columns))
-    june_nov_2020_df = post_covid_df.get(post_covid_df['June 1-Nov 1 2020']==True).get(list(post_covid_df.columns))
-    nov_2020_apr_2021_df = post_covid_df.get(post_covid_df['Nov 1 2020-Apr 1 2021']==True).get(list(post_covid_df.columns))
-    apr_june_2021_df = post_covid_df.get(post_covid_df['Apr 1-June 24 2021']==True).get(list(post_covid_df.columns))
+    import pdb; pdb.set_trace()
 
-    print(len(post_covid_df), len(mar_june_2020_df), len(june_nov_2020_df), len(nov_2020_apr_2021_df), len(apr_june_2021_df))
+    mar_june_2020_df = post_covid_df.get(post_covid_df['Mar 11-June 1 2020']==True)
+    june_nov_2020_df = post_covid_df.get(post_covid_df['June 1-Nov 1 2020']==True)
+    nov_2020_apr_2021_df = post_covid_df.get(post_covid_df['Nov 1 2020-Apr 1 2021']==True)
+    apr_june_2021_df = post_covid_df.get(post_covid_df['Apr 1-June 24 2021']==True)
+
+    #print(len(mar_june_2020_df), len(june_nov_2020_df), len(nov_2020_apr_2021_df), len(apr_june_2021_df))
 
     #Loads into Jsons
     mar_june_2020_df = mar_june_2020_df.to_json()

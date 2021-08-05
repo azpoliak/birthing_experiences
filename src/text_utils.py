@@ -110,21 +110,10 @@ def create_df_label_list(df, column, dct, disallows):
             label_counts.append(df[label].value_counts()[1]) 
     return label_counts
 
-#functions to assign labels to posts based on their titles
-def findkey(title, labels):
-    x = False
-    for label in labels:
-        if label in title:
-            x = True
-    return x
+#Function to read all dataframes 
+def load_data_bf(path_to_birth_stories):
 
-def findkeydisallow(title, labels, notlabels):
-    x = False
-    for label in labels:
-        if label in title:
-            for notlabel in notlabels:
-                if notlabel in title:
-                    return x
-                else:
-                    x = True
-    return x
+    birth_stories_df = compress_json.load(path_to_birth_stories)
+    birth_stories_df = pd.read_json(birth_stories_df)
+
+    return birth_stories_df

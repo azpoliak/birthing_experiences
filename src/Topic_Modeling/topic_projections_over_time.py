@@ -19,7 +19,7 @@ from scipy.stats import norm, pearsonr
 from matplotlib import pyplot as plt
 
 from date_utils import get_post_month
-from topic_utils import average_per_story, top_5_keys
+from topic_utils import average_per_story, top_5_keys, topic_distributions
 
 def get_args():
     parser = argparse.ArgumentParser("Load topic distributions, train Prophet model for projection, apply z-test for statistical significance, plot topics that are statistically significant.")
@@ -32,32 +32,6 @@ def get_args():
     parser.add_argument("--ztest_output", default="../data/Topic_Modeling_Data/Z_Test_Stats.csv")
     args = parser.parse_args()
     return args
-
-def topic_distributions(file_path, topic_key_path):
-	#makes df of the probabilities for each topic for each chunk of each story
-    topic_distributions = lmw.load_topic_distributions(file_path)
-    story_distributions =  pd.Series(topic_distributions)
-    story_topics_df = story_distributions.apply(pd.Series)
-
-    #goes through stories and names them based on the story number and chunk number
-    chunk_titles = []
-    for i in range(len(story_topics_df)//10):
-        for j in range(10):
-            chunk_titles.append(str(i) + ":" + str(j))
-
-    story_topics_df['chunk_titles'] = chunk_titles
-
-    #groups every ten stories together and finds the average for each story
-    story_topics_df.groupby(story_topics_df.index // 10)
-    story_topics_df = average_per_story(story_topics_df)
-
-    #loads topic keys
-    topic_keys = lmw.load_topic_keys(topic_key_path)
-    five_keys = top_5_keys(topic_keys)
-
-    #adds the keys as the names of the topic columns
-    story_topics_df.set_axis(five_keys, axis=1, inplace=True)
-    return story_topics_df
 
 def combine_topics_and_months(birth_stories_df, story_topics_df):
 	#load in data so that we can attach dates to stories
