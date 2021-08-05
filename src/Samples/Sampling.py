@@ -73,7 +73,7 @@ def main():
     story_topics_df = topic_distributions(args.topic_dist_path, args.topic_key_path)
     dates_topics_df = combine_topics_and_months(birth_stories_df, story_topics_df)
     post_covid_posts = get_post_covid_posts(dates_topics_df)
-    get_samples(post_covid_posts, ['cervix hours pitocin started foley', 'milk breastfeeding baby feeding formula', 'baby cord skin husband chest', 'contractions minutes apart started around', 'mom husband got time home'])
+    get_samples(post_covid_posts, ['cervix hours pitocin started foley', 'due weeks date induction week', 'milk breastfeeding baby feeding formula', 'baby cord skin husband chest', 'contractions minutes apart started around', 'mom husband got time home'])
 
 if __name__ == "__main__":
     main()
