@@ -62,8 +62,8 @@ def get_samples(post_df, topics):
     args = get_args()
     for topic in topics:
         post_df_sorted = post_df.sort_values(by = topic)
-        topic_df_highest = post_df_sorted.get([topic, 'title', 'selftext'])[:10]
-        topic_df_lowest = post_df_sorted.get([topic, 'title', 'selftext']).tail(10)
+        topic_df_highest = post_df_sorted.get([topic, 'title', 'selftext']).tail(10)
+        topic_df_lowest = post_df_sorted.get([topic, 'title', 'selftext']).head(10)
         topic_df_highest.to_excel(f'{args.topic_sample}{topic}_high.xlsx')
         topic_df_lowest.to_excel(f'{args.topic_sample}{topic}_low.xlsx')
 
@@ -73,7 +73,7 @@ def main():
     story_topics_df = topic_distributions(args.topic_dist_path, args.topic_key_path)
     dates_topics_df = combine_topics_and_months(birth_stories_df, story_topics_df)
     post_covid_posts = get_post_covid_posts(dates_topics_df)
-    get_samples(post_covid_posts, ['cervix hours pitocin started foley', 'due weeks date induction week', 'milk breastfeeding baby feeding formula', 'baby cord skin husband chest', 'contractions minutes apart started around', 'mom husband got time home'])
+    get_samples(post_covid_posts, ['cervix hours pitocin started dilated', 'mom husband family time sister', 'milk breastfeeding feeding formula baby', 'baby skin cord husband born', 'contractions minutes apart around started'])
 
 if __name__ == "__main__":
     main()

@@ -1,2 +1,2 @@
 # Sampling Data
-- `Sampling.py`: Samples data per topic choice (approx. 20 stories) both pertaining to COVID-19 and the topic
+- `Sampling.py`: Samples data (approx. 10 stories ea) with the highest and lowest probabilities for each topic per the topic list
