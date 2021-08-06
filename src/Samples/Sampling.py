@@ -62,8 +62,9 @@ def get_samples(post_df, topics):
     args = get_args()
     for topic in topics:
         post_df_sorted = post_df.sort_values(by = topic)
-        topic_df_highest = post_df_sorted.get([topic, 'title', 'selftext'])[:10]
-        topic_df_lowest = post_df_sorted.get([topic, 'title', 'selftext']).tail(10)
+        topic_df_highest = post_df_sorted.get([topic, 'title', 'selftext']).tail(10)
+        topic_df_lowest = post_df_sorted.get([topic, 'title', 'selftext']).head(10)
+        import pdb; pdb.set_trace()
         topic_df_highest.to_excel(f'{args.topic_sample}{topic}_high.xlsx')
         topic_df_lowest.to_excel(f'{args.topic_sample}{topic}_low.xlsx')
 
