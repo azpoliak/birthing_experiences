@@ -19,7 +19,7 @@ from scipy.stats import norm, pearsonr
 from matplotlib import pyplot as plt
 
 from date_utils import get_post_month
-from topic_utils import average_per_story, top_5_keys, topic_distributions
+from topic_utils import average_per_story, top_6_keys, topic_distributions
 
 def get_args():
     parser = argparse.ArgumentParser("Load topic distributions, train Prophet model for projection, apply z-test for statistical significance, plot topics that are statistically significant.")
