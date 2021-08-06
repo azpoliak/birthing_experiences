@@ -28,12 +28,12 @@ def average_per_story(df):
     return pd.DataFrame.from_dict(dictionary, orient='index')
 
 #makes string of the top five keys for each topic
-def top_5_keys(lst):
-    top5_per_list = []
+def top_6_keys(lst):
+    top6_per_list = []
     for l in lst:
-        joined = ' '.join(l[:5])
-        top5_per_list.append(joined)
-    return top5_per_list
+        joined = ' '.join(l[:6])
+        top6_per_list.append(joined)
+    return top6_per_list
 
 def topic_distributions(file_path, topic_key_path):
     #makes df of the probabilities for each topic for each chunk of each story
@@ -55,8 +55,8 @@ def topic_distributions(file_path, topic_key_path):
 
     #loads topic keys
     topic_keys = lmw.load_topic_keys(topic_key_path)
-    five_keys = top_5_keys(topic_keys)
+    six_keys = top_6_keys(topic_keys)
 
     #adds the keys as the names of the topic columns
-    story_topics_df.set_axis(five_keys, axis=1, inplace=True)
+    story_topics_df.set_axis(six_keys, axis=1, inplace=True)
     return story_topics_df

@@ -18,7 +18,7 @@ def get_args():
     #New data to create
     parser.add_argument("--mar_june_2020_df", default="../data/covid_era_jsons/mar_june_2020_df.json.gz", help="path to df of the stories from COVID era 1", type=str)
     parser.add_argument("--june_nov_2020_df", default="../data/covid_era_jsons/june_nov_2020_df.json.gz", help="path to df of the stories from COVID era 2", type=str)
-    parser.add_argument("--nov_2020_apr_2021_df", default="../covid_era_jsons/data/nov_2020_apr_2021_df.json.gz", help="path to df of the stories from COVID era 3", type=str)
+    parser.add_argument("--nov_2020_apr_2021_df", default="../data/covid_era_jsons/nov_2020_apr_2021_df.json.gz", help="path to df of the stories from COVID era 3", type=str)
     parser.add_argument("--apr_june_2021_df", default="../data/covid_era_jsons/apr_june_2021_df.json.gz", help="path to df of the stories from COVID era 4", type=str)
     parser.add_argument("--bar_graph_output", default="../data/Corpus_Stats_Plots/Posts_per_Month_Covid_bar.png", help="bar graph of number of posts made each month of the pandemic", type=str)
     args = parser.parse_args()
