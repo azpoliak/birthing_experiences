@@ -14,5 +14,5 @@
     -  One set of plots compares before and during COVID
     -  The other set of plots compares before COVID and each of the four "eras" of COVID
  
-`personas_stats.py`:
+`persona_stats.py`:
 - Computes 95% confidence intervals for all the personas using Welch's t-interval 
