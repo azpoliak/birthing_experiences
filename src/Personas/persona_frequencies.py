@@ -7,7 +7,6 @@ import nltk
 from nltk import tokenize
 from scipy import stats
 from scipy.stats import norm
-import posts_per_month_during_covid as cvd
 from text_utils import split_story_10, create_df_label_list
 from plots_utils import make_plots
 import json
@@ -19,21 +18,27 @@ def get_args():
     parser.add_argument("--birth_stories_df", default="birth_stories_df.json.gz", help="path to df with all birth stories", type=str)
     parser.add_argument("--pre_covid_df", default="pre_covid_posts_df.json.gz", help="path to df with all stories before March 11, 2020", type=str)
     parser.add_argument("--post_covid_df", default="post_covid_posts_df.json.gz", help="path to df with all stories on or after March 11, 2020", type=str)
+    #import covid eras dfs
+    parser.add_argument("--mar_june_2020_df", default="../data/covid_era_jsons/mar_june_2020_df.json.gz", help="path to df of the stories from COVID era 1", type=str)
+    parser.add_argument("--june_nov_2020_df", default="../data/covid_era_jsons/june_nov_2020_df.json.gz", help="path to df of the stories from COVID era 2", type=str)
+    parser.add_argument("--nov_2020_apr_2021_df", default="../data/covid_era_jsons/nov_2020_apr_2021_df.json.gz", help="path to df of the stories from COVID era 3", type=str)
+    parser.add_argument("--apr_june_2021_df", default="../data/covid_era_jsons/apr_june_2021_df.json.gz", help="path to df of the stories from COVID era 4", type=str)
     #path to ngram json
     parser.add_argument("--persona_ngrams", default="../data/Personas_Data/personas_ngrams.json", help="path to dictionary with list of personas and the ngrams mapping to them", type=str)
     #output for csv with numbers of mentions per story and ttest results
-    parser.add_argument("--persona_counts_output", default="../data/Personas_Data/personas_counts_df_", help="path to save csv with stats about number of persona mentions in stories", type=str)
+    parser.add_argument("--persona_counts_output", default="../data/Personas_Data/Persona_Counts_Statistics/personas_counts_df_", help="path to save csv with stats about number of persona mentions in stories", type=str)
     parser.add_argument("--persona_stats_output", default="../data/Personas_Data/normalized_persona_stats.csv", help="path to output of ttest results for each persona", type=str)
     parser.add_argument("--persona_chunk_stats_output", default="../data/Personas_Data/normalized_chunk_stats.csv", help="path to output of ttest results for each chunk of each persona", type=str)
+    parser.add_argument("--pre_persona_mentions_output", default="../data/Personas_Data/persona_csvs/pre_covid_persona_mentions.csv")
+    parser.add_argument("--post_persona_mentions_output", default="../data/Personas_Data/persona_csvs/post_covid_persona_mentions.csv")
     #output path for plots
     parser.add_argument("--pre_post_plot_output_folder", default="../data/Personas_Data/Personas_Pre_Post/", help="path to save line plots of pre and post covid persona mentions", type=str)
     parser.add_argument("--throughout_covid_output_folder", default="../data/Personas_Data/Personas_Throughout_Covid/", help="path to save line plots for personas throughout the covid eras", type=str)
     args = parser.parse_args()
     return args
 
-def load_data_for_personas(path_to_labeled, path_to_birth_stories, path_to_pre_covid, path_to_post_covid, path_to_personas_ngrams):
-    labels_df = compress_json.load(path_to_labeled)
-    labels_df = pd.read_json(labels_df)
+def load_data_for_personas(path_to_birth_stories, path_to_pre_covid, path_to_post_covid, path_to_personas_ngrams,
+    path_mar_june_2020_df, path_june_nov_2020_df, path_nov_2020_apr_2021_df, path_apr_june_2021_df):
 
     birth_stories_df = compress_json.load(path_to_birth_stories)
     birth_stories_df = pd.read_json(birth_stories_df)
@@ -47,7 +52,19 @@ def load_data_for_personas(path_to_labeled, path_to_birth_stories, path_to_pre_c
     with open(path_to_personas_ngrams, 'r') as fp:
         personas_and_n_grams = json.load(fp)
 
-    return labels_df, birth_stories_df, pre_covid_posts_df, post_covid_posts_df, personas_and_n_grams
+    mar_june_2020_df = compress_json.load(path_mar_june_2020_df)
+    mar_june_2020_df = pd.read_json(mar_june_2020_df)
+    
+    june_nov_2020_df = compress_json.load(path_june_nov_2020_df)
+    june_nov_2020_df = pd.read_json(june_nov_2020_df)
+    
+    nov_2020_apr_2021_df = compress_json.load(path_nov_2020_apr_2021_df)
+    nov_2020_apr_2021_df = pd.read_json(nov_2020_apr_2021_df)
+
+    apr_june_2021_df = compress_json.load(path_apr_june_2021_df)
+    apr_june_2021_df = pd.read_json(apr_june_2021_df)    
+
+    return birth_stories_df, pre_covid_posts_df, post_covid_posts_df, personas_and_n_grams, mar_june_2020_df, june_nov_2020_df, nov_2020_apr_2021_df, apr_june_2021_df
 
 #returns total number of mentions for each persona per story.
 def counter(story, dc):
@@ -97,7 +114,7 @@ def get_personas_stats(persona_df, df_name, personas_and_n_grams, dict_for_stats
           'Average Mentions per Story': avg_mentions}
 
     #turn dictionary into a dataframe
-    personas_counts_df = pd.DataFrame(personas_dict, index=np.arange(10))
+    personas_counts_df = pd.DataFrame(personas_dict, index=np.arange(len(personas_and_n_grams)))
 
     personas_counts_df.set_index('Personas', inplace = True)
     personas_counts_df.to_csv(f'{persona_counts_output}{df_name}.csv')
@@ -119,7 +136,7 @@ def count_personas_by_chunk(persona_df, df_name, personas_and_n_grams, personas_
     return d[df_name]
 
 #performs the t-test
-def ttest(df, df2, chunks=False, save=True, persona_chunk_stats_output=False, persona_stats_output=True):
+def ttest(df, df2, chunks=False, persona_chunk_stats_output=None, persona_stats_output=None):
     stat=[]
     p_value=[]
     index = []
@@ -148,18 +165,19 @@ def ttest(df, df2, chunks=False, save=True, persona_chunk_stats_output=False, pe
             stat.append(ttest.statistic)
             p_value.append(ttest.pvalue)
             index.append(persona_name)
-            return f"t-statistic: {ttest.statistic}, p-value: {ttest.pvalue, 4}"
-        if save==True:
-            ttest_df = pd.DataFrame(data = {'Statistics': stat, 'P-Values': p_value}, index = index)
-            ttest_df.to_csv(persona_stats_output)
-        else:
-            return
+            print(f"{persona_name} t-statistic: {ttest.statistic}, p-value: {ttest.pvalue}")
+        
+        ttest_df = pd.DataFrame(data = {'Statistics': stat, 'P-Values': p_value}, index = index)
+        ttest_df.to_csv(persona_stats_output)
 
-def run_ttest(dict_for_stats, pre_covid, post_covid, persona_stats_output, normalizing_ratio):
+def run_ttest(dict_for_stats, pre_covid, post_covid, persona_stats_output, normalizing_ratio, pre_persona_mentions_output, post_persona_mentions_output):
     pre_covid_persona_mentions = dict_for_stats[pre_covid]
     post_covid_persona_mentions = dict_for_stats[post_covid]
 
     normalized_personas = pre_covid_persona_mentions*normalizing_ratio
+
+    normalized_personas.to_csv(pre_persona_mentions_output, index=False)
+    post_covid_persona_mentions.to_csv(post_persona_mentions_output, index=False)
 
     ttest(normalized_personas, post_covid_persona_mentions, persona_stats_output=persona_stats_output)
 
@@ -182,19 +200,18 @@ def main():
     args = get_args()
     normalizing_ratio=(1182.53/1427.09)
     #loads data
-    labels_df, birth_stories_df, pre_covid_posts_df, post_covid_posts_df, personas_and_n_grams = load_data_for_personas(args.labeled_df, args.birth_stories_df, args.pre_covid_df, args.post_covid_df, args.persona_ngrams)
-    
+    birth_stories_df, pre_covid_posts_df, post_covid_posts_df, personas_and_n_grams, mar_june_2020_df, june_nov_2020_df, nov_2020_apr_2021_df, apr_june_2021_df = load_data_for_personas(args.birth_stories_df, args.pre_covid_df, args.post_covid_df, args.persona_ngrams, args.mar_june_2020_df, args.june_nov_2020_df, args.nov_2020_apr_2021_df, args.apr_june_2021_df)
     #name the dfs for easy reference inside the for loop
     birth_stories_df.name = 'all_stories'
     pre_covid_posts_df.name = 'pre_covid'
     post_covid_posts_df.name = 'post_covid'
-    cvd.mar_june_2020_df.name = 'mar_june'
-    cvd.june_nov_2020_df.name = 'june_nov'
-    cvd.nov_2020_apr_2021_df.name = 'nov_apr'
-    cvd.apr_june_2021_df.name = 'apr_june'
+    mar_june_2020_df.name = 'mar_june'
+    june_nov_2020_df.name = 'june_nov'
+    nov_2020_apr_2021_df.name = 'nov_apr'
+    apr_june_2021_df.name = 'apr_june'
 
     #list of dfs to iterate through in the for loop
-    dfs = (birth_stories_df, pre_covid_posts_df, post_covid_posts_df, cvd.mar_june_2020_df, cvd.june_nov_2020_df, cvd.nov_2020_apr_2021_df, cvd.apr_june_2021_df)
+    dfs = (birth_stories_df, pre_covid_posts_df, post_covid_posts_df, mar_june_2020_df, june_nov_2020_df, nov_2020_apr_2021_df, apr_june_2021_df)
     
     #dictionary to save the dfs to at the end of the for loop for easy reference for plotting
     d = {}
@@ -208,7 +225,7 @@ def main():
         d[df_name] = count_personas_by_chunk(persona_df, df_name, personas_and_n_grams, personas_dict, d)
 
     #computes statistical significance
-    run_ttest(dict_for_stats, 'pre_covid', 'post_covid', args.persona_stats_output, normalizing_ratio)
+    run_ttest(dict_for_stats, 'pre_covid', 'post_covid', args.persona_stats_output, normalizing_ratio, args.pre_persona_mentions_output, args.post_persona_mentions_output)
     #plots persona frequencies over narrative time
     plot_personas(d, normalizing_ratio, args.pre_post_plot_output_folder, args.throughout_covid_output_folder)
 
