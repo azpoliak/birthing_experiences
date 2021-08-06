@@ -48,7 +48,6 @@ def main():
     args = get_args()
     pre_covid_persona_mentions, post_covid_persona_mentions = read_csvs(args.pre_covid_mentions, args.post_covid_mentions)
     personas = list(pre_covid_persona_mentions.columns)
-    personas.remove('Unnamed: 0')
     compute_confidence_interval(personas, pre_covid_persona_mentions, post_covid_persona_mentions)
 
 if __name__ == '__main__':
