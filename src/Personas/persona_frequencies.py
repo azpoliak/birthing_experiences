@@ -203,22 +203,6 @@ def plot_personas(d, normalizing_ratio, pre_post_plot_output_folder, throughout_
     make_plots(pre_df=normalized_pre, post_df=post_covid_personas_df, pre_post_plot_output_folder=pre_post_plot_output_folder)
     make_plots(pre_df=normalized_pre, throughout=True, m_j_df=mar_june_personas_df, j_n_df=june_nov_personas_df, n_a_df=nov_apr_personas_df, a_j_df=apr_june_personas_df, throughout_covid_output_folder=throughout_covid_output_folder)
 
-def compute_confidence_intervals(x1, x2):
-
-    alpha = 0.05                                                      
-    n1, n2 = len(x1), len(x2)                                          
-    s1, s2 = np.var(x1, ddof=1), np.var(x2, ddof=1)  
-
-    print(f'ratio of sample variances: {s1**2/s2**2}')
-
-    df = (s1/n1 + s2/n2)**2 / ((s1/n1)**2/(n1-1) + (s2/n2)**2/(n2-1))  
-    t = stats.t.ppf(1 - alpha/2, df)                                   
-
-    lower = (np.mean(x1) - np.mean(x2)) - t * np.sqrt(1 / len(x1) + 1 / len(x2)) * s
-    upper = (np.mean(x1) - np.mean(x2)) + t * np.sqrt(1 / len(x1) + 1 / len(x2)) * s
-
-    print(f'95% Confidence Interval: {(lower, upper)}')
-
 def main():
     args = get_args()
     normalizing_ratio=(1182.53/1427.09)
@@ -256,7 +240,6 @@ def main():
     
     #plots persona frequencies over narrative time
     plot_personas(d, normalizing_ratio, args.pre_post_plot_output_folder, args.throughout_covid_output_folder)
-
 
 if __name__ == "__main__":
     main()
