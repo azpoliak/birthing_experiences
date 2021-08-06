@@ -7,7 +7,6 @@ import nltk
 from nltk import tokenize
 from scipy import stats
 from scipy.stats import norm
-import posts_per_month_during_covid as cvd
 from text_utils import split_story_10, create_df_label_list
 from plots_utils import make_plots
 import json
@@ -15,19 +14,28 @@ import json
 def get_args():
     parser = argparse.ArgumentParser()
     #general dfs with story text
-    parser.add_argument("--labeled_df", default="labeled_df.json.gz", help="path to df of the stories labeled based on their titles", type=str)
+    parser.add_argument("--labeled_df", default="relevant_jsons/labeled_df.json.gz", help="path to df of the stories labeled based on their titles", type=str)
     parser.add_argument("--birth_stories_df", default="birth_stories_df.json.gz", help="path to df with all birth stories", type=str)
-    parser.add_argument("--pre_covid_df", default="pre_covid_posts_df.json.gz", help="path to df with all stories before March 11, 2020", type=str)
-    parser.add_argument("--post_covid_df", default="post_covid_posts_df.json.gz", help="path to df with all stories on or after March 11, 2020", type=str)
+    parser.add_argument("--pre_covid_df", default="relevant_jsons/pre_covid_posts_df.json.gz", help="path to df with all stories before March 11, 2020", type=str)
+    parser.add_argument("--post_covid_df", default="relevant_jsons/post_covid_posts_df.json.gz", help="path to df with all stories on or after March 11, 2020", type=str)
+    parser.add_argument("--mar_june_2020_df", default="relevant_jsons/mar_june_2020_df.json.gz", help="path to df of the stories from COVID era 1", type=str)
+    parser.add_argument("--june_nov_2020_df", default="relevant_jsons/june_nov_2020_df.json.gz", help="path to df of the stories from COVID era 2", type=str)
+    parser.add_argument("--nov_2020_apr_2021_df", default="relevant_jsons/nov_2020_apr_2021_df.json.gz", help="path to df of the stories from COVID era 3", type=str)
+    parser.add_argument("--apr_june_2021_df", default="relevant_jsons/apr_june_2021_df.json.gz", help="path to df of the stories from COVID era 4", type=str)
+
     #path to ngram json
     parser.add_argument("--persona_ngrams", default="../data/Personas_Data/personas_ngrams.json", help="path to dictionary with list of personas and the ngrams mapping to them", type=str)
+    
     #output for csv with numbers of mentions per story and ttest results
     parser.add_argument("--persona_counts_output", default="../data/Personas_Data/personas_counts_df_", help="path to save csv with stats about number of persona mentions in stories", type=str)
     parser.add_argument("--persona_stats_output", default="../data/Personas_Data/normalized_persona_stats.csv", help="path to output of ttest results for each persona", type=str)
     parser.add_argument("--persona_chunk_stats_output", default="../data/Personas_Data/normalized_chunk_stats.csv", help="path to output of ttest results for each chunk of each persona", type=str)
+    
     #output path for plots
     parser.add_argument("--pre_post_plot_output_folder", default="../data/Personas_Data/Personas_Pre_Post/", help="path to save line plots of pre and post covid persona mentions", type=str)
     parser.add_argument("--throughout_covid_output_folder", default="../data/Personas_Data/Personas_Throughout_Covid/", help="path to save line plots for personas throughout the covid eras", type=str)
+
+
     args = parser.parse_args()
     return args
 
@@ -44,10 +52,27 @@ def load_data_for_personas(path_to_labeled, path_to_birth_stories, path_to_pre_c
     post_covid_posts_df = compress_json.load(path_to_post_covid)
     post_covid_posts_df = pd.read_json(post_covid_posts_df)
 
+
     with open(path_to_personas_ngrams, 'r') as fp:
         personas_and_n_grams = json.load(fp)
 
     return labels_df, birth_stories_df, pre_covid_posts_df, post_covid_posts_df, personas_and_n_grams
+
+def load_data_for_eras(path_e1, path_e2, path_e3, path_e4):
+    
+    mar_june_2020_df = compress_json.load(path_e1)
+    mar_june_2020_df = pd.read_json(mar_june_2020_df)
+
+    june_nov_2020_df = compress_json.load(path_e2)
+    june_nov_2020_df = pd.read_json(june_nov_2020_df)
+
+    nov_2020_apr_2021_df = compress_json.load(path_e3)
+    nov_2020_apr_2021_df = pd.read_json(nov_2020_apr_2021_df)
+
+    apr_june_2021_df = compress_json.load(path_e4)
+    apr_june_2021_df = pd.read_json(apr_june_2021_df)
+
+    return mar_june_2020_df, june_nov_2020_df, nov_2020_apr_2021_df, apr_june_2021_df
 
 #returns total number of mentions for each persona per story.
 def counter(story, dc):
@@ -181,24 +206,27 @@ def plot_personas(d, normalizing_ratio, pre_post_plot_output_folder, throughout_
 def main():
     args = get_args()
     normalizing_ratio=(1182.53/1427.09)
+    
     #loads data
     labels_df, birth_stories_df, pre_covid_posts_df, post_covid_posts_df, personas_and_n_grams = load_data_for_personas(args.labeled_df, args.birth_stories_df, args.pre_covid_df, args.post_covid_df, args.persona_ngrams)
-    
+    mar_june_2020_df, june_nov_2020_df, nov_2020_apr_2021_df, apr_june_2021_df = load_data_for_eras(args.mar_june_2020_df, args.june_nov_2020_df, args.nov_2020_apr_2021_df, args.apr_june_2021_df)
+
     #name the dfs for easy reference inside the for loop
     birth_stories_df.name = 'all_stories'
     pre_covid_posts_df.name = 'pre_covid'
     post_covid_posts_df.name = 'post_covid'
-    cvd.mar_june_2020_df.name = 'mar_june'
-    cvd.june_nov_2020_df.name = 'june_nov'
-    cvd.nov_2020_apr_2021_df.name = 'nov_apr'
-    cvd.apr_june_2021_df.name = 'apr_june'
+    mar_june_2020_df.name = 'mar_june'
+    june_nov_2020_df.name = 'june_nov'
+    nov_2020_apr_2021_df.name = 'nov_apr'
+    apr_june_2021_df.name = 'apr_june'
 
     #list of dfs to iterate through in the for loop
-    dfs = (birth_stories_df, pre_covid_posts_df, post_covid_posts_df, cvd.mar_june_2020_df, cvd.june_nov_2020_df, cvd.nov_2020_apr_2021_df, cvd.apr_june_2021_df)
+    dfs = (birth_stories_df, pre_covid_posts_df, post_covid_posts_df, mar_june_2020_df, june_nov_2020_df, nov_2020_apr_2021_df, apr_june_2021_df)
     
     #dictionary to save the dfs to at the end of the for loop for easy reference for plotting
     d = {}
     dict_for_stats = {}
+
     #iterate through each df in the list above and return a df of average mentions for each persona for each chunk of the average story
     for df in dfs:
         df_name = df.name
@@ -209,6 +237,7 @@ def main():
 
     #computes statistical significance
     run_ttest(dict_for_stats, 'pre_covid', 'post_covid', args.persona_stats_output, normalizing_ratio)
+    
     #plots persona frequencies over narrative time
     plot_personas(d, normalizing_ratio, args.pre_post_plot_output_folder, args.throughout_covid_output_folder)
 
