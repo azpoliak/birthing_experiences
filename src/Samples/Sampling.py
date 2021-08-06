@@ -30,9 +30,9 @@ def get_args():
     parser = argparse.ArgumentParser()
     #general dfs with story text
     parser.add_argument("--birth_stories_df", default="birth_stories_df.json.gz", help="path to df with all birth stories", type=str)
-    #parser.add_argument("--topic_sample", default="../data/Samples/contractions_topic_sample.xlsx", help="path to sample of topics", type=str)
     parser.add_argument("--topic_key_path", default="/home/daphnaspira/birthing_experiences/src/Topic_Modeling/output/50/mallet.topic_keys.50")
     parser.add_argument("--topic_dist_path", default="/home/daphnaspira/birthing_experiences/src/Topic_Modeling/output/50/mallet.topic_distributions.50")
+    parser.add_argument("--topic_sample", default="../data/Samples/topic_sample_", help="path to sample of topics", type=str)
     args = parser.parse_args()
     return args
 
@@ -59,10 +59,13 @@ def get_post_covid_posts(df):
     return post_df
 
 def get_samples(post_df, topics):
+    args = get_args()
     for topic in topics:
-        post_df = post_df.sort_values(by = topic)
-        topic_df = post_df.get(post_df[topic])
-        print(topic_df)
+        post_df_sorted = post_df.sort_values(by = topic)
+        topic_df_highest = post_df_sorted.get([topic, 'title', 'selftext'])[:10]
+        topic_df_lowest = post_df_sorted.get([topic, 'title', 'selftext']).tail(10)
+        topic_df_highest.to_excel(f'{args.topic_sample}{topic}_high.xlsx')
+        topic_df_lowest.to_excel(f'{args.topic_sample}{topic}_low.xlsx')
 
 def main():
     args = get_args()
@@ -70,7 +73,7 @@ def main():
     story_topics_df = topic_distributions(args.topic_dist_path, args.topic_key_path)
     dates_topics_df = combine_topics_and_months(birth_stories_df, story_topics_df)
     post_covid_posts = get_post_covid_posts(dates_topics_df)
-    get_samples(post_covid_posts, [''])
+    get_samples(post_covid_posts, ['cervix hours pitocin started foley', 'due weeks date induction week', 'milk breastfeeding baby feeding formula', 'baby cord skin husband chest', 'contractions minutes apart started around', 'mom husband got time home'])
 
 if __name__ == "__main__":
     main()
