@@ -1,24 +1,10 @@
 import pandas as pd
-import os
-import nltk
-from nltk import ngrams
-from nltk import tokenize
-nltk.download('stopwords')
-from nltk.corpus import stopwords
-import numpy as np
-from datetime import datetime
-from matplotlib import pyplot as plt
-import seaborn
-import redditcleaner
-import re
-import warnings
 import compress_json
 import json
-warnings.filterwarnings("ignore")
+import argparse
 from date_utils import pandemic_eras, get_post_month, convert_datetime
 from text_utils import story_lengths, load_data
-from plots_utils import posts_per_month_bar_graph
-import argparse
+from plots_utils import plot_bar_graph
 
 def get_args():
     parser = argparse.ArgumentParser()
@@ -77,7 +63,7 @@ def main():
 
     post_covid_posts_df = convert_datetime(post_covid_posts_df)
 
-    posts_per_month_bar_graph(post_covid_posts_df, args.bar_graph_output)
+    plot_bar_graph(post_covid_posts_df['year-month'], title="Posts per Month of COVID", bar_graph_output=args.bar_graph_output)
 
     mar_june_2020_df, june_nov_2020_df, nov_2020_apr_2021_df, apr_june_2021_df = four_eras(post_covid_posts_df)
     save_jsons(mar_june_2020_df, june_nov_2020_df, nov_2020_apr_2021_df, apr_june_2021_df, args.mar_june_2020_df, args.june_nov_2020_df, args.nov_2020_apr_2021_df, args.apr_june_2021_df)

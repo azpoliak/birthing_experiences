@@ -30,9 +30,13 @@ def make_plots(pre_df, post_df=None, throughout=False, m_j_df=None, j_n_df=None,
             fig.savefig(f'{throughout_covid_output_folder}{persona_label}_throughout_covid_frequency.png')
 
 #Generates bar graph of number of posts made each month of the pandemic
-def posts_per_month_bar_graph(post_covid_posts_df, bar_graph_output):
-    posts_per_month = post_covid_posts_df['year-month'].value_counts()
+def plot_bar_graph(series, name=None, title=None, bar_graph_output=None, path_output=None):
+    posts_per_month = series.value_counts()
     fig = plt.figure(figsize=(20,10))
     posts_per_month.sort_index().plot.bar()
-    fig.suptitle('Posts per Month of Covid')
-    fig.savefig(bar_graph_output)
+    if bar_graph_output != None:
+        fig.suptitle(title)
+        fig.savefig(bar_graph_output)
+    if path_output != None:
+        fig.suptitle(f'Number of posts in r/{str(name)} per year')
+        fig.savefig(f'{path_output}{str(name)}_years.png')
