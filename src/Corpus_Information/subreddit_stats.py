@@ -9,15 +9,15 @@ from plots_utils import plot_bar_graph
 def get_args():
     parser = argparse.ArgumentParser()
     #general dfs with story text
-    parser.add_argument("--BabyBumps", default="../data/subreddit_json_gzs/BabyBumps_df.json.gz", help="path to df with all posts from BabyBumps", type=str)
-    parser.add_argument("--beyond_the_bump", default="../data/subreddit_json_gzs/beyond_the_bump_df.json.gz", help="path to df with all posts from beyond_the_bump", type=str)
-    parser.add_argument("--BirthStories", default="../data/subreddit_json_gzs/BirthStories_df.json.gz", help="path to df with all posts from BirthStories", type=str)
-    parser.add_argument("--daddit", default="../data/subreddit_json_gzs/daddit_df.json.gz", help="path to df with all posts from daddit", type=str)
-    parser.add_argument("--predaddit", default="../data/subreddit_json_gzs/predaddit_df.json.gz", help="path to df with all posts from predaddit", type=str)
-    parser.add_argument("--pregnant", default="../data/subreddit_json_gzs/pregnant_df.json.gz", help="path to df with all posts from pregnant", type=str)
-    parser.add_argument("--Mommit", default="../data/subreddit_json_gzs/Mommit_df.json.gz", help="ppath to df with all posts from Mommit", type=str)
-    parser.add_argument("--NewParents", default="../data/subreddit_json_gzs/NewParents_df.json.gz", help="path to df with all posts from NewParents", type=str)
-    parser.add_argument("--InfertilityBabies", default="../data/subreddit_json_gzs/InfertilityBabies_df.json.gz", help="path to df with all posts from InfertilityBabies", type=str)
+    parser.add_argument("--BabyBumps", default="/home/daphnaspira/birthing_experiences/data/subreddit_json_gzs/BabyBumps_df.json.gz", help="path to df with all posts from BabyBumps", type=str)
+    parser.add_argument("--beyond_the_bump", default="/home/daphnaspira/birthing_experiences/data/subreddit_json_gzs/beyond_the_bump_df.json.gz", help="path to df with all posts from beyond_the_bump", type=str)
+    parser.add_argument("--BirthStories", default="/home/daphnaspira/birthing_experiences/data/subreddit_json_gzs/BirthStories_df.json.gz", help="path to df with all posts from BirthStories", type=str)
+    parser.add_argument("--daddit", default="/home/daphnaspira/birthing_experiences/data/subreddit_json_gzs/daddit_df.json.gz", help="path to df with all posts from daddit", type=str)
+    parser.add_argument("--predaddit", default="/home/daphnaspira/birthing_experiences/data/subreddit_json_gzs/predaddit_df.json.gz", help="path to df with all posts from predaddit", type=str)
+    parser.add_argument("--pregnant", default="/home/daphnaspira/birthing_experiences/data/subreddit_json_gzs/pregnant_df.json.gz", help="path to df with all posts from pregnant", type=str)
+    parser.add_argument("--Mommit", default="/home/daphnaspira/birthing_experiences/data/subreddit_json_gzs/Mommit_df.json.gz", help="ppath to df with all posts from Mommit", type=str)
+    parser.add_argument("--NewParents", default="/home/daphnaspira/birthing_experiences/data/subreddit_json_gzs/NewParents_df.json.gz", help="path to df with all posts from NewParents", type=str)
+    parser.add_argument("--InfertilityBabies", default="/home/daphnaspira/birthing_experiences/data/subreddit_json_gzs/InfertilityBabies_df.json.gz", help="path to df with all posts from InfertilityBabies", type=str)
     parser.add_argument("--bar_graph_output", default="../data/Corpus_Stats_Plots/subreddit_years_bar_graphs/", help="path to save bar graphs", type=str)
     args = parser.parse_args()
     return args  
@@ -51,30 +51,32 @@ def load_subreddits(BabyBumps, beyond_the_bump, BirthStories, daddit, predaddit,
 	InfertilityBabies_df = pd.read_json(InfertilityBabies_df)
 	return BabyBumps_df, beyond_the_bump_df, BirthStories_df, daddit_df, predaddit_df, pregnant_df, Mommit_df, NewParents_df, InfertilityBabies_df
 
+def year_created_column(dfs):
+	for df in dfs:
+		df['year created'] = df['created_utc'].apply(get_post_year)
+
+def make_bar_graphs(dfs, path):
+	for df in dfs:
+		plot_bar_graph(df['year created'], name = df.name, path_output = path)
+
 def main():
 	args = get_args()
 
 	BabyBumps_df, beyond_the_bump_df, BirthStories_df, daddit_df, predaddit_df, pregnant_df, Mommit_df, NewParents_df, InfertilityBabies_df = load_subreddits(args.BabyBumps, args.beyond_the_bump, args.BirthStories, args.daddit, args.predaddit, args.pregnant, args.Mommit, args.NewParents, args.InfertilityBabies)
+	
+	#Set names 
+	BabyBumps_df.name = 'BabyBumps'
+	beyond_the_bump_df.name = 'beyond_the_bump'
+	BirthStories_df.name = 'BirthStories'
+	daddit_df.name = 'daddit'
+	predaddit_df.name = 'predaddit'
+	pregnant_df.name = 'pregnant'
+	Mommit_df.name = 'Mommit'
+	NewParents_df.name = 'NewParents'
+	InfertilityBabies_df.name = 'InfertilityBabies'
 
-	BabyBumps_df['year created'] = BabyBumps_df['created_utc'].apply(get_post_year)
-	beyond_the_bump_df['year created'] = beyond_the_bump_df['created_utc'].apply(get_post_year)
-	BirthStories_df['year created'] = BirthStories_df['created_utc'].apply(get_post_year)
-	daddit_df['year created'] = daddit_df['created_utc'].apply(get_post_year)
-	predaddit_df['year created'] = predaddit_df['created_utc'].apply(get_post_year)
-	pregnant_df['year created'] = pregnant_df['created_utc'].apply(get_post_year)
-	Mommit_df['year created'] = Mommit_df['created_utc'].apply(get_post_year)
-	NewParents_df['year created'] = NewParents_df['created_utc'].apply(get_post_year)
-	InfertilityBabies_df['year created'] = InfertilityBabies_df['created_utc'].apply(get_post_year)
-
-	plot_bar_graph(BabyBumps_df['year created'], name='BabyBumps', path_output=args.bar_graph_output)
-	plot_bar_graph(beyond_the_bump_df['year created'], name='beyond_the_bump', path_output=args.bar_graph_output)
-	plot_bar_graph(BirthStories_df['year created'], name='BirthStories', path_output=args.bar_graph_output)
-	plot_bar_graph(daddit_df['year created'], name='daddit', path_output=args.bar_graph_output)
-	plot_bar_graph(predaddit_df['year created'], name='predaddit', path_output=args.bar_graph_output)
-	plot_bar_graph(pregnant_df['year created'], name='pregnant', path_output=args.bar_graph_output)
-	plot_bar_graph(Mommit_df['year created'], name='Mommit', path_output=args.bar_graph_output)
-	plot_bar_graph(NewParents_df['year created'], name='NewParents', path_output=args.bar_graph_output)
-	plot_bar_graph(InfertilityBabies_df['year created'], name='InfertilityBabies', path_output=args.bar_graph_output)
+	year_created_column([BabyBumps_df, beyond_the_bump_df, BirthStories_df, daddit_df, predaddit_df, pregnant_df, Mommit_df, NewParents_df, InfertilityBabies_df])
+	make_bar_graphs([BabyBumps_df, beyond_the_bump_df, BirthStories_df, daddit_df, predaddit_df, pregnant_df, Mommit_df, NewParents_df, InfertilityBabies_df], args.bar_graph_output)
 
 if __name__ == "__main__":
     main()
