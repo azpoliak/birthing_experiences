@@ -2,7 +2,7 @@ import argparse
 import pandas as pd
 import os
 from date_utils import combine_topics_and_months, pre_covid_posts, posts_2019_on
-from topic_utils import ztest, prophet_projection, projection_percent_outside_ci_and_ztest, predict_topic_trend_and_plot_significant_differences
+from topic_utils import predict_topic_trend_and_plot_significant_differences
 
 def get_args():
 	parser = argparse.ArgumentParser()
@@ -15,14 +15,10 @@ def get_args():
 	args = parser.parse_args()
 	return args
 
-def load_liwc_df(liwc_scores):
-	liwc_df = pd.read_csv(liwc_scores)
-	return liwc_df
-
 def main():
 	args=get_args()
 
-	liwc_df = load_liwc_df(args.liwc_scores)
+	liwc_df = pd.read_csv(args.liwc_scores)
 	dates_topics_df = combine_topics_and_months(args.birth_stories_df, liwc_df, period='M', drop=False)
 	
 	recent_dates_topics_df = combine_topics_and_months(args.birth_stories_df, liwc_df, period='W', drop=False)	

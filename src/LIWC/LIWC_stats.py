@@ -7,7 +7,8 @@ import nltk
 from nltk import tokenize
 from scipy import stats
 from scipy.stats import norm
-from text_utils import load_data_bf, compute_confidence_interval
+from text_utils import load_data_bf
+from stats_utils import compute_confidence_interval
 
 def get_args():
     parser = argparse.ArgumentParser()

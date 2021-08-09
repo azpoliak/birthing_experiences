@@ -12,6 +12,7 @@ from scipy.stats import norm, pearsonr
 from matplotlib import pyplot as plt
 
 from date_utils import get_post_month
+from stats_utils import ztest
 
 def get_all_chunks_from_column(series):
     #makes list of all chunks from all stories in the df
@@ -71,21 +72,6 @@ def topic_distributions(file_path, topic_key_path):
     #adds the keys as the names of the topic columns
     story_topics_df.set_axis(six_keys, axis=1, inplace=True)
     return story_topics_df
-
-def ztest(actual, forecast, percent):
-    residual = actual - forecast
-    residual = list(residual)
-
-    #compute correlation between data points for pre-covid data (using pearsonr)
-    corr = pearsonr(residual[:-1], residual[1:])[0]
-
-    #plug correlation as r into z test (function from biester)
-    #calculate z test for pre and post covid data
-    z = (percent - 0.05) / np.sqrt((0.05*(1-0.05))/len(actual))
-
-    #find p-value
-    pval = norm.sf(np.abs(z))
-    return z, pval
 
 def prophet_projection(df, df2, topic_label, i, m, periods, frequency):
     topic = pd.DataFrame(df.iloc[:,i])
