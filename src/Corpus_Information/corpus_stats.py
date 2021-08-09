@@ -106,7 +106,7 @@ def make_hist(main_df):
 def main():
     args = get_args()
     
-    birth_stories_df, pre_covid_posts_df, post_covid_posts_df, labels_df = load_data(args.birth_stories_df, args.pre_covid_posts_df, args.post_covid_posts_df, args.labels_df)
+    labels_df, pre_covid_posts_df, post_covid_posts_df, birth_stories_df = load_data(args.birth_stories_df, args.pre_covid_posts_df, args.post_covid_posts_df, args.labels_df)
 
     birth_stories_df.name = 'all'
     pre_covid_posts_df.name = 'pre-covid'
