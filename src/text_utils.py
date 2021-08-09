@@ -77,10 +77,14 @@ def split_story_10(string):
     return split_story
 
 #processes the story using little mallet wrapper process_string function
-def process_s(s):
+def process_s(s, stpwrds=True):
     stop = stopwords.words('english')
-    new = lmw.process_string(s,lowercase=True,remove_punctuation=True, stop_words=stop)
-    return new
+    if stpwrds==True:
+        new = lmw.process_string(s,lowercase=True,remove_punctuation=True, stop_words=stop)
+        return new
+    else:
+        new = lmw.process_string(s,lowercase=True,remove_punctuation=True, remove_stop_words=False)
+        return new
 
 #removes all emojis
 def remove_emojis(s):
@@ -129,4 +133,25 @@ def load_data_bf(path_to_birth_stories):
     birth_stories_df = compress_json.load(path_to_birth_stories)
     birth_stories_df = pd.read_json(birth_stories_df)
 
+    return birth_stories_df
+
+def prepare_data(df, stopwords=True):
+    #load in data
+    birth_stories_df = compress_json.load(df)
+    birth_stories_df = pd.read_json(birth_stories_df)
+
+    if stopwords==True:
+        #remove emojis, apply redditcleaner, process string with remove stop words
+        birth_stories_df['Cleaned Submission'] = birth_stories_df['selftext'].apply(redditcleaner.clean).apply(remove_emojis).apply(process_s)
+    else:
+        #remove emojis, apply redditcleaner, process string WITHOUT remove stop words
+        birth_stories_df['Cleaned Submission'] = birth_stories_df['selftext'].apply(redditcleaner.clean).apply(remove_emojis).apply(process_s, args=(False))
+    #replace urls with ''
+    birth_stories_df['Cleaned Submission'] = birth_stories_df['Cleaned Submission'].replace(to_replace=r'^https?:\/\/.*[\r\n]*',value='',regex=True)
+
+    #remove numbers
+    birth_stories_df['Cleaned Submission'] = birth_stories_df['Cleaned Submission'].replace(to_replace=r'NUM*',value='',regex=True)
+
+    #remove any missing values
+    birth_stories_df = birth_stories_df.dropna()
     return birth_stories_df
