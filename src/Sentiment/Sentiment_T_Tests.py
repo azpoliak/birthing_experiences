@@ -21,7 +21,6 @@ import itertools
 import compress_json
 from scipy import stats
 import argparse
-import Test_Sen as ts
 from text_utils import load_data, split_story_10_sentiment, per_group
 warnings.filterwarnings("ignore")
 
@@ -29,13 +28,13 @@ def get_args():
     parser = argparse.ArgumentParser()
 
     #general dfs with story text
-    parser.add_argument("--birth_stories_df", default="../birth_stories_df.json.gz", help="path to df with all birth stories", type=str)
-    parser.add_argument("--pre_covid_posts_df", default="../relevant_jsons/pre_covid_posts_df.json.gz", help="path to df with all stories before March 11, 2020", type=str)
-    parser.add_argument("--post_covid_posts_df", default="../relevant_jsons/post_covid_posts_df.json.gz", help="path to df with all stories on or after March 11, 2020", type=str)
+    parser.add_argument("--birth_stories_df", default="birth_stories_df.json.gz", help="path to df with all birth stories", type=str)
+    parser.add_argument("--pre_covid_posts_df", default="relevant_jsons/pre_covid_posts_df.json.gz", help="path to df with all stories before March 11, 2020", type=str)
+    parser.add_argument("--post_covid_posts_df", default="relevant_jsons/post_covid_posts_df.json.gz", help="path to df with all stories on or after March 11, 2020", type=str)
     parser.add_argument("--labels_df", default="../relevant_jsons/labeled_df.json.gz", help="path to df of the stories labeled based on their titles", type=str)
     parser.add_argument("--overall_labels", default="../data/Sentiment_T_Tests/overall_labels.csv", help="path to the t-test folder for all story labels", type=str)
     parser.add_argument("--pairs", default="../data/Sentiment_T_Tests/pairs.csv", help="path to the t-test folder for all story pair labels", type=str)
-    parser.add_argument("--chunks", default="../../data/Sentiment_T_Tests/chunks_labels_", help="path to the t-test folder for each story label, broken up into chunks", type=str)
+    parser.add_argument("--chunks", default="../data/Sentiment_T_Tests/chunks_labels_", help="path to the t-test folder for each story label, broken up into chunks", type=str)
 
     args = parser.parse_args()
     return args
