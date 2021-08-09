@@ -38,6 +38,11 @@ def this_year(date, y):
     else:
         return False
 
+#todo look into why < 03-01 doesnt work
+def pre_covid_posts(df):
+    pre_covid = df[(df.index <= '2020-02-01')]
+    return pre_covid
+
 #True/False column based on before and after pandemic 
 def pandemic(date):
     start_date = datetime.strptime("11 March, 2020", "%d %B, %Y")

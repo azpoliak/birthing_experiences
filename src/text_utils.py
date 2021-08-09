@@ -83,7 +83,7 @@ def process_s(s, stpwrds=True):
         new = lmw.process_string(s,lowercase=True,remove_punctuation=True, stop_words=stop)
         return new
     else:
-        new = lmw.process_string(s,lowercase=True,remove_punctuation=True, remove_stop_words=False)
+        new = lmw.process_string(s,lowercase=True,remove_punctuation=True, remove_short_words=False, remove_stop_words=False)
         return new
 
 #removes all emojis
