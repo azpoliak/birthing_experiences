@@ -14,6 +14,7 @@ def get_args():
     #output path for plots
     parser.add_argument("--pre_covid_mentions", default="../../data/Personas_Data/persona_csvs/pre_covid_persona_mentions.csv", help="path to pre covid persona mentions", type=str)
     parser.add_argument("--post_covid_mentions", default="../../data/Personas_Data/persona_csvs/post_covid_persona_mentions.csv", help="path to post covid persona mentions", type=str)
+    parser.add_argument("--persona_CI_df", default="../../data/Personas_Data/persona_csvs/persona_CI_df.csv", help="path to post covid persona mentions", type=str)
 
     args = parser.parse_args()
     return args
@@ -25,6 +26,8 @@ def read_csvs(path_pre, path_post):
     return pre_covid_persona_mentions, post_covid_persona_mentions
 
 def compute_confidence_interval(personas, pre_df, post_df):
+    lowers = []
+    uppers = []
     for persona in personas:
         x1 = pre_df[persona]
         x2 = post_df[persona]
@@ -41,14 +44,20 @@ def compute_confidence_interval(personas, pre_df, post_df):
 
         lower = (np.mean(x1) - np.mean(x2)) - t * np.sqrt(1 / len(x1) + 1 / len(x2)) * s
         upper = (np.mean(x1) - np.mean(x2)) + t * np.sqrt(1 / len(x1) + 1 / len(x2)) * s
+        
+        lowers.append(lower)
+        uppers.append(upper)
 
-        print(f'95% Confidence Interval {persona}: {(lower, upper)}')
+    df = pd.DataFrame({'Lower Bound': lowers, 'Upper Bound': uppers}, index = personas)
+    df.index.name = 'Persona'
+    return df 
 
 def main():
     args = get_args()
     pre_covid_persona_mentions, post_covid_persona_mentions = read_csvs(args.pre_covid_mentions, args.post_covid_mentions)
     personas = list(pre_covid_persona_mentions.columns)
-    compute_confidence_interval(personas, pre_covid_persona_mentions, post_covid_persona_mentions)
+    persona_CI_df = compute_confidence_interval(personas, pre_covid_persona_mentions, post_covid_persona_mentions)
+    persona_CI_df.to_csv(args.persona_CI_df)
 
 if __name__ == '__main__':
     main()
