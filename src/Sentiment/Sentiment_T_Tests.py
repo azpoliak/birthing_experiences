@@ -21,21 +21,21 @@ import itertools
 import compress_json
 from scipy import stats
 import argparse
-import Test_Sen as ts
 from text_utils import load_data
+from sentiment_utils import split_story_10_sentiment, per_group
 warnings.filterwarnings("ignore")
 
 def get_args():
     parser = argparse.ArgumentParser()
 
     #general dfs with story text
-    parser.add_argument("--birth_stories_df", default="../birth_stories_df.json.gz", help="path to df with all birth stories", type=str)
-    parser.add_argument("--pre_covid_posts_df", default="../relevant_jsons/pre_covid_posts_df.json.gz", help="path to df with all stories before March 11, 2020", type=str)
-    parser.add_argument("--post_covid_posts_df", default="../relevant_jsons/post_covid_posts_df.json.gz", help="path to df with all stories on or after March 11, 2020", type=str)
-    parser.add_argument("--labels_df", default="../relevant_jsons/labeled_df.json.gz", help="path to df of the stories labeled based on their titles", type=str)
+    parser.add_argument("--birth_stories_df", default="birth_stories_df.json.gz", help="path to df with all birth stories", type=str)
+    parser.add_argument("--pre_covid_posts_df", default="relevant_jsons/pre_covid_posts_df.json.gz", help="path to df with all stories before March 11, 2020", type=str)
+    parser.add_argument("--post_covid_posts_df", default="relevant_jsons/post_covid_posts_df.json.gz", help="path to df with all stories on or after March 11, 2020", type=str)
+    parser.add_argument("--labels_df", default="relevant_jsons/labeled_df.json.gz", help="path to df of the stories labeled based on their titles", type=str)
     parser.add_argument("--overall_labels", default="../data/Sentiment_T_Tests/overall_labels.csv", help="path to the t-test folder for all story labels", type=str)
     parser.add_argument("--pairs", default="../data/Sentiment_T_Tests/pairs.csv", help="path to the t-test folder for all story pair labels", type=str)
-    parser.add_argument("--chunks", default="../../data/Sentiment_T_Tests/chunks_labels_", help="path to the t-test folder for each story label, broken up into chunks", type=str)
+    parser.add_argument("--chunks", default="../data/Sentiment_T_Tests/chunks_labels_", help="path to the t-test folder for each story label, broken up into chunks", type=str)
 
     args = parser.parse_args()
     return args
@@ -44,8 +44,8 @@ def get_args():
 def group_raw_scores(df, l):
 	new_df = df[['title', 'selftext']].get(df[l] == True)
 	new_df['tokenized sentences'] = new_df['selftext'].apply(tokenize.sent_tokenize)
-	new_df['sentiment groups'] = new_df['tokenized sentences'].apply(ts.split_story_10_sentiment)
-	new_df['comp sent per group'] = new_df['sentiment groups'].apply(ts.per_group, args = ('compound',)) 
+	new_df['sentiment groups'] = new_df['tokenized sentences'].apply(split_story_10_sentiment)
+	new_df['comp sent per group'] = new_df['sentiment groups'].apply(per_group, args = ('compound',)) 
 	compressed = pd.DataFrame(list(new_df['comp sent per group'])).to_dict(orient='list')
 	raw_score_dict = {} 
 	for key in compressed:
@@ -122,7 +122,7 @@ def t_test_two_labels(df_1, df_2, tuples):
 def main():
 	args = get_args()
 
-	birth_stories_df, pre_covid_posts_df, post_covid_posts_df, labels_df = load_data(args.birth_stories_df, args.pre_covid_posts_df, args.post_covid_posts_df, args.labels_df)
+	labels_df, pre_covid_posts_df, post_covid_posts_df, birth_stories_df = load_data(args.birth_stories_df, args.pre_covid_posts_df, args.post_covid_posts_df, args.labels_df)
 
 	labels = list(labels_df.columns)
 	labels.remove('title')
@@ -137,7 +137,7 @@ def main():
 	t_test(pre_covid_posts_df, post_covid_posts_df, labels).to_csv(args.overall_labels)
 	t_test_chunks(pre_covid_posts_df, post_covid_posts_df, labels)
 	tuples = [('Positive', 'Negative'), ('Medicated', 'Unmedicated'), ('Home', 'Hospital'), ('Birth Center', 'Hospital'), ('First', 'Second'), ('C-Section', 'Vaginal')]
-	t_test_two_labels(pre_covid_posts_df,post_covid_posts_df, tuples).to_csv(arg.pairs)
+	t_test_two_labels(pre_covid_posts_df,post_covid_posts_df, tuples).to_csv(args.pairs)
 
 if __name__ == '__main__':
 	main()

@@ -11,15 +11,13 @@ from little_mallet_wrapper import process_string
 import redditcleaner
 import re
 import compress_json
+from scipy import stats
+from scipy.stats import norm
 
 #Function to read all dataframes 
 def load_data(path_to_birth_stories, path_to_pre_covid, path_to_post_covid, path_to_labels):
-    
     labels_df = compress_json.load(path_to_labels)
     labels_df = pd.read_json(labels_df)
-
-    birth_stories_df = compress_json.load(path_to_birth_stories)
-    birth_stories_df = pd.read_json(birth_stories_df)
     
     pre_covid_posts_df = compress_json.load(path_to_pre_covid)
     pre_covid_posts_df = pd.read_json(pre_covid_posts_df)
@@ -27,7 +25,10 @@ def load_data(path_to_birth_stories, path_to_pre_covid, path_to_post_covid, path
     post_covid_posts_df = compress_json.load(path_to_post_covid)
     post_covid_posts_df = pd.read_json(post_covid_posts_df)
 
-    return labels_df, birth_stories_df, pre_covid_posts_df, post_covid_posts_df
+    birth_stories_df = compress_json.load(path_to_birth_stories)
+    birth_stories_df = pd.read_json(birth_stories_df)
+
+    return labels_df, pre_covid_posts_df, post_covid_posts_df, birth_stories_df
 
 #Function for story length
 def story_lengths(series):
@@ -201,6 +202,32 @@ def clean_posts(all_posts_df):
 
     all_posts_df = all_posts_df[all_posts_df['selftext'] != '[removed]']
     all_posts_df = all_posts_df[all_posts_df['selftext'] != '[deleted]']
-    #print(all_posts_df.shape)
+
     return all_posts_df
 
+def compute_confidence_interval(personas, pre_df, post_df):
+    lowers = []
+    uppers = []
+    for persona in personas:
+        x1 = pre_df[persona]
+        x2 = post_df[persona]
+
+        alpha = 0.05                                                      
+        n1, n2 = len(x1), len(x2)                                          
+        s1, s2 = np.var(x1, ddof=1), np.var(x2, ddof=1)  
+
+        #print(f'ratio of sample variances: {s1**2/s2**2}')
+
+        s = np.sqrt(((n1 - 1) * s1 + (n2 - 1) * s2) / (n1 + n2 - 2))
+        df = (s1/n1 + s2/n2)**2 / ((s1/n1)**2/(n1-1) + (s2/n2)**2/(n2-1))  
+        t = stats.t.ppf(1 - alpha/2, df)                                   
+
+        lower = (np.mean(x1) - np.mean(x2)) - t * np.sqrt(1 / len(x1) + 1 / len(x2)) * s
+        upper = (np.mean(x1) - np.mean(x2)) + t * np.sqrt(1 / len(x1) + 1 / len(x2)) * s
+        
+        lowers.append(lower)
+        uppers.append(upper)
+
+    df = pd.DataFrame({'Lower Bound': lowers, 'Upper Bound': uppers}, index = personas)
+    df.index.name = 'Persona'
+    return df

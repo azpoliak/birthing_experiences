@@ -21,7 +21,7 @@ import itertools
 import compress_json
 warnings.filterwarnings("ignore")
 import argparse
-from date_utils import get_post_year, get_post_date, this_year
+from date_utils import get_post_year
 from text_utils import avg_story_length, load_data, story_lengths
 
 def get_args():
@@ -73,19 +73,20 @@ def stats(pre_df, post_df, main_df):
     num_unique = len(all_unique_words)
 
     #make dictionary with stats
-    corpus_stats = {'Stat':['Number of stories with more than 500 words', 'Average number of words per story',
+    corpus_stats = {'Stat':['Number of stories with more than 500 words', 'Number of stories Pre-Covid-19', 'Number of stories Post-Covid-19', 'Average number of words per story',
     'Number of words in longest story', 'Number of unique words'],
-    'Number':[num_stories, average_story_lengths[2], max_story_length, num_unique]}
+    'Number':[num_stories, len(pre_df), len(post_df), average_story_lengths[2], max_story_length, num_unique]}
 
     return corpus_stats
 
 def make_df_with_stats(corpus_stats):
     args = get_args()
     #turn dictionary into a dataframe
-    table1_df = pd.DataFrame(corpus_stats, index=np.arange(4))
+    table1_df = pd.DataFrame(corpus_stats, index=np.arange(6))
     table1_df.to_csv(args.corpus_stats)
 
-def posts_per_year():
+def posts_per_year(birth_stories_df):
+    args = get_args()
     birth_stories_df['year created'] = birth_stories_df['created_utc'].apply(get_post_year)
     posts_per_year = birth_stories_df['year created'].value_counts()
     fig = plt.figure(figsize=(20,10))
@@ -105,7 +106,7 @@ def make_hist(main_df):
 def main():
     args = get_args()
     
-    birth_stories_df, pre_covid_posts_df, post_covid_posts_df, labels_df = load_data(args.birth_stories_df, args.pre_covid_posts_df, args.post_covid_posts_df, args.labels_df)
+    labels_df, pre_covid_posts_df, post_covid_posts_df, birth_stories_df = load_data(args.birth_stories_df, args.pre_covid_posts_df, args.post_covid_posts_df, args.labels_df)
 
     birth_stories_df.name = 'all'
     pre_covid_posts_df.name = 'pre-covid'
@@ -113,7 +114,8 @@ def main():
 
     corpus_stats = stats(pre_covid_posts_df, post_covid_posts_df, birth_stories_df)
     make_df_with_stats(corpus_stats)
-    #make_hist(birth_stories_df)
+    posts_per_year(birth_stories_df)
+    make_hist(birth_stories_df)
 
 if __name__ == "__main__":
     main()
