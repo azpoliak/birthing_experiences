@@ -234,6 +234,24 @@ def split_story_10_sentiment(lst):
         split_story_sents.append(sentiment_story[i:i+rounded])
     return split_story_sents
 
+#Creates list of the story sentiment values per section of the story 
+def group(story, num, val):
+    compound_scores = []
+    sentences = []
+    for sent in story[num]:
+        if val == 'compound' or val == 'pos' or val == 'neg':
+            dictionary = sent[1]
+            compound_score = dictionary[val]
+            compound_scores.append(compound_score)
+        else:
+            sen = sent[0]
+            sentences.append(sen)
+    if val == 'sentences': 
+        return " ".join(sentences)
+    else:
+        return compound_scores
+
+
 #Groups together the stories per section in a dictionary
 def per_group(story, val):
     group_dict = {} 
