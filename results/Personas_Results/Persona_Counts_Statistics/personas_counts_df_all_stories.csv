@@ -1,0 +1,12 @@
+Personas,N-Grams,Total Mentions,Stories Containing Mentions,Average Mentions per Story
+Author,"['i', 'me', 'myself']",408585,5397,75.70594774874931
+We,"['we', 'us', 'ourselves']",48504,5397,8.98721511951084
+Baby,"['baby', 'son', 'daughter']",37461,5260,7.121863117870722
+Doctor,"['doctor', 'dr', 'doc', 'ob', 'obgyn', 'gynecologist', 'physician']",20250,5252,3.8556740289413556
+Partner,"['partner', 'husband', 'wife']",18909,4383,4.314168377823409
+Nurse,['nurse'],13392,4224,3.1704545454545454
+Midwife,['midwife'],8252,1722,4.792102206736353
+Family,"['mom', 'dad', 'mother', 'father', 'brother', 'sister']",7329,3610,2.0301939058171743
+Anesthesiologist,['anesthesiologist'],2690,1679,1.6021441334127458
+Doula,['doula'],1899,493,3.8519269776876266
+Induction,"['induction', 'induced', 'pitocin', 'foley', 'balloon', 'bulb', 'cervidil', 'cervadil', 'cytotec', 'misoprostol']",15152,3319,4.56523049111178
