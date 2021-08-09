@@ -15,8 +15,8 @@ from gensim.models import CoherenceModel
 from matplotlib import pyplot as plt
 
 from topic_utils import get_all_chunks_from_column
-from text_utils import remove_emojis, process_s, split_story_10, clean_training_text
 
+from text_utils import remove_emojis, process_s, split_story_10, clean_training_text
 
 def get_args():
     parser = argparse.ArgumentParser("Train topic models and choose the best model based on c_v coherence score")
@@ -26,30 +26,15 @@ def get_args():
     parser.add_argument("--path_to_mallet", default="/home/daphnaspira/birthing_experiences/src/mallet-2.0.8/bin/mallet", help="path where mallet is installed", type=str)
     parser.add_argument("--path_to_save", default="Topic_Modeling/output", help="output path to store topic modeling training data", type=str)
     parser.add_argument("--output_coherence_plot", default="/home/daphnaspira/birthing_experiences/data/Topic_Modeling_Data/topic_coherences.png", help="output path to store line plot of coherence scores")
+    parser.add_argument("--output_coherence_csv", default="/home/daphnaspira/birthing_experiences/data/Topic_Modeling_Data/topic_coherence_df.csv", help="output path to store csv of coherence scores")
     parser.add_argument("--start", default=5, help="start value for range of numbers of topics to train the model on")
-    parser.add_argument("--stop", default=55, help="stop value for range of numbers of topics to train the model on")
-    parser.add_argument("--step", default=5, help="step value for range of numbers of topics to train the model on")
+    parser.add_argument("--stop", default=51, help="stop value for range of numbers of topics to train the model on")
+    parser.add_argument("--step", default=1, help="step value for range of numbers of topics to train the model on")
     args = parser.parse_args()
     print(args)
     return args
 
-def prepare_data(df):
-	#load in data
-	birth_stories_df = compress_json.load(df)
-	birth_stories_df = pd.read_json(birth_stories_df)
-
-	#remove emojis, apply redditcleaner, removed stop words
-	birth_stories_df['Cleaned Submission'] = birth_stories_df['selftext'].apply(redditcleaner.clean).apply(remove_emojis).apply(process_s)
-
-	#replace urls with ''
-	birth_stories_df['Cleaned Submission'] = birth_stories_df['Cleaned Submission'].replace(to_replace=r'^https?:\/\/.*[\r\n]*',value='',regex=True)
-
-	#remove numbers
-	birth_stories_df['Cleaned Submission'] = birth_stories_df['Cleaned Submission'].replace(to_replace=r'NUM*',value='',regex=True)
-
-	#remove any missing values
-	birth_stories_df = birth_stories_df.dropna()
-
+def split_data(birth_stories_df):
 	#split data for training
 	birth_stories_df['10 chunks'] = birth_stories_df['Cleaned Submission'].apply(split_story_10)
 
@@ -94,30 +79,32 @@ def main():
 	args = get_args()
 
 	#1. prepare data for training topic models
-	training_data = prepare_data(args.birth_stories_df)
+	birth_stories_df = prepare_data(args.birth_stories_df)
+	training_data = split_data(birth_stories_df)
 	
 	#2. for loop:
 		#train topic model
 		#score the topic model
 
 	coherences = {}
-	highest_coherence = ()
+	highest_coherence = (0,0)
 	for k in range(args.start, args.stop, args.step):
 
 		if not os.path.exists(f"{args.path_to_save}/{k}"):
 			os.mkdir(f"{args.path_to_save}/{k}")
 
 		topic_keys, topic_doc_distributions = lmw.quick_train_topic_model(args.path_to_mallet, f"{args.path_to_save}/{k}", k, training_data)
-
+	
 		coherence_score = lmw_coherence(topic_keys, training_data)
 
-		if coherence_score > highest_coherence:
-			highest_coherence = (f"{k} topics: {coherence_score}")
+		if coherence_score > highest_coherence[0]:
+			highest_coherence = (coherence_score, k)
 
-	coherences[k] = coherence_score
+		coherences[k] = coherence_score
 	coherence_df = pd.Series(coherences, dtype='float64')
-	coherence_plot(coherence_df, args.output_coherence_plot)
+	coherence_df.to_csv(args.output_coherence_csv)
 
+	coherence_plot(coherence_df, args.output_coherence_plot)
 	#4. which score had the highest coherence
 	print(highest_coherence)
 
