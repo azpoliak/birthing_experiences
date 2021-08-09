@@ -11,6 +11,7 @@ from little_mallet_wrapper import process_string
 import redditcleaner
 import re
 import compress_json
+from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 
 #Function to read all dataframes 
 def load_data(path_to_birth_stories, path_to_pre_covid, path_to_post_covid, path_to_labels):
