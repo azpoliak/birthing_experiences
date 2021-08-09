@@ -21,7 +21,8 @@ import itertools
 import compress_json
 from scipy import stats
 import argparse
-from text_utils import load_data, split_story_10_sentiment, per_group
+from text_utils import load_data
+from sentiment_utils import split_story_10_sentiment, per_group
 warnings.filterwarnings("ignore")
 
 def get_args():

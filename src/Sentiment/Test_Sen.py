@@ -20,7 +20,7 @@ import warnings
 import itertools
 import compress_json
 import argparse
-from text_utils import split_story_10_sentiment, per_group, group
+from sentiment_utils import split_story_10_sentiment, per_group, group
 warnings.filterwarnings("ignore")
 
 def get_args():
