@@ -14,9 +14,8 @@ import compress_json
 
 #Function to read all dataframes 
 def load_data(path_to_birth_stories, path_to_pre_covid, path_to_post_covid, path_to_labels):
-
-    birth_stories_df = compress_json.load(path_to_birth_stories)
-    birth_stories_df = pd.read_json(birth_stories_df)
+    labels_df = compress_json.load(path_to_labels)
+    labels_df = pd.read_json(labels_df)
     
     pre_covid_posts_df = compress_json.load(path_to_pre_covid)
     pre_covid_posts_df = pd.read_json(pre_covid_posts_df)
@@ -24,10 +23,10 @@ def load_data(path_to_birth_stories, path_to_pre_covid, path_to_post_covid, path
     post_covid_posts_df = compress_json.load(path_to_post_covid)
     post_covid_posts_df = pd.read_json(post_covid_posts_df)
 
-    labels_df = compress_json.load(path_to_labels)
-    labels_df = pd.read_json(labels_df)
+    birth_stories_df = compress_json.load(path_to_birth_stories)
+    birth_stories_df = pd.read_json(birth_stories_df)
 
-    return birth_stories_df, pre_covid_posts_df, post_covid_posts_df, labels_df
+    return labels_df, pre_covid_posts_df, post_covid_posts_df, birth_stories_df
 
 #Function for story length
 def story_lengths(series):
