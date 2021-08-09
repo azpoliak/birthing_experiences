@@ -203,6 +203,12 @@ def clean_posts(all_posts_df):
 
     return all_posts_df
 
+#set up sentiment analyzer
+analyzer = SentimentIntensityAnalyzer()
+def sentiment_analyzer_scores(sentence):
+    score = analyzer.polarity_scores(sentence)
+    return(sentence, score)
+
 #Splits stories into 10 sections and runs sentiment analysis on them
 def split_story_10_sentiment(lst):
     sentiment_story = []
