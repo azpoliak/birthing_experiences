@@ -114,7 +114,7 @@ def main():
 
     corpus_stats = stats(pre_covid_posts_df, post_covid_posts_df, birth_stories_df)
     make_df_with_stats(corpus_stats)
-    #posts_per_year(birth_stories_df)
+    posts_per_year(birth_stories_df)
     make_hist(birth_stories_df)
 
 if __name__ == "__main__":
