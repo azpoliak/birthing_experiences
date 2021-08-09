@@ -15,7 +15,8 @@ from gensim.models import CoherenceModel
 from matplotlib import pyplot as plt
 
 from topic_utils import get_all_chunks_from_column
-from text_utils import prepare_data, remove_emojis, process_s, split_story_10
+
+from text_utils import remove_emojis, process_s, split_story_10, clean_training_text
 
 def get_args():
     parser = argparse.ArgumentParser("Train topic models and choose the best model based on c_v coherence score")
@@ -41,11 +42,6 @@ def split_data(birth_stories_df):
 	training_chunks = get_all_chunks_from_column(birth_stories_df['10 chunks'])
 
 	return training_chunks
-
-#cleans up the training_data file
-def clean_training_text(row):
-    cleaned = row.replace(to_replace=r"[0-9]+ no_label ", value='', regex=True)
-    return list(cleaned)
 
 def lmw_coherence(topic_keys, training_data):
     #Computes c_v coherence from LMW model using Gensim

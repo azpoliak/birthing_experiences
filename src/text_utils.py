@@ -134,6 +134,11 @@ def load_data_bf(path_to_birth_stories):
     birth_stories_df = pd.read_json(birth_stories_df)
 
     return birth_stories_df
+  
+#cleans up the training_data file
+def clean_training_text(row):
+    cleaned = row.replace(to_replace=r"[0-9]+ no_label ", value='', regex=True)
+    return list(cleaned)
 
 def prepare_data(df, stopwords=True):
     #load in data
@@ -155,3 +160,47 @@ def prepare_data(df, stopwords=True):
     #remove any missing values
     birth_stories_df = birth_stories_df.dropna()
     return birth_stories_df
+
+def missing_text(birth_stories_df):
+    missing_text_df = birth_stories_df[birth_stories_df['selftext'].map(lambda x: not x)]
+    missing_id_author_df = missing_text_df[['id', 'author', 'Pre-Covid']]
+    missing_id_author_df['body'] = missing_id_author_df.apply(get_first_comment, axis=1)
+    missing_id_author_df['body'].map(lambda x: x == None).value_counts()
+
+    missing_id_author_df[missing_id_author_df['body'] == None]
+
+    print(birth_stories_df['selftext'].map(lambda x: not x).value_counts())
+    for idx, row in missing_id_author_df.iterrows():
+        birth_stories_df.at[idx, 'selftext'] = row.body
+
+    birth_stories_df['selftext'].map(lambda x: not x).value_counts()
+
+    birth_stories_df['selftext'].map(lambda x: x != None).value_counts()
+
+    birth_stories_df[birth_stories_df['selftext'].map(lambda x: not not x)]['selftext'].shape
+
+    birth_stories_df = birth_stories_df[birth_stories_df['selftext'].map(lambda x: not not x)]
+    birth_stories_df.shape
+
+    birth_stories_df['selftext'].map(lambda x: x != '[removed]' or x != '[deleted]').value_counts()
+
+    birth_stories_df = birth_stories_df[birth_stories_df['selftext'] != '[removed]']
+    birth_stories_df = birth_stories_df[birth_stories_df['selftext'] != '[deleted]']
+
+    return birth_stories_df
+
+#gets rid of posts that have no content or are invalid 
+def clean_posts(all_posts_df):
+    nan_value = float("NaN")
+    all_posts_df.replace("", nan_value, inplace=True)
+    all_posts_df.dropna(subset=['selftext'], inplace=True)
+
+    warning = 'disclaimer: this is the list that was previously posted'
+    all_posts_df['Valid'] = [findkeyword(sub, warning) for sub in all_posts_df['selftext']]
+    all_posts_df = all_posts_df.get(all_posts_df['Valid'] == False)
+
+    all_posts_df = all_posts_df[all_posts_df['selftext'] != '[removed]']
+    all_posts_df = all_posts_df[all_posts_df['selftext'] != '[deleted]']
+    #print(all_posts_df.shape)
+    return all_posts_df
+

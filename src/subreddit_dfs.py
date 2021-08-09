@@ -15,7 +15,7 @@ warnings.filterwarnings("ignore")
 from nltk.stem.wordnet import WordNetLemmatizer
 from collections import defaultdict
 from tqdm import tqdm
-from text_utils import story_lengths
+from text_utils import story_lengths, missing_text, clean_posts
 from date_utils import get_post_date, pandemic
 import argparse
 
@@ -90,43 +90,6 @@ def process_df(birth_stories_df):
     birth_stories_df['Pre-Covid'] = birth_stories_df['date created'].apply(pandemic)
     return birth_stories_df
 
-def missing_text(birth_stories_df):
-    missing_text_df = birth_stories_df[birth_stories_df['selftext'].map(lambda x: not x)]
-    missing_id_author_df = missing_text_df[['id', 'author', 'Pre-Covid']]
-    missing_id_author_df['body'] = missing_id_author_df.apply(get_first_comment, axis=1)
-    missing_id_author_df['body'].map(lambda x: x == None).value_counts()
-
-    missing_id_author_df[missing_id_author_df['body'] == None]
-
-    print(birth_stories_df['selftext'].map(lambda x: not x).value_counts())
-    for idx, row in missing_id_author_df.iterrows():
-        birth_stories_df.at[idx, 'selftext'] = row.body
-
-    birth_stories_df['selftext'].map(lambda x: not x).value_counts()
-
-
-    birth_stories_df['selftext'].map(lambda x: x != None).value_counts()
-
-
-    birth_stories_df[birth_stories_df['selftext'].map(lambda x: not not x)]['selftext'].shape
-
-
-    birth_stories_df = birth_stories_df[birth_stories_df['selftext'].map(lambda x: not not x)]
-    birth_stories_df.shape
-
-
-    birth_stories_df['selftext'].map(lambda x: x != '[removed]' or x != '[deleted]').value_counts()
-
-
-    birth_stories_df = birth_stories_df[birth_stories_df['selftext'] != '[removed]']
-    birth_stories_df = birth_stories_df[birth_stories_df['selftext'] != '[deleted]']
-
-    #gets rid of posts that have no content
-    nan_value = float("NaN")
-    birth_stories_df.replace("", nan_value, inplace=True)
-    birth_stories_df.dropna(subset=['selftext'], inplace=True)
-    return birth_stories_df
-
 def only_useful_long_stories(birth_stories_df):
     #get story lengths
     birth_stories_df['story length'] = birth_stories_df['selftext'].apply(story_lengths)
@@ -138,9 +101,6 @@ def only_useful_long_stories(birth_stories_df):
     #only useful columns
     birth_stories_df = birth_stories_df[['id','author', 'title', 'selftext','story length','created_utc', 'Pre-Covid']]
 
-    warning = 'disclaimer: this is the list that was previously posted'
-    birth_stories_df['Valid'] = [findkeyword(sub, warning) for sub in birth_stories_df['selftext']]
-    birth_stories_df = birth_stories_df.get(birth_stories_df['Valid'] == False)
     return birth_stories_df
 
 def main():
@@ -149,6 +109,7 @@ def main():
     birth_stories_df = create_dataframe(args.path, args.output_each_subreddit)
     birth_stories_df = process_df(birth_stories_df)
     birth_stories_df = missing_text(birth_stories_df)
+    birth_stories_df = clean_posts(birth_stories_df)
     birth_stories_df = only_useful_long_stories(birth_stories_df)
 
     #Convert to compressed json 
