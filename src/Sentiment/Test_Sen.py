@@ -20,7 +20,7 @@ import warnings
 import itertools
 import compress_json
 import argparse
-from text_utils import split_story_10_sentiment, per_group
+from text_utils import split_story_10_sentiment, per_group, group
 warnings.filterwarnings("ignore")
 
 def get_args():
@@ -78,32 +78,9 @@ def load_data(path_to_birth_stories, path_to_pre_covid, path_to_post_covid, path
 
 # **Figure 2: Sentiment Analysis**
 
-#set up sentiment analyzer
-analyzer = SentimentIntensityAnalyzer()
-def sentiment_analyzer_scores(sentence):
-    score = analyzer.polarity_scores(sentence)
-    return(sentence, score)
-
 #Computes all story lengths
 def story_lengths(lst):
     return len(lst)
-
-#Creates list of the story sentiment values per section of the story 
-def group(story, num, val):
-    compound_scores = []
-    sentences = []
-    for sent in story[num]:
-        if val == 'compound' or val == 'pos' or val == 'neg':
-            dictionary = sent[1]
-            compound_score = dictionary[val]
-            compound_scores.append(compound_score)
-        else:
-            sen = sent[0]
-            sentences.append(sen)
-    if val == 'sentences': 
-        return " ".join(sentences)
-    else:
-        return compound_scores
 
 #Converts the dictionary of values into a dataframe with only one value per section (the average of the sentiments)
 def dict_to_frame(lst):
