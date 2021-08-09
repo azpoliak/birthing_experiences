@@ -130,3 +130,8 @@ def load_data_bf(path_to_birth_stories):
     birth_stories_df = pd.read_json(birth_stories_df)
 
     return birth_stories_df
+
+#cleans up the training_data file
+def clean_training_text(row):
+    cleaned = row.replace(to_replace=r"[0-9]+ no_label ", value='', regex=True)
+    return list(cleaned)
