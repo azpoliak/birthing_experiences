@@ -11,6 +11,7 @@ from little_mallet_wrapper import process_string
 import redditcleaner
 import re
 import compress_json
+from text_utils import split_story_10_sentiment, per_group
 
 #Function to read all dataframes 
 def load_data(path_to_birth_stories, path_to_pre_covid, path_to_post_covid, path_to_labels):
@@ -202,3 +203,34 @@ def clean_posts(all_posts_df):
     all_posts_df = all_posts_df[all_posts_df['selftext'] != '[deleted]']
 
     return all_posts_df
+
+#Splits stories into 10 sections and runs sentiment analysis on them
+def split_story_10_sentiment(lst):
+    sentiment_story = []
+    if isinstance(lst, float) == True:
+        lst = str(lst)
+    for sentence in lst:
+        if len(tokenize.word_tokenize(sentence)) >=5:
+            analyzed = sentiment_analyzer_scores(sentence)
+            sentiment_story.append(analyzed)
+    rounded = round(len(lst)/10)
+    if rounded != 0:
+        ind = np.arange(0, rounded*10, rounded)
+        remainder = len(lst) % rounded*10
+    else:
+        ind = np.arange(0, rounded*10)
+        remainder = 0
+    split_story_sents = []
+    for i in ind:
+        if i == ind[-1]:
+            split_story_sents.append(sentiment_story[i:i+remainder])
+            return split_story_sents
+        split_story_sents.append(sentiment_story[i:i+rounded])
+    return split_story_sents
+
+#Groups together the stories per section in a dictionary
+def per_group(story, val):
+    group_dict = {} 
+    for i in np.arange(10):
+        group_dict[f"0.{str(i)}"] = group(story, i, val)
+    return group_dict
