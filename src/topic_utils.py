@@ -72,33 +72,6 @@ def topic_distributions(file_path, topic_key_path):
     story_topics_df.set_axis(six_keys, axis=1, inplace=True)
     return story_topics_df
 
-def combine_topics_and_months(birth_stories_df, story_topics_df, drop=True):
-    #load in data so that we can attach dates to stories
-    birth_stories_df = compress_json.load(birth_stories_df)
-    birth_stories_df = pd.read_json(birth_stories_df)
-
-    if drop==True:
-        #makes it even
-        birth_stories_df.drop(birth_stories_df.head(3).index, inplace=True)
-
-    #combines story dates with topic distributions
-    birth_stories_df.reset_index(drop=True, inplace=True)
-    dates_topics_df = pd.concat([birth_stories_df[['created_utc', 'id']], story_topics_df], axis=1)
-
-    #converts the date into datetime object for year and month
-    dates_topics_df['Date Created'] = dates_topics_df['created_utc'].apply(get_post_month)
-    dates_topics_df['date'] = pd.to_datetime(dates_topics_df['Date Created'])
-    dates_topics_df['year-month'] = dates_topics_df['date'].dt.to_period('M')
-    dates_topics_df['Date'] = [month.to_timestamp() for month in dates_topics_df['year-month']]
-    dates_topics_df.drop(columns=['Date Created', 'created_utc', 'year-month', 'date'], inplace=True)
-
-    dates_topics_df = dates_topics_df.set_index('Date')
-
-    #groups stories by month and finds average
-    dates_topics_df = pd.DataFrame(dates_topics_df.groupby(dates_topics_df.index).mean())
- 
-    return dates_topics_df
-
 def ztest(actual, forecast, percent):
     residual = actual - forecast
     residual = list(residual)
@@ -135,6 +108,8 @@ def prophet_projection(df, df2, topic_label, i, m, periods, frequency):
 def projection_percent_outside_ci_and_ztest(forecast, df2, topic_label, pre_ztest_dict, post_ztest_dict):
     values = df2.loc[:, topic_label]
 
+    #import pdb; pdb.set_trace()
+
     #finds values that are outside of the forecasted confidence interval
     inside_forecast = []
     for j in range(len(values)):
@@ -162,7 +137,7 @@ def projection_percent_outside_ci_and_ztest(forecast, df2, topic_label, pre_ztes
     post_ztest_dict[topic_label] = ztest_vals_post
     return ztest_vals_post, pre_ztest_dict[topic_label], post_ztest_dict[topic_label]
 
-def predict_topic_trend_and_plot_significant_differences(df, df2, topic_forecasts_plots_output, ztest_output):
+def predict_topic_trend_and_plot_significant_differences(df, df2, topic_forecasts_plots_output, ztest_output, periods=16, frequency="MS", timestamp='2020-03-01'):
     fig = plt.figure(figsize=(15,10))
     ax = fig.add_subplot(111)
     pre_ztest_dict = {}
@@ -172,7 +147,7 @@ def predict_topic_trend_and_plot_significant_differences(df, df2, topic_forecast
         topic_label = df.iloc[:, i].name
         #train a prophet model
         m = Prophet()
-        forecast = prophet_projection(df, df2, topic_label, i, m, 16, 'MS')
+        forecast = prophet_projection(df, df2, topic_label, i, m, periods, frequency)
         #do statistical analysis (find percent of values outside the CI and do a z-test on the forecasted values compared to actual values)
         ztest_vals_post, pre_ztest_dict[topic_label], post_ztest_dict[topic_label] = projection_percent_outside_ci_and_ztest(forecast, df2, topic_label, pre_ztest_dict, post_ztest_dict)
 
@@ -181,7 +156,7 @@ def predict_topic_trend_and_plot_significant_differences(df, df2, topic_forecast
             ax.plot(df2.iloc[:, i], color='k')
             ax = fig.gca()
             ax.set_title(f'{topic_label} Forecast', fontsize=20)
-            plt.axvline(pd.Timestamp('2020-03-01'),color='r')
+            plt.axvline(pd.Timestamp(timestamp),color='r')
             fig1.savefig(f'{topic_forecasts_plots_output}/{topic_label}_Prediction_Plot.png')
 
     pre_ztest_df = pd.DataFrame.from_dict(pre_ztest_dict, orient='index', columns=['Z Statistic Pre', 'P-Value Pre'])

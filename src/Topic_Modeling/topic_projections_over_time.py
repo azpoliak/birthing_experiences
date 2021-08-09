@@ -18,8 +18,8 @@ from scipy.stats import norm, pearsonr
 
 from matplotlib import pyplot as plt
 
-from date_utils import get_post_month, pre_covid_posts
-from topic_utils import combine_topics_and_months, ztest, prophet_projection, projection_percent_outside_ci_and_ztest, predict_topic_trend_and_plot_significant_differences, topic_distributions
+from date_utils import combine_topics_and_months, pre_covid_posts
+from topic_utils import ztest, prophet_projection, projection_percent_outside_ci_and_ztest, predict_topic_trend_and_plot_significant_differences, topic_distributions
 
 def get_args():
     parser = argparse.ArgumentParser("Load topic distributions, train Prophet model for projection, apply z-test for statistical significance, plot topics that are statistically significant.")
@@ -38,7 +38,7 @@ def main():
 
 	#1. load topic model
 	story_topics_df = topic_distributions(args.topic_dist_path, args.topic_key_path)
-	dates_topics_df = combine_topics_and_months(args.birth_stories_df, story_topics_df)
+	dates_topics_df = combine_topics_and_months(args.birth_stories_df, story_topics_df, period="M")
 
 	#2. for every topic:
 		#train a model
