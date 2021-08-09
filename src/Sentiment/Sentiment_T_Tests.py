@@ -22,7 +22,7 @@ import compress_json
 from scipy import stats
 import argparse
 import Test_Sen as ts
-from text_utils import load_data
+from text_utils import load_data, split_story_10_sentiment, per_group
 warnings.filterwarnings("ignore")
 
 def get_args():
@@ -44,8 +44,8 @@ def get_args():
 def group_raw_scores(df, l):
 	new_df = df[['title', 'selftext']].get(df[l] == True)
 	new_df['tokenized sentences'] = new_df['selftext'].apply(tokenize.sent_tokenize)
-	new_df['sentiment groups'] = new_df['tokenized sentences'].apply(ts.split_story_10_sentiment)
-	new_df['comp sent per group'] = new_df['sentiment groups'].apply(ts.per_group, args = ('compound',)) 
+	new_df['sentiment groups'] = new_df['tokenized sentences'].apply(split_story_10_sentiment)
+	new_df['comp sent per group'] = new_df['sentiment groups'].apply(per_group, args = ('compound',)) 
 	compressed = pd.DataFrame(list(new_df['comp sent per group'])).to_dict(orient='list')
 	raw_score_dict = {} 
 	for key in compressed:
