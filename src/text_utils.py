@@ -201,6 +201,5 @@ def clean_posts(all_posts_df):
 
     all_posts_df = all_posts_df[all_posts_df['selftext'] != '[removed]']
     all_posts_df = all_posts_df[all_posts_df['selftext'] != '[deleted]']
-    #print(all_posts_df.shape)
-    return all_posts_df
 
+    return all_posts_df
