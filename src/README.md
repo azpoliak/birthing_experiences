@@ -22,4 +22,4 @@ Run python files from `src`, not inner directories. Call `python -m` and the pat
 - `text_utils.py`: functions used to split up text and make plots.
 - `topic_utils.py`: functions used for text processing and topic modeling.
 - `sentiment_utils.py`: functions used for sentiment analysis.
-- `LIWC_stats.py`: statistics for LIWC data
+- `LIWC_stats.py`: statistics for LIWC data.
