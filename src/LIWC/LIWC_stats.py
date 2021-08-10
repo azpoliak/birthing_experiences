@@ -34,6 +34,7 @@ def get_pre_post(birth_stories_df, df):
 def t_tests(cols, pre_df, post_df):
     stat = []
     p_value = []
+    sig_cols = []
     for col in cols:
         pre_scores = pre_df[col]
         post_scores = post_df[col]
@@ -41,7 +42,8 @@ def t_tests(cols, pre_df, post_df):
         if t_test.pvalue < .05:
             p_value.append(t_test.pvalue)
             stat.append(t_test.statistic)
-    label_frame = pd.DataFrame(data = {'Statistics': stat, 'P-Values': p_value}, index = cols)
+            sig_cols.append(col)
+    label_frame = pd.DataFrame(data = {'Statistics': stat, 'P-Values': p_value}, index = sig_cols)
     label_frame = label_frame.dropna()
     return label_frame
 
