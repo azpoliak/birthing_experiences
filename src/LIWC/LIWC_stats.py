@@ -31,18 +31,19 @@ def get_pre_post(birth_stories_df, df):
     post_covid_posts = post_covid_posts.drop(['id', 'author', 'title', 'selftext', 'story length', 'created_utc','Pre-Covid', 'Valid', 'Source (A)'], axis = 1)
     return (pre_covid_posts, post_covid_posts) 
 
-def t_tests(cols, pre_df, post_df):
+def t_tests(cols, pre_df, post_df, puncts):
     stat = []
     p_value = []
     sig_cols = []
     for col in cols:
-        pre_scores = pre_df[col]
-        post_scores = post_df[col]
-        t_test = stats.ttest_ind(pre_scores, post_scores)
-        if t_test.pvalue < .05:
-            p_value.append(t_test.pvalue)
-            stat.append(t_test.statistic)
-            sig_cols.append(col)
+        if col not in puncts:
+            pre_scores = pre_df[col]
+            post_scores = post_df[col]
+            t_test = stats.ttest_ind(pre_scores, post_scores)
+            if t_test.pvalue < .05:
+                p_value.append(t_test.pvalue)
+                stat.append(t_test.statistic)
+                sig_cols.append(col)
     label_frame = pd.DataFrame(data = {'Statistics': stat, 'P-Values': p_value}, index = sig_cols)
     label_frame = label_frame.dropna()
     return label_frame
@@ -54,9 +55,9 @@ def main():
     pre_covid_posts, post_covid_posts = get_pre_post(birth_stories_df, LIWC_df)
     cols = list(pre_covid_posts.columns)
     cols.remove('Source (C)')
-
-    t_tests(cols, pre_covid_posts, post_covid_posts).to_csv(args.LIWC_t_tests)
-    LIWC_CI_df = compute_confidence_interval(cols, pre_covid_posts, post_covid_posts)
+    puncts =  ['AllPunc', 'OtherP', 'Period', 'Comma', 'Colon', 'SemiC', 'QMark', 'Exclam', 'Dash', 'Quote', 'Apostro', 'Parenth', 'WC', 'WPS']
+    t_tests(cols, pre_covid_posts, post_covid_posts, puncts).to_csv(args.LIWC_t_tests)
+    LIWC_CI_df = compute_confidence_interval(cols, pre_covid_posts, post_covid_posts, puncts)
     LIWC_CI_df.to_csv(args.LIWC_CI_df)
 
 if __name__ == '__main__':
