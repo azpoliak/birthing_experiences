@@ -21,3 +21,5 @@ Run python files from `src`, not inner directories. Call `python -m` and the pat
   -   April 1, 2021-June 24, 2021 (widespread vaccine availability in US, dip in cases)
 - `text_utils.py`: functions used to split up text and make plots.
 - `topic_utils.py`: functions used for text processing and topic modeling.
+- `sentiment_utils.py`: functions used for sentiment analysis.
+- `LIWC_stats.py`: statistics for LIWC data.

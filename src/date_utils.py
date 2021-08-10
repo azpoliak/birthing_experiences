@@ -3,6 +3,7 @@ from nltk import tokenize
 import numpy as np
 import pandas as pd
 from datetime import datetime
+import compress_json
 
 #translate created_utc column into dates
 def get_post_date(series):
@@ -38,6 +39,15 @@ def this_year(date, y):
     else:
         return False
 
+#todo look into why < 03-01 doesnt work
+def pre_covid_posts(df):
+    pre_covid = df[(df.index <= '2020-02-01')]
+    return pre_covid
+
+def posts_2019_on(df):
+    recent_pre_covid = df[(df.index >= '2019-01-01')]
+    return recent_pre_covid
+
 #True/False column based on before and after pandemic 
 def pandemic(date):
     start_date = datetime.strptime("11 March, 2020", "%d %B, %Y")
@@ -60,3 +70,32 @@ def pandemic_eras(series, start_date, end_date):
             return True
         else:
             return False
+
+def combine_topics_and_months(birth_stories_df, story_topics_df, period, drop=True):
+    #load in data so that we can attach dates to stories
+    birth_stories_df = compress_json.load(birth_stories_df)
+    birth_stories_df = pd.read_json(birth_stories_df)
+
+    if drop==True:
+        #makes it even
+        birth_stories_df.drop(birth_stories_df.head(3).index, inplace=True)
+
+        #combines story dates with topic distributions
+        birth_stories_df.reset_index(drop=True, inplace=True)
+        dates_topics_df = pd.concat([birth_stories_df[['created_utc', 'id']], story_topics_df], axis=1)
+    else:
+        dates_topics_df = pd.merge(birth_stories_df[['created_utc', 'id']], story_topics_df, how='outer', left_on='id', right_on="Source (B)")
+
+    #converts the date into datetime object for year and month
+    dates_topics_df['Date Created'] = dates_topics_df['created_utc'].apply(get_post_month)
+    dates_topics_df['date'] = pd.to_datetime(dates_topics_df['Date Created'])
+    dates_topics_df['year-month'] = dates_topics_df['date'].dt.to_period(period)
+    dates_topics_df['Date'] = [month.to_timestamp() for month in dates_topics_df['year-month']]
+    dates_topics_df.drop(columns=['Date Created', 'created_utc', 'year-month', 'date'], inplace=True)
+
+    dates_topics_df = dates_topics_df.set_index('Date')
+
+    #groups stories by month and finds average
+    dates_topics_df = pd.DataFrame(dates_topics_df.groupby(dates_topics_df.index).mean())
+ 
+    return dates_topics_df

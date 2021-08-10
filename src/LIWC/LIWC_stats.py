@@ -7,7 +7,8 @@ import nltk
 from nltk import tokenize
 from scipy import stats
 from scipy.stats import norm
-from text_utils import load_data_bf, compute_confidence_interval
+from text_utils import load_data_bf
+from stats_utils import compute_confidence_interval
 
 def get_args():
     parser = argparse.ArgumentParser()
@@ -33,13 +34,16 @@ def get_pre_post(birth_stories_df, df):
 def t_tests(cols, pre_df, post_df):
     stat = []
     p_value = []
+    sig_cols = []
     for col in cols:
         pre_scores = pre_df[col]
         post_scores = post_df[col]
         t_test = stats.ttest_ind(pre_scores, post_scores)
-        stat.append(t_test.statistic)
-        p_value.append(t_test.pvalue)
-    label_frame = pd.DataFrame(data = {'Statistics': stat, 'P-Values': p_value}, index = cols)
+        if t_test.pvalue < .05:
+            p_value.append(t_test.pvalue)
+            stat.append(t_test.statistic)
+            sig_cols.append(col)
+    label_frame = pd.DataFrame(data = {'Statistics': stat, 'P-Values': p_value}, index = sig_cols)
     label_frame = label_frame.dropna()
     return label_frame
 
