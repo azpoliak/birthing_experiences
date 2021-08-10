@@ -38,8 +38,9 @@ def t_tests(cols, pre_df, post_df):
         pre_scores = pre_df[col]
         post_scores = post_df[col]
         t_test = stats.ttest_ind(pre_scores, post_scores)
-        stat.append(t_test.statistic)
-        p_value.append(t_test.pvalue)
+        if t_test.pvalue < .05:
+            p_value.append(t_test.pvalue)
+            stat.append(t_test.statistic)
     label_frame = pd.DataFrame(data = {'Statistics': stat, 'P-Values': p_value}, index = cols)
     label_frame = label_frame.dropna()
     return label_frame
