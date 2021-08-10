@@ -6,8 +6,6 @@ Put data in this repository
 
 - `Corpus_Stats_Plots/`: contains bar graph of number of posts made per year and histogram of number of words in stories.
 - `Personas_Data/`: contains data and plots related to persona analysis.
-- `Sentiment_Plots/`: contains line plots for story sentiment over story time.
-- `Sentiment_T_Tests/`: statistical analysis on sentiment differences before and during COVID-19.
 - `Topic_Modeling_Data/`: contains data and plots related to topic modeling.
 - `Home_vs_Hospital_Births_Covid.png`: bar graph showing number of posts in each year labeled as "home" or "hospital".
 - `original-reddit/`: put the original downloaded reddit data here. Do not push the data from that directory to the remote server.
