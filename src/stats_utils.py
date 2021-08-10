@@ -2,6 +2,8 @@ import numpy as np
 import pandas as pd
 from scipy import stats
 from scipy.stats import norm, pearsonr
+import warnings
+warnings.filterwarnings("ignore")
 
 def ztest(actual, forecast, percent):
     residual = actual - forecast
@@ -56,6 +58,7 @@ def ttest(df, df2, chunks=False, persona_chunk_stats_output=None, persona_stats_
 def compute_confidence_interval(personas, pre_df, post_df):
     lowers = []
     uppers = []
+    personas_sigs = []
     for persona in personas:
         x1 = pre_df[persona]
         x2 = post_df[persona]
@@ -73,10 +76,14 @@ def compute_confidence_interval(personas, pre_df, post_df):
         lower = (np.mean(x1) - np.mean(x2)) - t * np.sqrt(1 / len(x1) + 1 / len(x2)) * s
         upper = (np.mean(x1) - np.mean(x2)) + t * np.sqrt(1 / len(x1) + 1 / len(x2)) * s
 
-        if lower < 0 && upper > 0:
+        x = False 
+        if lower < 0 and upper > 0:
+            x = True 
+        if x == False:
             lowers.append(lower)
             uppers.append(upper)
+            personas_sigs.append(persona)
 
-    df = pd.DataFrame({'Lower Bound': lowers, 'Upper Bound': uppers}, index = personas)
+    df = pd.DataFrame({'Lower Bound': lowers, 'Upper Bound': uppers}, index = personas_sigs)
     df.index.name = 'Persona'
     return df
