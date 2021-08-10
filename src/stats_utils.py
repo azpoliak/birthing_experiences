@@ -55,34 +55,35 @@ def ttest(df, df2, chunks=False, persona_chunk_stats_output=None, persona_stats_
         ttest_df = pd.DataFrame(data = {'Statistics': stat, 'P-Values': p_value}, index = index)
         ttest_df.to_csv(persona_stats_output)
 
-def compute_confidence_interval(personas, pre_df, post_df):
+def compute_confidence_interval(personas, pre_df, post_df, puncts):
     lowers = []
     uppers = []
     personas_sigs = []
     for persona in personas:
-        x1 = pre_df[persona]
-        x2 = post_df[persona]
+        if persona not in puncts:
+            x1 = pre_df[persona]
+            x2 = post_df[persona]
 
-        alpha = 0.05                                                      
-        n1, n2 = len(x1), len(x2)                                          
-        s1, s2 = np.var(x1, ddof=1), np.var(x2, ddof=1)  
+            alpha = 0.05                                                      
+            n1, n2 = len(x1), len(x2)                                          
+            s1, s2 = np.var(x1, ddof=1), np.var(x2, ddof=1)  
 
-        #print(f'ratio of sample variances: {s1**2/s2**2}')
+            #print(f'ratio of sample variances: {s1**2/s2**2}')
 
-        s = np.sqrt(((n1 - 1) * s1 + (n2 - 1) * s2) / (n1 + n2 - 2))
-        df = (s1/n1 + s2/n2)**2 / ((s1/n1)**2/(n1-1) + (s2/n2)**2/(n2-1))  
-        t = stats.t.ppf(1 - alpha/2, df)                                   
+            s = np.sqrt(((n1 - 1) * s1 + (n2 - 1) * s2) / (n1 + n2 - 2))
+            df = (s1/n1 + s2/n2)**2 / ((s1/n1)**2/(n1-1) + (s2/n2)**2/(n2-1))  
+            t = stats.t.ppf(1 - alpha/2, df)                                   
 
-        lower = (np.mean(x1) - np.mean(x2)) - t * np.sqrt(1 / len(x1) + 1 / len(x2)) * s
-        upper = (np.mean(x1) - np.mean(x2)) + t * np.sqrt(1 / len(x1) + 1 / len(x2)) * s
+            lower = (np.mean(x1) - np.mean(x2)) - t * np.sqrt(1 / len(x1) + 1 / len(x2)) * s
+            upper = (np.mean(x1) - np.mean(x2)) + t * np.sqrt(1 / len(x1) + 1 / len(x2)) * s
 
-        x = False 
-        if lower < 0 and upper > 0:
-            x = True 
-        if x == False:
-            lowers.append(lower)
-            uppers.append(upper)
-            personas_sigs.append(persona)
+            x = False 
+            if lower < 0 and upper > 0:
+                x = True 
+            if x == False:
+                lowers.append(lower)
+                uppers.append(upper)
+                personas_sigs.append(persona)
 
     df = pd.DataFrame({'Lower Bound': lowers, 'Upper Bound': uppers}, index = personas_sigs)
     df.index.name = 'Persona'
