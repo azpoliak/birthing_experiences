@@ -72,9 +72,10 @@ def compute_confidence_interval(personas, pre_df, post_df):
 
         lower = (np.mean(x1) - np.mean(x2)) - t * np.sqrt(1 / len(x1) + 1 / len(x2)) * s
         upper = (np.mean(x1) - np.mean(x2)) + t * np.sqrt(1 / len(x1) + 1 / len(x2)) * s
-        
-        lowers.append(lower)
-        uppers.append(upper)
+
+        if lower < 0 && upper > 0:
+            lowers.append(lower)
+            uppers.append(upper)
 
     df = pd.DataFrame({'Lower Bound': lowers, 'Upper Bound': uppers}, index = personas)
     df.index.name = 'Persona'
