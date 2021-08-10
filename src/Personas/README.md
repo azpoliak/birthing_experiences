@@ -9,10 +9,12 @@
     -  Counts mentions of each persona in each chunk.
     -  Computes statistics about the mentions of personas in the corpus. 
   -  Normalizes the before-COVID numbers to account for a higher overall average story length in the pre-COVID dataset
-  -  Compares the mentions before and during COVID using a t-test to determine if the differences for each persona are statistically significant
+  -  Compares the mentions before and during COVID using a t-test to determine if the differences for each persona are statistically significant/
+  -  We use a significance cutoff of .05.
   -  Plots the mention frequency for each persona over the course of the average story
     -  One set of plots compares before and during COVID
     -  The other set of plots compares before COVID and each of the four "eras" of COVID
  
 `persona_stats.py`:
-- Computes 95% confidence intervals for all the personas using Welch's t-interval 
+- Computes 95% confidence intervals for all the personas using Welch's t-interval.
+- If 0 exists between the upper and lower bound, the difference is not significant.  
