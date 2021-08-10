@@ -18,3 +18,5 @@
 `persona_stats.py`:
 - Computes 95% confidence intervals for all the personas using Welch's t-interval.
 - If 0 exists between the upper and lower bounds of the confidence interval, the difference is not significant.  
+- If the lower and upper bounds are negative--this means the pre-COVID-19 persona frequency was LESS than the post-COVID-19 persona frequency.
+- If the lower and upper bounds are positive--this means the pre-COVID-19 persona frequency was MORE than the post-COVID-19 persona frequency. 
