@@ -46,6 +46,7 @@ def t_tests(cols, pre_df, post_df, puncts):
                 sig_cols.append(col)
     label_frame = pd.DataFrame(data = {'Statistics': stat, 'P-Values': p_value}, index = sig_cols)
     label_frame = label_frame.dropna()
+    label_frame = label_frame.sort_values(by=['P-Values'])
     return label_frame
 
 def main():

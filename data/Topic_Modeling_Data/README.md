@@ -1,4 +1,1 @@
-- `Topic_Forecasts/`: line plots for topics' average monthly forecasted probabilities compared to their actual average monthly probabilities over time (2010-2021).
-- `Z_Test_Stats.csv`: results of z-test for 50 topics.
-- `percent_outside_CI_pre_post.csv`: dataframe showing percent of data points (months) outside of confidence interval before and during COVID.
-- `topic_coherences.png`: line plot showing c_v coherence scores for each number of topics tested (5-50, inclusive).
+- `topic_coherence_df.csv`: dataframe containing coherence scores for each number of topics between 5 and 50 inclusive.
