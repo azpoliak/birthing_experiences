@@ -2,6 +2,7 @@ import pandas as pd
 import compress_json
 import os 
 import argparse
+from text_utils import process_df, missing_text, clean_posts
 
 def get_args():
     parser = argparse.ArgumentParser("Create dataframes of each subreddit")
@@ -12,7 +13,7 @@ def get_args():
     return args
 
 def create_dataframe(path, output_each_subreddit):
-    subreddits = ("BabyBumps", "beyondthebump", "BirthStories", "daddit", "predaddit", "pregnant", "NewParents", "InfertilityBabies")
+    subreddits = ("BabyBumps", "beyondthebump", "BirthStories", "daddit", "Mommit", "predaddit", "pregnant", "NewParents", "InfertilityBabies")
     for subreddit in subreddits:
         df = f"{subreddit}_df"
         df = pd.DataFrame()
@@ -22,8 +23,11 @@ def create_dataframe(path, output_each_subreddit):
                 content = pd.read_json(post)
                 df = df.append(content)
 
+        df = process_df(df)
+        df = missing_text(df, subreddit)
+
         df.reset_index(drop=True, inplace=True)
-        df_j = df.to_json()
+        df_j = df.to_json() 
         compress_json.dump(df_j, f"{output_each_subreddit}/{subreddit}_all_df.json.gz")
 
 def main():
