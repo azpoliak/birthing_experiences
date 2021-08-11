@@ -33,14 +33,17 @@ def get_args():
     return args  
 
 def clean_text(dfs):
-	corpus = []
+	corpuses = []
 	for df in dfs:
-		strings = df['selftext'].apply(str).str.lower()
-		cleaned = strings.apply(redditcleaner.clean)
-		cleaned_tokenized = cleaned.apply(nltk.sent_tokenize)
-		import pdb; pdb.set_trace()
-		corpus.append(cleaned_tokenized)
-	return corpus
+		corpus = []
+		for story in df['selftext']:
+			text = redditcleaner.clean(str(story))
+			tokenized = nltk.sent_tokenize(text)
+			for string in tokenized:
+				word_tokenized = nltk.word_tokenize(string)
+				corpus.append(word_tokenized)
+		corpuses.append(corpus)
+	return corpuses
 
 def main():
 	args = get_args()
@@ -58,6 +61,7 @@ def main():
 	NewParents_df.name = 'NewParents'
 	InfertilityBabies_df.name = 'InfertilityBabies'
 
-	corp = clean_text([BabyBumps_df, beyond_the_bump_df, BirthStories_df, daddit_df, predaddit_df, pregnant_df, Mommit_df, NewParents_df, InfertilityBabies_df])
+	clean_text([BabyBumps_df, beyond_the_bump_df, BirthStories_df, daddit_df, predaddit_df, pregnant_df, Mommit_df, NewParents_df, InfertilityBabies_df])
+
 if __name__ == '__main__':
 	main()
