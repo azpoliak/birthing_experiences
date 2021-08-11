@@ -33,6 +33,7 @@ def get_args():
     return args  
 
 def clean_text(dfs):
+
 	corpuses = []
 	for df in dfs:
 		corpus = []
