@@ -4,5 +4,5 @@
 ### Structure of repo
 
 - `data/` - all data goes here
-- `results` - all results and figures go here
+- `results/` - all results and figures go here
 - `src/` - all code goes here
