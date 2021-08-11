@@ -15,7 +15,7 @@ warnings.filterwarnings("ignore")
 from nltk.stem.wordnet import WordNetLemmatizer
 from collections import defaultdict
 from tqdm import tqdm
-from text_utils import story_lengths, missing_text, clean_posts
+from text_utils import story_lengths, process_df, missing_text, get_first_comment, clean_posts
 from date_utils import get_post_date, pandemic
 import argparse
 
@@ -38,18 +38,6 @@ def birthstories(series):
     else:
         return False
 
-def get_first_comment(row):
-    curr_id, author = row.id, row.author
-    if not os.path.exists(f"..data/original-reddit/subreddits/BabyBumps/comments/{curr_id}.json.gz"):
-        return 
-    comments_df = pd.read_json(f"../data/original-reddit/subreddits/BabyBumps/comments/{curr_id}.json.gz", compression='gzip')
-    if comments_df.shape[0] == 0:
-        return
-    match_df = comments_df[(comments_df['parent_id'].map(lambda x: curr_id in x)) & (comments_df['author'] == author)].sort_values('created_utc',ascending=True)
-    if match_df.shape[0] == 0:
-        return 
-    return match_df.iloc[0]['body']
-
 #return if a story is 500+ words long or not
 def long_stories(series):
     if series >= 500:
@@ -64,7 +52,7 @@ def findkeyword(word, key):
 
 def create_dataframe(path, output_each_subreddit):
     birth_stories_df = pd.DataFrame()
-    subreddits = ("BabyBumps", "beyondthebump", "BirthStories", "daddit", "predaddit", "pregnant", "NewParents", "InfertilityBabies")
+    subreddits = ("BabyBumps", "beyondthebump", "BirthStories", "daddit", "Mommit", "predaddit", "pregnant", "NewParents", "InfertilityBabies")
     for subreddit in subreddits:
         df = f"{subreddit}_df"
         df = pd.DataFrame()
@@ -77,17 +65,15 @@ def create_dataframe(path, output_each_subreddit):
         df['birth story'] = df['title'].apply(birthstories)
         df = df[df['birth story'] == True]
 
+        df = process_df(df)
+        df = missing_text(df, subreddit)
+
         df.reset_index(drop=True, inplace=True)
         df_j = df.to_json()
         compress_json.dump(df_j, f"{output_each_subreddit}/{subreddit}_df.json.gz")
         birth_stories_df = birth_stories_df.append(df, ignore_index=True)
-    return birth_stories_df
 
-def process_df(birth_stories_df):
-    #label stories as pre or post covid (March 11, 2020)
-    birth_stories_df['date created'] = birth_stories_df['created_utc'].apply(get_post_date)
-    birth_stories_df = birth_stories_df.sort_values(by = 'date created')
-    birth_stories_df['Pre-Covid'] = birth_stories_df['date created'].apply(pandemic)
+
     return birth_stories_df
 
 def only_useful_long_stories(birth_stories_df):
@@ -107,8 +93,6 @@ def main():
     args = get_args()
 
     birth_stories_df = create_dataframe(args.path, args.output_each_subreddit)
-    birth_stories_df = process_df(birth_stories_df)
-    birth_stories_df = missing_text(birth_stories_df)
     birth_stories_df = clean_posts(birth_stories_df)
     birth_stories_df = only_useful_long_stories(birth_stories_df)
 
