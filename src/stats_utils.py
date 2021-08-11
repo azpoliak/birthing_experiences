@@ -86,5 +86,4 @@ def compute_confidence_interval(personas, pre_df, post_df, puncts):
                 personas_sigs.append(persona)
 
     df = pd.DataFrame({'Lower Bound': lowers, 'Upper Bound': uppers}, index = personas_sigs)
-    df.index.name = 'Persona'
     return df

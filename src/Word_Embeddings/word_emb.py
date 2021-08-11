@@ -1,11 +1,17 @@
-import pandas as pd
+import nltk
+from nltk import tokenize
+from nltk.corpus import stopwords
 import numpy as np
+import pandas as pd
+from datetime import datetime
+from matplotlib import pyplot as plt
+import little_mallet_wrapper as lmw
+from little_mallet_wrapper import process_string
+import redditcleaner
+import re
 import compress_json
-import argparse
-import json
-from date_utils import get_post_year
-from plots_utils import plot_bar_graph
-from text_utils import load_subreddits
+import argparse 
+from text_utils import load_subreddits 
 
 def get_args():
     parser = argparse.ArgumentParser()
@@ -19,21 +25,21 @@ def get_args():
     parser.add_argument("--Mommit", default="/home/daphnaspira/birthing_experiences/data/subreddit_json_gzs/Mommit_df.json.gz", help="ppath to df with all posts from Mommit", type=str)
     parser.add_argument("--NewParents", default="/home/daphnaspira/birthing_experiences/data/subreddit_json_gzs/NewParents_df.json.gz", help="path to df with all posts from NewParents", type=str)
     parser.add_argument("--InfertilityBabies", default="/home/daphnaspira/birthing_experiences/data/subreddit_json_gzs/InfertilityBabies_df.json.gz", help="path to df with all posts from InfertilityBabies", type=str)
-    parser.add_argument("--bar_graph_output", default="../data/Corpus_Stats_Plots/subreddit_years_bar_graphs/", help="path to save bar graphs", type=str)
     args = parser.parse_args()
     return args  
 
-def year_created_column(dfs):
+def clean_text(dfs):
 	for df in dfs:
-		df['year created'] = df['created_utc'].apply(get_post_year)
+		clean_text = df["selftext"].apply(nltk.word_tokenize)
+		df['Cleaned Text'] = clean_text.apply(redditcleaner.clean)
 
-def make_bar_graphs(dfs, path):
+def word_embeds(dfs):
 	for df in dfs:
-		plot_bar_graph(df['year created'], name = df.name, path_output = path)
+		df['Cleaned Text']
 
 def main():
 	args = get_args()
-
+	
 	BabyBumps_df, beyond_the_bump_df, BirthStories_df, daddit_df, predaddit_df, pregnant_df, Mommit_df, NewParents_df, InfertilityBabies_df = load_subreddits(args.BabyBumps, args.beyond_the_bump, args.BirthStories, args.daddit, args.predaddit, args.pregnant, args.Mommit, args.NewParents, args.InfertilityBabies)
 	
 	#Set names 
@@ -47,8 +53,5 @@ def main():
 	NewParents_df.name = 'NewParents'
 	InfertilityBabies_df.name = 'InfertilityBabies'
 
-	year_created_column([BabyBumps_df, beyond_the_bump_df, BirthStories_df, daddit_df, predaddit_df, pregnant_df, Mommit_df, NewParents_df, InfertilityBabies_df])
-	make_bar_graphs([BabyBumps_df, beyond_the_bump_df, BirthStories_df, daddit_df, predaddit_df, pregnant_df, Mommit_df, NewParents_df, InfertilityBabies_df], args.bar_graph_output)
-
-if __name__ == "__main__":
-    main()
+if __name__ == '__main__':
+	main()

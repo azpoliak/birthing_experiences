@@ -4,6 +4,8 @@
   - Only stores significant results in dataframe.
   - Uses p-value significance of .05.
   - If 0 exists between the upper and lower bounds of the confidence interval, the difference is not significant.
+  - If the lower and upper bounds are negative--this means the pre-COVID-19 LIWC scores on average were LESS than the post-COVID-19 LIWC scores.
+  - If the lower and upper bounds are positive--this means the pre-COVID-19 LIWC scores on average were MORE than the post-COVID-19 LIWC scores. 
  
 `liwc_projections_over_time.py`:
 - LIWC prophet forecasts.
