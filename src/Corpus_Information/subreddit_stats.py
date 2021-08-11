@@ -5,6 +5,7 @@ import argparse
 import json
 from date_utils import get_post_year
 from plots_utils import plot_bar_graph
+from text_utils import load_subreddits
 
 def get_args():
     parser = argparse.ArgumentParser()
@@ -21,35 +22,6 @@ def get_args():
     parser.add_argument("--bar_graph_output", default="../data/Corpus_Stats_Plots/subreddit_years_bar_graphs/", help="path to save bar graphs", type=str)
     args = parser.parse_args()
     return args  
-
-def load_subreddits(BabyBumps, beyond_the_bump, BirthStories, daddit, predaddit, pregnant, Mommit, NewParents, InfertilityBabies):
-	BabyBumps_df = compress_json.load(BabyBumps)
-	BabyBumps_df = pd.read_json(BabyBumps_df)
-
-	beyond_the_bump_df = compress_json.load(beyond_the_bump)
-	beyond_the_bump_df = pd.read_json(beyond_the_bump_df)
-
-	BirthStories_df = compress_json.load(BirthStories)
-	BirthStories_df = pd.read_json(BirthStories_df)
-
-	daddit_df = compress_json.load(daddit)
-	daddit_df = pd.read_json(daddit_df)
-
-	predaddit_df = compress_json.load(predaddit)
-	predaddit_df = pd.read_json(predaddit_df)
-
-	pregnant_df = compress_json.load(pregnant)
-	pregnant_df = pd.read_json(pregnant_df)
-
-	Mommit_df = compress_json.load(Mommit)
-	Mommit_df = pd.read_json(Mommit_df)
-
-	NewParents_df = compress_json.load(NewParents)
-	NewParents_df = pd.read_json(NewParents_df)
-
-	InfertilityBabies_df = compress_json.load(InfertilityBabies)
-	InfertilityBabies_df = pd.read_json(InfertilityBabies_df)
-	return BabyBumps_df, beyond_the_bump_df, BirthStories_df, daddit_df, predaddit_df, pregnant_df, Mommit_df, NewParents_df, InfertilityBabies_df
 
 def year_created_column(dfs):
 	for df in dfs:
