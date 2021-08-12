@@ -13,6 +13,8 @@ import re
 import compress_json
 from scipy import stats
 from scipy.stats import norm
+import os
+from date_utils import pandemic, get_post_date
 
 #Function to read all dataframes 
 def load_data(path_to_birth_stories, path_to_pre_covid, path_to_post_covid, path_to_labels):
@@ -162,14 +164,34 @@ def prepare_data(df, stopwords=True):
     birth_stories_df = birth_stories_df.dropna()
     return birth_stories_df
 
-def missing_text(birth_stories_df):
+def process_df(birth_stories_df):
+    #label stories as pre or post covid (March 11, 2020)
+    birth_stories_df['date created'] = birth_stories_df['created_utc'].apply(get_post_date)
+    birth_stories_df = birth_stories_df.sort_values(by = 'date created')
+    birth_stories_df['Pre-Covid'] = birth_stories_df['date created'].apply(pandemic)
+    return birth_stories_df
+
+def get_first_comment(row, subreddit):
+    curr_id, author = row.id, row.author
+    if not os.path.exists(f"../data/original-reddit/subreddits/{subreddit}/comments/{curr_id}.json.gz"):
+        return 
+    comments_df = pd.read_json(f"../data/original-reddit/subreddits/{subreddit}/comments/{curr_id}.json.gz", compression='gzip')
+    if comments_df.shape[0] == 0:
+        return
+    match_df = comments_df[(comments_df['parent_id'].map(lambda x: curr_id in x)) & (comments_df['author'] == author)].sort_values('created_utc',ascending=True)
+    if match_df.shape[0] == 0:
+        return 
+    return match_df.iloc[0]['body']
+
+def missing_text(birth_stories_df, subreddit):
     missing_text_df = birth_stories_df[birth_stories_df['selftext'].map(lambda x: not x)]
     missing_id_author_df = missing_text_df[['id', 'author', 'Pre-Covid']]
-    missing_id_author_df['body'] = missing_id_author_df.apply(get_first_comment, axis=1)
+    print(missing_id_author_df.shape)
+    missing_id_author_df['body'] = missing_id_author_df.apply(get_first_comment, args=(subreddit,), axis=1)
     missing_id_author_df['body'].map(lambda x: x == None).value_counts()
 
     missing_id_author_df[missing_id_author_df['body'] == None]
-
+    print(missing_id_author_df.shape)
     print(birth_stories_df['selftext'].map(lambda x: not x).value_counts())
     for idx, row in missing_id_author_df.iterrows():
         birth_stories_df.at[idx, 'selftext'] = row.body
@@ -188,13 +210,14 @@ def missing_text(birth_stories_df):
     birth_stories_df = birth_stories_df[birth_stories_df['selftext'] != '[removed]']
     birth_stories_df = birth_stories_df[birth_stories_df['selftext'] != '[deleted]']
 
+    nan_value = float("NaN")
+    birth_stories_df.replace("", nan_value, inplace=True)
+    birth_stories_df.dropna(subset=['selftext'], inplace=True)
+
     return birth_stories_df
 
 #gets rid of posts that have no content or are invalid 
 def clean_posts(all_posts_df):
-    nan_value = float("NaN")
-    all_posts_df.replace("", nan_value, inplace=True)
-    all_posts_df.dropna(subset=['selftext'], inplace=True)
 
     warning = 'disclaimer: this is the list that was previously posted'
     all_posts_df['Valid'] = [findkeyword(sub, warning) for sub in all_posts_df['selftext']]
@@ -204,32 +227,3 @@ def clean_posts(all_posts_df):
     all_posts_df = all_posts_df[all_posts_df['selftext'] != '[deleted]']
 
     return all_posts_df
-
-def load_subreddits(BabyBumps, beyond_the_bump, BirthStories, daddit, predaddit, pregnant, Mommit, NewParents, InfertilityBabies):
-    BabyBumps_df = compress_json.load(BabyBumps)
-    BabyBumps_df = pd.read_json(BabyBumps_df)
-
-    beyond_the_bump_df = compress_json.load(beyond_the_bump)
-    beyond_the_bump_df = pd.read_json(beyond_the_bump_df)
-
-    BirthStories_df = compress_json.load(BirthStories)
-    BirthStories_df = pd.read_json(BirthStories_df)
-
-    daddit_df = compress_json.load(daddit)
-    daddit_df = pd.read_json(daddit_df)
-
-    predaddit_df = compress_json.load(predaddit)
-    predaddit_df = pd.read_json(predaddit_df)
-
-    pregnant_df = compress_json.load(pregnant)
-    pregnant_df = pd.read_json(pregnant_df)
-
-    Mommit_df = compress_json.load(Mommit)
-    Mommit_df = pd.read_json(Mommit_df)
-
-    NewParents_df = compress_json.load(NewParents)
-    NewParents_df = pd.read_json(NewParents_df)
-
-    InfertilityBabies_df = compress_json.load(InfertilityBabies)
-    InfertilityBabies_df = pd.read_json(InfertilityBabies_df)
-    return BabyBumps_df, beyond_the_bump_df, BirthStories_df, daddit_df, predaddit_df, pregnant_df, Mommit_df, NewParents_df, InfertilityBabies_df
