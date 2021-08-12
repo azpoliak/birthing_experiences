@@ -6,6 +6,7 @@ Run python files from `src`, not inner directories. Call `python -m` and the pat
 - **Path to corpus:**`birthing_experiences/src/birth_stories_df.json.gz`: compressed json file containing the dataframe of our corpus.
 - **Pre and Post COVID corpus:** `birthing_experiences/src/pre_covid_posts_df.json.gz` and `birthing_experiences/src/post_covid_posts_df.json.gz` are compressed json files containing dataframes of the posts made before and after (respectively) March 11, 2020.
 - `Corpus_Information/`: Statistics about the corpus, including data about the subreddits and statistics comparing number of posts made over time.
+- `LIWC/`: Analyzing appearance of LIWC features in our corpus.
 - `Personas/`: Analyzing persona frequency pre- and post-COVID.
 - `Sentiment/`: Analyzing post sentiment pre- and post-COVID across several different categories of birthing experiences.
 - `Topic_Modeling/`: Analyzing topic probability over time for 50 topics and comparing the forecasted probability during COVID to actual probability trends during COVID.
@@ -23,4 +24,3 @@ Run python files from `src`, not inner directories. Call `python -m` and the pat
 - `topic_utils.py`: functions used for text processing and topic modeling.
 - `sentiment_utils.py`: functions used for sentiment analysis.
 - `stats_utils.py`: functions for computing confidence intervals, Z-test scores and t-test scores.
-- `LIWC_stats.py`: statistics for LIWC data.
