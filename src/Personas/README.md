@@ -1,4 +1,6 @@
 # Persona Mention Frequencies
+To replicate these results, first run `personas_frequencies.py` and then run `persona_stats` from the `src` directory in terminal (full instructions in the `src/` readme).
+
 `personas_frequencies.py`:
   - Takes in birth stories and a dictionary of n-grams mapped to specific personas. 
   - Iterates for different time periods:
