@@ -52,7 +52,7 @@ def ttest(df, df2, chunks=False, persona_chunk_stats_output=None, persona_stats_
             index.append(persona_name)
             print(f"{persona_name} t-statistic: {ttest.statistic}, p-value: {ttest.pvalue}")
         
-        ttest_df = pd.DataFrame(data = {'Statistics': stat, 'P-Values': p_value}, index = index)
+        ttest_df = pd.DataFrame(data = {'T-test statistic': stat, 'P-Values': p_value}, index = index)
         ttest_df.to_csv(persona_stats_output)
 
 def compute_confidence_interval(personas, pre_df, post_df, puncts):
