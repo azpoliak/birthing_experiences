@@ -15,8 +15,8 @@ def get_args():
     #general dfs with story text
     parser.add_argument("--birth_stories_df", default= "birth_stories_df.json.gz", help="path to birth stories", type=str)
     parser.add_argument("--LIWC_df", default= "LIWC2015_results_birth_stories_and_ids.csv", help="path to csv with birth story LIWC scores", type=str)
-    parser.add_argument("--LIWC_t_tests", default= "../data/LIWC_t_tests.csv", help="path to csv with birth story LIWC pre-post t-tests", type=str)
-    parser.add_argument("--LIWC_CI_df", default="../data/LIWC_CI_df.csv", help="path to 95 percent confidence intervals CSVs", type=str)
+    parser.add_argument("--LIWC_t_tests", default= "../results/LIWC_Results/LIWC_t_tests.csv", help="path to csv with birth story LIWC pre-post t-tests", type=str)
+    parser.add_argument("--LIWC_CI_df", default="../results/LIWC_Results/LIWC_CI_df.csv", help="path to 95 percent confidence intervals CSVs", type=str)
 
     args = parser.parse_args()
     return args
