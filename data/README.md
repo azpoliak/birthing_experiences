@@ -5,7 +5,6 @@
 - `original-reddit/`: the original reddit data collected using Keith Harrigian's [Reddit Retriever](https://github.com/kharrigian/retriever) is saved here (full path: `original-reddit/subreddits/{subreddit_name}`). Do not push the data from that directory to the remote server.
 
 ### Folders for data for each analysis method:
-- `Corpus_Stats_Plots/`: contains bar graph of number of posts made per year and histogram of number of words in stories.
 - `Personas_Data/`: contains data related to persona analysis.
 - `Topic_Modeling_Data/`: contains data related to topic modeling.
 
