@@ -59,10 +59,11 @@ def compute_confidence_interval(personas, pre_df, post_df, puncts):
     lowers = []
     uppers = []
     personas_sigs = []
+    diff = []
     for persona in personas:
         if persona not in puncts:
-            x1 = pre_df[persona]
-            x2 = post_df[persona]
+            x1 = post_df[persona]
+            x2 = pre_df[persona]
 
             alpha = 0.05                                                      
             n1, n2 = len(x1), len(x2)                                          
@@ -72,8 +73,9 @@ def compute_confidence_interval(personas, pre_df, post_df, puncts):
 
             s = np.sqrt(((n1 - 1) * s1 + (n2 - 1) * s2) / (n1 + n2 - 2))
             df = (s1/n1 + s2/n2)**2 / ((s1/n1)**2/(n1-1) + (s2/n2)**2/(n2-1))  
-            t = stats.t.ppf(1 - alpha/2, df)                                   
+            t = stats.t.ppf(1 - alpha/2, df)  
 
+            d = (np.mean(x1) - np.mean(x2))
             lower = (np.mean(x1) - np.mean(x2)) - t * np.sqrt(1 / len(x1) + 1 / len(x2)) * s
             upper = (np.mean(x1) - np.mean(x2)) + t * np.sqrt(1 / len(x1) + 1 / len(x2)) * s
 
@@ -84,6 +86,7 @@ def compute_confidence_interval(personas, pre_df, post_df, puncts):
                 lowers.append(lower)
                 uppers.append(upper)
                 personas_sigs.append(persona)
+                diff.append(d)
 
-    df = pd.DataFrame({'Lower Bound': lowers, 'Upper Bound': uppers}, index = personas_sigs)
+    df = pd.DataFrame({'Lower Bound': lowers, 'Upper Bound': uppers, 'Difference in Sample Means: Post - Pre': diff}, index = personas_sigs)
     return df
