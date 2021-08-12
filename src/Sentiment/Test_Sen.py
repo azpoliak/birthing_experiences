@@ -20,29 +20,30 @@ import warnings
 import itertools
 import compress_json
 import argparse
+from sentiment_utils import split_story_10_sentiment, per_group, group
 warnings.filterwarnings("ignore")
 
 def get_args():
     parser = argparse.ArgumentParser()
 
     #general dfs with story text
-    parser.add_argument("--birth_stories_df", default="../birth_stories_df.json.gz", help="path to df with all birth stories", type=str)
-    parser.add_argument("--pre_covid_posts_df", default="../relevant_jsons/pre_covid_posts_df.json.gz", help="path to df with all stories before March 11, 2020", type=str)
-    parser.add_argument("--post_covid_posts_df", default="../relevant_jsons/post_covid_posts_df.json.gz", help="path to df with all stories on or after March 11, 2020", type=str)
-    parser.add_argument("--labels_df", default="../relevant_jsons/labeled_df.json.gz", help="path to df of the stories labeled based on their titles", type=str)
-    parser.add_argument("--mar_june_2020_df", default="../relevant_jsons/mar_june_2020_df.json.gz", help="path to df of the stories from COVID era 1", type=str)
-    parser.add_argument("--june_nov_2020_df", default="../relevant_jsons/june_nov_2020_df.json.gz", help="path to df of the stories from COVID era 2", type=str)
-    parser.add_argument("--nov_2020_apr_2021_df", default="../relevant_jsons/nov_2020_apr_2021_df.json.gz", help="path to df of the stories from COVID era 3", type=str)
-    parser.add_argument("--apr_june_2021_df", default="../relevant_jsons/apr_june_2021_df.json.gz", help="path to df of the stories from COVID era 4", type=str)
+    parser.add_argument("--birth_stories_df", default="birth_stories_df.json.gz", help="path to df with all birth stories", type=str)
+    parser.add_argument("--pre_covid_posts_df", default="relevant_jsons/pre_covid_posts_df.json.gz", help="path to df with all stories before March 11, 2020", type=str)
+    parser.add_argument("--post_covid_posts_df", default="relevant_jsons/post_covid_posts_df.json.gz", help="path to df with all stories on or after March 11, 2020", type=str)
+    parser.add_argument("--labels_df", default="relevant_jsons/labeled_df.json.gz", help="path to df of the stories labeled based on their titles", type=str)
+    parser.add_argument("--mar_june_2020_df", default="relevant_jsons/mar_june_2020_df.json.gz", help="path to df of the stories from COVID era 1", type=str)
+    parser.add_argument("--june_nov_2020_df", default="relevant_jsons/june_nov_2020_df.json.gz", help="path to df of the stories from COVID era 2", type=str)
+    parser.add_argument("--nov_2020_apr_2021_df", default="relevant_jsons/nov_2020_apr_2021_df.json.gz", help="path to df of the stories from COVID era 3", type=str)
+    parser.add_argument("--apr_june_2021_df", default="relevant_jsons/apr_june_2021_df.json.gz", help="path to df of the stories from COVID era 4", type=str)
 
     #where to save
-    parser.add_argument("--compound_sent_output", default="../../data/Sentiment_Plots/Compound_Sentiment_Plot_", help="path to save png plot with compound sentiment of stories", type=str)
-    parser.add_argument("--pos_neg_sent_output", default="../../data/Sentiment_Plots/Pos_Neg_Sentiment_Plot_", help="path to save png plot with pos/neg sentiment of stories", type=str)
-    parser.add_argument("--all", default="../../data/Sentiment_Plots/All_Plot_", help="path to save png plot with sentiment of all stories", type=str)
-    parser.add_argument("--pre_post", default="../../data/Sentiment_Plots/Pre_Post_Covid/Pre_Post_Plot_", help="path to save png plot with sentiment of stories per label pair, 4 lines per graph", type=str)
-    parser.add_argument("--four_sects", default="../../data/Sentiment_Plots/4_Section_Sentiment_Plots/4_Sects_Pre_Post_Plot_", help="path to save png plot with sentiment of stories per label with 4 COVID eras", type=str)
-    parser.add_argument("--label", default="../../data/Sentiment_Plots/Singular_Labels/Pre_Post_Plot_", help="path to save png plot with sentiment of stories per label", type=str)
-    parser.add_argument("--diff", default="../../data/Sentiment_Plots/Differences_Plotted/Diff_Plot_", help="path to save png plot with differences of sentiment of stories betweem label pairs", type=str)
+    parser.add_argument("--compound_sent_output", default="../data/Sentiment_Plots/Compound_Sentiment_Plot_", help="path to save png plot with compound sentiment of stories", type=str)
+    parser.add_argument("--pos_neg_sent_output", default="../data/Sentiment_Plots/Pos_Neg_Sentiment_Plot_", help="path to save png plot with pos/neg sentiment of stories", type=str)
+    parser.add_argument("--all", default="../data/Sentiment_Plots/All_Plot_", help="path to save png plot with sentiment of all stories", type=str)
+    parser.add_argument("--pre_post", default="../data/Sentiment_Plots/Pre_Post_Covid/Pre_Post_Plot_", help="path to save png plot with sentiment of stories per label pair, 4 lines per graph", type=str)
+    parser.add_argument("--four_sects", default="../data/Sentiment_Plots/4_Section_Sentiment_Plots/4_Sects_Pre_Post_Plot_", help="path to save png plot with sentiment of stories per label with 4 COVID eras", type=str)
+    parser.add_argument("--label", default="../data/Sentiment_Plots/Singular_Labels/Pre_Post_Plot_", help="path to save png plot with sentiment of stories per label", type=str)
+    parser.add_argument("--diff", default="../data/Sentiment_Plots/Differences_Plotted/Diff_Plot_", help="path to save png plot with differences of sentiment of stories betweem label pairs", type=str)
     
     args = parser.parse_args()
     return args
@@ -77,63 +78,9 @@ def load_data(path_to_birth_stories, path_to_pre_covid, path_to_post_covid, path
 
 # **Figure 2: Sentiment Analysis**
 
-#set up sentiment analyzer
-analyzer = SentimentIntensityAnalyzer()
-def sentiment_analyzer_scores(sentence):
-    score = analyzer.polarity_scores(sentence)
-    return(sentence, score)
-
-#Splits stories into 10 sections and runs sentiment analysis on them
-def split_story_10_sentiment(lst):
-    sentiment_story = []
-    if isinstance(lst, float) == True:
-        lst = str(lst)
-    for sentence in lst:
-        if len(tokenize.word_tokenize(sentence)) >=5:
-            analyzed = sentiment_analyzer_scores(sentence)
-            sentiment_story.append(analyzed)
-    rounded = round(len(lst)/10)
-    if rounded != 0:
-        ind = np.arange(0, rounded*10, rounded)
-        remainder = len(lst) % rounded*10
-    else:
-        ind = np.arange(0, rounded*10)
-        remainder = 0
-    split_story_sents = []
-    for i in ind:
-        if i == ind[-1]:
-            split_story_sents.append(sentiment_story[i:i+remainder])
-            return split_story_sents
-        split_story_sents.append(sentiment_story[i:i+rounded])
-    return split_story_sents
-
 #Computes all story lengths
 def story_lengths(lst):
     return len(lst)
-
-#Creates list of the story sentiment values per section of the story 
-def group(story, num, val):
-    compound_scores = []
-    sentences = []
-    for sent in story[num]:
-        if val == 'compound' or val == 'pos' or val == 'neg':
-            dictionary = sent[1]
-            compound_score = dictionary[val]
-            compound_scores.append(compound_score)
-        else:
-            sen = sent[0]
-            sentences.append(sen)
-    if val == 'sentences': 
-        return " ".join(sentences)
-    else:
-        return compound_scores
-
-#Groups together the stories per section in a dictionary
-def per_group(story, val):
-    group_dict = {} 
-    for i in np.arange(10):
-        group_dict[f"0.{str(i)}"] = group(story, i, val)
-    return group_dict
 
 #Converts the dictionary of values into a dataframe with only one value per section (the average of the sentiments)
 def dict_to_frame(lst):

@@ -1,14 +1,1 @@
-- `50/`: line plots for each of 50 topics' average monthly probability over time (2010-2021).
-- `50_Topic_Forecasts/`: line plots for each of 50 topics' average monthly forecasted probabilities compared to their actual average monthly probabilities over time (2010-2021).
-- `Topic_Forecasts/`: line plots for each of another 50 topics' average monthly forecasted probabilities compared to their actual average monthly probabilities over time (2010-2021).
-- `Topic_Models_Over_Time/`: line plots for each of another 50 topics' average monthly probability over time (2010-2021).
-- `Topic_Plots/`: line plots for each of 50 topics distributed across story time.
-- `Week_50_Topic_Forecasts/`: line plots for each of 50 topics' average weekly forecasted probabilities compared to their actual average weekly probabilities over time (2010-2021).
-- `Week_Topic_Forecasts/`: line plots for each of another 50 topics' average weekly forecasted probabilities compared to their actual average weekly probabilities over time (2010-2021).
-- `Z_Test_Stats.csv`: results of z-test for 50 topics on a monthly level.
-- `Z_Test_Stats_50.csv`: results of z-test for another 50 topics level.
-- `Z_Test_Stats_Week.csv`: results of z-test for 50 topics on a weekly level.
-- `percent_outside_CI_pre_post.csv`: dataframe showing percent of data points outside of confidence interval before and during COVID on a monthly level.
-- `percent_outside_CI_pre_post_50.csv`: dataframe showing percent of data points outside of confidence interval before and during COVID on a monthly level.
-- `percent_outside_CI_pre_post_week.csv`: dataframe showing percent of data points outside of confidence interval before and during COVID on a weekly level.
-- `topic_coherences.png`: line plot showing c_v coherence scores for each number of topics tested (every 5 from 5-50, inclusive).
+- `topic_coherence_df.csv`: dataframe containing coherence scores for each number of topics between 5 and 50 inclusive.
