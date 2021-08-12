@@ -25,7 +25,6 @@ def ttest(df, df2, chunks=False, persona_chunk_stats_output=None, persona_stats_
     stat=[]
     p_value=[]
     index = []
-    args = get_args()
     if chunks==True:
         for i in range(df.shape[1]):
             chunk = i
