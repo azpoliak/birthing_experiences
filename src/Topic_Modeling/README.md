@@ -1,6 +1,4 @@
 # Topic Modeling
-- `all_posts_topics.py`: 
-  - trains topic model for corpus of all posts from all subreddits from 2019-June 24, 2021 (end of our data collection).
 - `topic_projections_over_time`:
   - loads topic keys and dataframe of the distribution of topic probabilities for each topic for each story
   - combines topic probabilities with the date the story was posted
