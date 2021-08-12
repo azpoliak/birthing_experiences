@@ -1,2 +1,0 @@
-- `subreddit_years_bar_graphs` - bar graphs showing the number of posts made in each subreddit per year.
-- `Posts_per_Month_Covid_bar.png` - bar graph showing number of posts made during each month of COVID (March 2020 to June 2021).

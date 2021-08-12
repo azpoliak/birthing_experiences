@@ -24,7 +24,8 @@ def get_args():
 def clean_text(df):
 	corpus = []
 	for story in df['selftext']:
-		text = redditcleaner.clean(str(story))
+		lower = str(story).lower()
+		text = redditcleaner.clean(lower)
 		tokenized = nltk.sent_tokenize(text)
 		for string in tokenized:
 			word_tokenized = nltk.word_tokenize(string)
@@ -33,7 +34,7 @@ def clean_text(df):
 
 def train_model(corpus, df_name, tmpfile, model_path):
 	path = get_tmpfile(tmpfile)
-	model = Word2Vec(sentences=corpus, workers=4)
+	model = Word2Vec(sentences=corpus, min_count=2, workers=4)
 	model.save(f"{model_path}/{df_name}_word2vec.model")
 
 def main():

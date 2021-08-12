@@ -15,26 +15,26 @@ import json
 def get_args():
     parser = argparse.ArgumentParser()
     #general dfs with story text
-    parser.add_argument("--labeled_df", default="labeled_df.json.gz", help="path to df of the stories labeled based on their titles", type=str)
-    parser.add_argument("--birth_stories_df", default="birth_stories_df.json.gz", help="path to df with all birth stories", type=str)
-    parser.add_argument("--pre_covid_df", default="pre_covid_posts_df.json.gz", help="path to df with all stories before March 11, 2020", type=str)
-    parser.add_argument("--post_covid_df", default="post_covid_posts_df.json.gz", help="path to df with all stories on or after March 11, 2020", type=str)
+    parser.add_argument("--labeled_df", default="/home/daphnaspira/birthing_experiences/src/labeled_df.json.gz", help="path to df of the stories labeled based on their titles", type=str)
+    parser.add_argument("--birth_stories_df", default="/home/daphnaspira/birthing_experiences/src/birth_stories_df.json.gz", help="path to df with all birth stories", type=str)
+    parser.add_argument("--pre_covid_df", default="/home/daphnaspira/birthing_experiences/src/pre_covid_posts_df.json.gz", help="path to df with all stories before March 11, 2020", type=str)
+    parser.add_argument("--post_covid_df", default="/home/daphnaspira/birthing_experiences/src/post_covid_posts_df.json.gz", help="path to df with all stories on or after March 11, 2020", type=str)
     #import covid eras dfs
-    parser.add_argument("--mar_june_2020_df", default="../data/covid_era_jsons/mar_june_2020_df.json.gz", help="path to df of the stories from COVID era 1", type=str)
-    parser.add_argument("--june_nov_2020_df", default="../data/covid_era_jsons/june_nov_2020_df.json.gz", help="path to df of the stories from COVID era 2", type=str)
-    parser.add_argument("--nov_2020_apr_2021_df", default="../data/covid_era_jsons/nov_2020_apr_2021_df.json.gz", help="path to df of the stories from COVID era 3", type=str)
-    parser.add_argument("--apr_june_2021_df", default="../data/covid_era_jsons/apr_june_2021_df.json.gz", help="path to df of the stories from COVID era 4", type=str)
+    parser.add_argument("--mar_june_2020_df", default="/home/daphnaspira/birthing_experiences/data/covid_era_jsons/mar_june_2020_df.json.gz", help="path to df of the stories from COVID era 1", type=str)
+    parser.add_argument("--june_nov_2020_df", default="/home/daphnaspira/birthing_experiences/data/covid_era_jsons/june_nov_2020_df.json.gz", help="path to df of the stories from COVID era 2", type=str)
+    parser.add_argument("--nov_2020_apr_2021_df", default="/home/daphnaspira/birthing_experiences/data/covid_era_jsons/nov_2020_apr_2021_df.json.gz", help="path to df of the stories from COVID era 3", type=str)
+    parser.add_argument("--apr_june_2021_df", default="/home/daphnaspira/birthing_experiences/data/covid_era_jsons/apr_june_2021_df.json.gz", help="path to df of the stories from COVID era 4", type=str)
     #path to ngram json
-    parser.add_argument("--persona_ngrams", default="../data/Personas_Data/personas_ngrams.json", help="path to dictionary with list of personas and the ngrams mapping to them", type=str)
+    parser.add_argument("--persona_ngrams", default="/home/daphnaspira/birthing_experiences/data/Personas_Data/personas_ngrams.json", help="path to dictionary with list of personas and the ngrams mapping to them", type=str)
     #output for csv with numbers of mentions per story and ttest results
-    parser.add_argument("--persona_counts_output", default="../data/Personas_Data/Persona_Counts_Statistics/personas_counts_df_", help="path to save csv with stats about number of persona mentions in stories", type=str)
-    parser.add_argument("--persona_stats_output", default="../data/Personas_Data/normalized_persona_stats.csv", help="path to output of ttest results for each persona", type=str)
-    parser.add_argument("--persona_chunk_stats_output", default="../data/Personas_Data/normalized_chunk_stats.csv", help="path to output of ttest results for each chunk of each persona", type=str)
+    parser.add_argument("--persona_counts_output", default="../results/Personas_Results/Persona_Counts_Statistics/personas_counts_df_", help="path to save csv with stats about number of persona mentions in stories", type=str)
+    parser.add_argument("--persona_stats_output", default="../results/Personas_Results/normalized_persona_stats.csv", help="path to output of ttest results for each persona", type=str)
+    parser.add_argument("--persona_chunk_stats_output", default="../results/Personas_Results/normalized_chunk_stats.csv", help="path to output of ttest results for each chunk of each persona", type=str)
     parser.add_argument("--pre_persona_mentions_output", default="../data/Personas_Data/persona_csvs/pre_covid_persona_mentions.csv")
     parser.add_argument("--post_persona_mentions_output", default="../data/Personas_Data/persona_csvs/post_covid_persona_mentions.csv")
     #output path for plots
-    parser.add_argument("--pre_post_plot_output_folder", default="../data/Personas_Data/Personas_Pre_Post/", help="path to save line plots of pre and post covid persona mentions", type=str)
-    parser.add_argument("--throughout_covid_output_folder", default="../data/Personas_Data/Personas_Throughout_Covid/", help="path to save line plots for personas throughout the covid eras", type=str)
+    parser.add_argument("--pre_post_plot_output_folder", default="../results/Personas_Results/Personas_Pre_Post_Figures/", help="path to save line plots of pre and post covid persona mentions", type=str)
+    parser.add_argument("--throughout_covid_output_folder", default="../results/Personas_Results/Personas_Throughout_Covid_Figures/", help="path to save line plots for personas throughout the covid eras", type=str)
     args = parser.parse_args()
     return args
 
