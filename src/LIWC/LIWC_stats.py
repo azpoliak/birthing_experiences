@@ -39,7 +39,7 @@ def t_tests(cols, pre_df, post_df, puncts):
         if col not in puncts:
             pre_scores = pre_df[col]
             post_scores = post_df[col]
-            t_test = stats.ttest_ind(pre_scores, post_scores)
+            t_test = stats.ttest_ind(post_scores, pre_scores)
             if t_test.pvalue < .05:
                 p_value.append(t_test.pvalue)
                 stat.append(t_test.statistic)
