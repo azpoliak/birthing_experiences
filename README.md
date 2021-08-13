@@ -1,9 +1,10 @@
 # SRI Project related to birthing experiences
 
-Set up conda environment by running the following line:
-
-`conda env create -f new_environment.yml`
-
+Set up and activate the conda environment by running the following lines:
+```
+conda env create -f new_environment.yml
+conda activate new_environment
+```
 ### Structure of repo
 
 - `data/` - all data is saved here. Our original Reddit data is saved in the `original-reddit/` folder.
