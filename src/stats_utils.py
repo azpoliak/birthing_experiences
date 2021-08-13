@@ -81,7 +81,7 @@ def compute_confidence_interval(personas, pre_df, post_df, puncts):
             x = False 
             if lower < 0 and upper > 0:
                 x = True 
-            if x == False:
+            if x == False or len(puncts) == 0:
                 lowers.append(lower)
                 uppers.append(upper)
                 personas_sigs.append(persona)
