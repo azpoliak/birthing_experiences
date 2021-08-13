@@ -1,4 +1,4 @@
-# Raw counts of mentions of personas
+# Raw counts of persona mentions
 
 ### Raw mentions of personas in each story and each chunk of each story for each persona:
 
