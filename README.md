@@ -1,4 +1,4 @@
-# SRI Project related to birthing experiences
+# Discovering Changes in Birthing Narratives during COVID-19
 
 Set up and activate the conda environment by running the following lines:
 ```
